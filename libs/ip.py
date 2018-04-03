@@ -1,3 +1,6 @@
+from contextlib import suppress
+
+
 class IPList(list):
     """Allow network masks in INTERNAL_IPS setting
 
@@ -9,18 +12,14 @@ class IPList(list):
     """
 
     def __init__(self, ips):
-        try:
+        with suppress(ImportError):
             from IPy import IP
             for ip in ips:
                 self.append(IP(ip))
-        except ImportError:
-            pass
 
     def __contains__(self, ip):
-        try:
+        with suppress(BaseException):
             for net in self:
                 if ip in net:
                     return True
-        except:
-            pass
         return False
