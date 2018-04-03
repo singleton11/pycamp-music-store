@@ -1,0 +1,16 @@
+title: Location
+description: Location coordinates
+type: object
+x-nullable: true
+properties:
+  longitude:
+    type: number
+    description: Longitude
+    example: 86.89232
+  latitude:
+    type: number
+    description: Latitude
+    example: 56.89323
+required:
+  - longitude
+  - latitude

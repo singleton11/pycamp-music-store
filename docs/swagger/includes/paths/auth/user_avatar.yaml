@@ -1,0 +1,45 @@
+post:
+  summary: Update user avatar
+  description: Update user avatar
+  tags:
+    - auth
+  operationId: UpdateUserAvatar
+  consumes:
+    - multipart/form-data
+    - application/x-www-form-urlencoded
+  parameters:
+    - name: upload
+      in: formData
+      required: true
+      type: file
+      description: New avatar image
+  responses:
+    '201':
+      description: User exists
+      schema:
+        type: object
+        properties:
+          url:
+            type: string
+            description: URL of avatar image
+            example: "http://anyevent-dev.s3.amazonaws.com/appuser/1/1d44d97d06f19d5c78a0a982a2d09dfe.png"
+        required:
+          - url
+    'default':
+      $ref: "../../responses.yaml#/APIErrorResponse"
+  security:
+    - token: []
+
+delete:
+  summary: Delete user avatar
+  description: Delete user avatar
+  operationId: deleteUserAvatar
+  tags:
+    - auth
+  responses:
+    200:
+      description: Avatar was deleted
+    'default':
+      $ref: "../../responses.yaml#/APIErrorResponse"
+  security:
+    - token: []

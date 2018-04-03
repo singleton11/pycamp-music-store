@@ -1,0 +1,119 @@
+import os
+import socket
+
+from libs.ip import IPList
+
+from .development import *
+ENVIRONMENT = 'development'
+DEBUG = True
+
+# Trick so that debug variable inside HTML
+# templates work
+host_ip = socket.gethostbyname(socket.gethostname())
+
+# if you want to share you debug
+# to someone else in local network just use netmask
+# like 192.168.1.0/30 as value in the list below
+INTERNAL_IPS = IPList([
+    '0.0.0.0',
+    '127.0.0.1',
+    host_ip
+])
+
+# Make sure we always display debug toolbar
+# if we run in local environment
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+}
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': 'music_store_exercise_dev',
+        'USER': 'music_store_exercise_user',
+        'PASSWORD': 'manager',
+        'HOST': 'postgres',
+        'PORT': '5432',
+    }
+}
+
+# Don't use celery when you're local
+USE_CELERY = False
+
+# Disable opbeat error notifications
+os.environ['OPBEAT_DISABLE_SEND'] = 'true'
+
+# Disable local OPBEAT
+OPBEAT['DEBUG'] = False
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# disable any password restrictions
+AUTH_PASSWORD_VALIDATORS = []
+
+# add fake_app from tests for local development
+# (may be deleted later)
+if DEBUG:
+    for app in TESTING_APPS:
+        if app not in INSTALLED_APPS:
+            INSTALLED_APPS += (app,)
+
+# shell_plus configuration
+# you can specify what additional libraries and blocks of
+# code to be automatically imported when you run shell_plus
+# command, in our case `fab shell`
+# if you want factories to be included into your shell then you can do
+# something like this
+# *[('{}.factories'.format(app), '*')
+#   for app in LOCAL_APPS + TESTING_APPS]
+# right inside SHELL_PLUS_PRE_IMPORTS
+
+# what packages to preload inside shell plus
+SHELL_PLUS_PRE_IMPORTS = [
+    'itertools', 'collections'
+]
+
+# configuration for jupyter notebooks
+# you can see list of available params
+# by doing jupyter notebook --help
+# additional documentaton can be found here
+# http://jupyter-notebook.readthedocs.io/en/latest/config.html#options
+NOTEBOOK_ARGUMENTS = [
+    '--notebook-dir', 'docs/jupyter',
+    '--allow-root',
+    '--ip', '0.0.0.0',
+    '--port', '8000'
+]
+
+
+# in the case you need to debug jupyter on your side
+# you may need to pass additional `debug` param into
+# ipython CLI
+# all params can be seen with
+# ipython --help
+IPYTHON_ARGUMENTS = [
+    # '--debug',
+]
+
+
+
+# Celery config
+CELERY_TASK_DEFAULT_QUEUE = 'music_store_exercise-{ENVIRONMENT}'.format(
+    ENVIRONMENT=ENVIRONMENT)
+CELERY_BROKER = 'amqp://music_store_exercise_user:manager@rabbitmq/music_store_exercise-{ENVIRONMENT}'.format(
+    ENVIRONMENT=ENVIRONMENT)
+CELERY_BACKEND = 'redis://redis/11'
+
+# Cache ops
+CACHEOPS_REDIS = {
+    'host': 'redis',        # redis-server is on same machine
+    'port': 6379,           # default redis port
+    'db': 1,                # SELECT non-default redis database
+                            # using separate redis db or redis instance
+                            # is highly recommended
+    'socket_timeout': 3     # connection timeout in seconds, optional
+}

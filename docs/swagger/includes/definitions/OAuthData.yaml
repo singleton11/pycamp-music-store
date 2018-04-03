@@ -1,0 +1,9 @@
+description: OAuth authentication data
+type: object
+properties:
+  access_token:
+    description: Access token
+    type: string
+    example: CAAVfhSiLrhkBADRGY5RigHcvpHu2epTMQk0MY9T4SRfA98qH5MJEbzp9JazkomAcWWkEKsBiZCjiI7yq2DgZAJZCzDUV9G02MZAx6Eh6Vci2jrp5kYaZAP6aO30ZCrmZAPD7BxZBBlLBCFwrJG3l5B6j639ZCWhvVodz1impZB7DWcHZAC8vBHZA285rTI1FA5GEq8opM5IjlxLT4yodn7gl2Rzv
+required:
+  - access_token

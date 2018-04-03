@@ -1,0 +1,10 @@
+title: Success Details
+description: Success operation info
+type: object
+properties:
+  detail:
+    type: string
+    description: Success message
+    example: Operation successfully performed
+required:
+  - detail

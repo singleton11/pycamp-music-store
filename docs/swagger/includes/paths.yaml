@@ -1,0 +1,25 @@
+# Auth endpoints
+/auth/register/:
+  $ref: 'paths/auth/register.yaml#'
+/auth/login/:
+  $ref: 'paths/auth/login.yaml#'
+/auth/logout/:
+  $ref: 'paths/auth/logout.yaml#'
+/auth/password/change/:
+  $ref: 'paths/auth/password_change.yaml#'
+/auth/password/reset/:
+  $ref: 'paths/auth/password_reset.yaml#'
+/auth/password/reset/confirm/:
+  $ref: 'paths/auth/password_reset_confirm.yaml#'
+/auth/user/:
+  $ref: 'paths/auth/user.yaml#'
+/auth/user/avatar/:
+  $ref: 'paths/auth/user_avatar.yaml#'
+/auth/check/{username}/:
+  $ref: 'paths/auth/check_username.yaml#'
+
+# OAuth endpoints
+/oauth/facebook/:
+  $ref: 'paths/oauth/facebook.yaml#'
+/oauth/google/:
+  $ref: 'paths/oauth/google.yaml#'

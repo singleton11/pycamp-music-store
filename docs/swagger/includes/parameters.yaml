@@ -1,0 +1,29 @@
+OAuthData:
+  name: OAuthData
+  in: body
+  required: true
+  schema:
+    $ref: 'definitions.yaml#/OAuthData'
+
+UserTimezone:
+  name: User-Timezone
+  in: header
+  required: false
+  type: string
+  description: User's timezone
+
+Offset:
+  name: offset
+  in: query
+  description: Pagination offset
+  required: true
+  type: integer
+  default: 0
+
+Limit:
+  name: limit
+  in: query
+  description: Pagination limit
+  required: true
+  type: integer
+  default: 3

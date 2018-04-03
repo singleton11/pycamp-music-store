@@ -1,0 +1,11 @@
+title: TokenInfo
+description: Token information
+type: object
+properties:
+  key:
+    type: string
+    description: Authentication token
+required:
+  - key
+example:
+  key: "8c5ee2352d6e79e2470aabdf0dfb81a35fe462c7"

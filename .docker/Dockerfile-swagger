@@ -1,0 +1,9 @@
+# Dockerfile used to build swagger files on Jenkins
+# you can find definition of this image here:
+# https://gitblit.saritasa.com/summary/?r=~vladimirkasatkin/docker/swagger-tools.git
+FROM docker.saritasa.com/swagger-tools:latest
+
+# build and display latest swagger file
+CMD bash -c "grunt swagger > /dev/null && cat www/swaggers/swagger-latest.yaml"
+
+ADD ./docs/swagger /home/project

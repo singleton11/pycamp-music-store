@@ -1,0 +1,13 @@
+post:
+  summary: OAuth via Facebook
+  description: OAuth via Facebook
+  tags:
+    - OAuth
+  operationId: AuthFacebook
+  parameters:
+    - $ref: "../../parameters.yaml#/OAuthData"
+  responses:
+    '200':
+      $ref: "../../responses.yaml#/SuccessAuth"
+    'default':
+      $ref: "../../responses.yaml#/APIErrorResponse"

@@ -1,0 +1,13 @@
+post:
+  summary: Log out system
+  description: This endpoint is responsible for logout
+  tags:
+    - auth
+  operationId: AuthLogout
+  responses:
+    '200':
+      description: Success
+    'default':
+      $ref: "../../responses.yaml#/APIErrorResponse"
+  security:
+    - token: []

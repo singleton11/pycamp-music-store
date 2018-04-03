@@ -1,0 +1,69 @@
+-r base.in
+
+coverage
+django_coverage_plugin
+django-test-plus
+django-extensions
+django-debug-toolbar
+django-pdb
+Werkzeug
+flake8
+pep8
+autopep8
+
+# Fast creatin of model instances. May be used in tests
+factory_boy
+
+# improved REPL
+ipdb
+ipython
+ipython-genutils
+ptipython
+ptpython
+fabric3
+jupyter
+
+# https://pylama.readthedocs.io/en/latest/#configuration-files
+# linters
+pylama
+
+# emacs
+rope
+jedi
+importmagic
+elpy
+yapf
+
+# pip extension
+pip-tools
+
+# for generating test coverage reports
+django-jenkins
+
+# add ability to run tests without migrations
+# usage: ./manage.py test --keepdb --nomigrations
+django-test-without-migrations
+
+# for generating test coverage reports
+django-jenkins
+
+# Sphinx
+Sphinx
+sphinxcontrib-napoleon
+sphinx_rtd_theme
+sphinx-autobuild
+sphinxcontrib-blockdiag
+sphinx_py3doc_enhanced_theme
+
+# for proper sorting
+isort
+
+# tool for celery monitoring
+flower
+
+# Obtaining traceback when run tests in parallel
+tblib
+
+# fabfile tools
+fabric3
+munch

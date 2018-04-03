@@ -1,0 +1,26 @@
+title: API Error Details
+description: API Error details
+type: object
+properties:
+  validation_errors:
+    type: array
+    description: List of validation errors
+    items:
+      $ref: 'ValidationError.yaml'
+  detail:
+    type: string
+    description: Information about error
+  code:
+    type: string
+    description: Short code of error from reference
+required:
+  - code
+  - detail
+example:
+  validation_errors:
+    - field: "password"
+      errors:
+      - This password is too common.
+      - This password is entirely numeric.
+  detail: Unfortunately, there are some problems with the data you committed
+  code: validation_error

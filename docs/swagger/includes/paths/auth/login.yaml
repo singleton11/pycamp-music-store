@@ -1,0 +1,30 @@
+post:
+  summary: Log in system
+  description: This endpoint is responsible for authentication
+  operationId: AuthLogin
+  tags:
+    - auth
+  parameters:
+    - name: LoginData
+      in: body
+      required: true
+      schema:
+        type: object
+        properties:
+          email:
+            type: string
+            description: User's email
+            example: john@example.com
+          password:
+            type: string
+            description: User's password
+            example: goodpass11
+        required:
+          - email
+          - password
+  responses:
+    '200':
+      $ref: "../../responses.yaml#/SuccessAuth"
+    'default':
+      $ref: "../../responses.yaml#/APIErrorResponse"
+  security: []

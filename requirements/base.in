@@ -1,0 +1,119 @@
+# *************************************************                                        
+# Django packages
+# *************************************************
+django==1.11.8
+
+# ORM Caching layer for Django Models
+django-cacheops
+
+# Control CORS headers from within the app
+django-cors-headers
+
+# Authentication system with 'batteries included'
+django-allauth
+
+# The app provides a tag and filter that lets you quickly render forms
+django-crispy-forms
+
+# filter querysets dynamically
+django-filter
+
+# Ability to work with Postgres' HSTORE extension
+django-hstore
+
+# Raw operations on the image (like to crop avatars etc)
+django-imagekit
+
+# Nice addons to simplify ORM layer
+django-model-utils
+
+
+# APNS and GCM push notifications
+django-push-notifications
+
+
+
+# Django REST Framework
+djangorestframework
+djangorestframework-gis
+djangorestframework-hstore
+drf-nested-routers
+django-taggit-serializer
+django-rest-auth
+
+
+# PDF Support
+pdfkit
+
+
+
+# Storage to AWS S3
+django-storages
+boto3
+
+# Tags for any DB model
+django-taggit
+
+# One of its main features is a set of processors which expose a simple interface for performing manipulations on PIL images.
+pilkit
+
+# Pillow is the friendly PIL fork by Alex Clark and Contributors. PIL is the Python Imaging Library by Fredrik Lundh and Contributors.
+Pillow
+
+# Database abstraction layer
+psycopg2
+
+# Timezones and datetime utils
+pytz
+
+# redis SDK
+redis
+django-redis
+
+
+# Celery
+celery
+django-celery-beat
+
+
+# sendgrid django email backend
+sendgrid-django
+
+# Twilio sdk for sending SMS notifications
+twilio
+
+# nice string conversion procedures
+inflection
+
+# django localflavor
+django-localflavor
+
+# opbeat
+opbeat
+
+# boltons = super cool batteries included
+# https://boltons.readthedocs.io/en/latest/
+boltons
+
+# swagger validation tools
+# fork of bravado without twisted support
+-e git+https://github.com/Saritasa/bravado.git#egg=bravado
+
+# Bind actions on every object in admin object view
+django-object-actions
+
+# Freeze time for tests
+freezegun
+
+# Constance - Dynamic Django settings
+django-constance
+django-constance[database]
+django-picklefield
+
+# Functional programming in python
+funcy
+
+
+
+# ip management
+IPy

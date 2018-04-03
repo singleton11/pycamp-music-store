@@ -1,0 +1,13 @@
+post:
+  summary: OAuth via Google
+  description: OAuth via Google
+  tags:
+    - OAuth
+  operationId: AuthGoogle
+  parameters:
+    - $ref: "../../parameters.yaml#/OAuthData"
+  responses:
+    '200':
+      $ref: "../../responses.yaml#/SuccessAuth"
+    'default':
+      $ref: "../../responses.yaml#/APIErrorResponse"

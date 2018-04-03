@@ -1,0 +1,30 @@
+{% load staticfiles i18n %}<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>{% block title %}Music Store Exercise</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    {% block css %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    {% endblock %}
+  </head>
+  <body>
+    <div class="container">
+
+      {% block content %}
+        <h1>Use this document as a way to quick start any new project.</h1>
+      {% endblock content %}
+
+    </div> <!-- /container -->
+
+    {% block javascript %}
+      <script src="{% static 'js/jquery.min.js' %}"></script>
+      <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    {% endblock javascript %}
+  </body>
+</html>

@@ -1,0 +1,9 @@
+title: Settings for user's notifications
+type: object
+x-nullable: true
+properties:
+  push_notification:
+    type: integer
+    format: int32
+    description: Number of push notification
+    example: 10

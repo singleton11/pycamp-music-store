@@ -1,0 +1,16 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block head_title %}{% trans "Email confirmed" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+        <h2>{% trans "Email successfully confirmed" %}</h2>
+    </div>
+  </div>
+</div>
+{% endblock %}

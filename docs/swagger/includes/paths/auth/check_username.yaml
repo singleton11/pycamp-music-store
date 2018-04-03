@@ -1,0 +1,17 @@
+get:
+  summary: Check username uniqueness
+  description: Check username uniqueness
+  tags:
+    - auth
+  operationId: CheckUniqName
+  parameters:
+    - name: username
+      in: path
+      required: true
+      type: string
+      description: Username to check
+  responses:
+    '200':
+      description: User exists
+    'default':
+      $ref: "../../responses.yaml#/APIErrorResponse"

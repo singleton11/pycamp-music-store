@@ -1,0 +1,48 @@
+version: '2'
+services:
+    music_store_exercise-backend-autotest:
+        image: docker.saritasa.com/music_store_exercise-backend:develop
+        build:
+          context: ../
+          dockerfile: Dockerfile
+        extra_hosts:
+        - "mysql:172.31.39.163"
+        - "mongo:172.31.254.223"
+        - "redis:172.31.254.223"
+        - "postgres:172.31.254.223"
+        volumes:
+        - ../:/home/www/app/
+        command: /bin/sh -c 'python3 manage.py test --keepdb -v 2'
+
+    music_store_exercise-backend:
+        image: docker.saritasa.com/music_store_exercise-backend:develop
+        build:
+            context: ../
+            dockerfile: Dockerfile
+        hostname: music_store_exercise-backend
+        container_name: music_store_exercise-backend
+        expose:
+        - "80"
+        environment:
+        - DJANGO_SETTINGS_MODULE=config.settings.development
+        - APP_ENV=development
+        - NEW_RELIC_ENVIRONMENT=develop
+        extra_hosts:
+        - "mysql:172.31.39.163"
+        - "mongo:172.31.254.223"
+        - "redis:172.31.254.223"
+        - "postgres:172.31.254.223"
+        - "rabbitmq:172.31.254.223"
+        labels:
+            io.rancher.container.network: 'true'
+            io.rancher.container.pull_image: always
+            SERVICE_TAGS: traefik.frontend.rule=Host:music_store_exercise-backend.saritasa-hosting.com,traefik.tags=app,traefik.backend.loadbalancer=drr
+            SERVICE_NAME: usummit-backend
+        stdin_open: true
+        tty: true
+        restart: always
+
+    swagger:
+        build:
+            context:  ../
+            dockerfile: .docker/Dockerfile-swagger

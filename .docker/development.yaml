@@ -1,0 +1,22 @@
+version: '2'
+services:
+  backend:
+    image: docker.saritasa.com/music_store_exercise-backend:development
+    hostname: music_store_exercise-backend
+    container_name: music_store_exercise-backend
+    mem_limit: 536870912
+    expose:
+    - "80"
+    environment:
+    - DJANGO_SETTINGS_MODULE=config.settings.development
+    - APP_ENV=development
+    - music_store_exercise_ENVIRONMENT=development
+    - C_FORCE_ROOT=True
+    labels:
+      io.rancher.container.network: 'true'
+      io.rancher.container.pull_image: always
+      SERVICE_TAGS: traefik.frontend.rule=Host:music_store_exercise-dev.saritasa-hosting.com,traefik.tags=app,traefik.web.loadbalancer=drr
+      SERVICE_NAME: music_store_exercise-backend
+    stdin_open: true
+    tty: true
+    restart: always

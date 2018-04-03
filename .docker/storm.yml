@@ -1,0 +1,154 @@
+version: '2'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    environment:
+      - MUSIC_STORE_EXERCISE_ENVIRONMENT=dev
+    labels:
+      io.rancher.container.network: 'true'
+      io.rancher.container.pull_image: always
+      SERVICE_NAME: music_store_exercise-zookeeper
+
+  kafka:
+    image: wurstmeister/kafka:0.10.0.0
+    expose:
+      - "9092"
+    links:
+      - zookeeper
+    environment:
+      #- KAFKA_CREATE_TOPICS="viewability:1:1,engagement:1:1"
+      - KAFKA_ADVERTISED_HOST_NAME=kafka
+      - KAFKA_PORT=9092
+      - KAFKA_ADVERTISED_PORT=9092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - MUSIC_STORE_EXERCISE_ENVIRONMENT=dev
+    labels:
+      io.rancher.container.network: 'true'
+      io.rancher.container.pull_image: always
+      SERVICE_NAME: music_store_exercise-kafka
+
+  nimbus:
+    image: docker.saritasa.com/music_store_exercise-storm:develop
+    hostname: nimbus
+    container_name: music_store_exercise_storm_nimbus
+    command: storm nimbus -c storm.zookeeper.servers="[\"zookeeper\"]" -c nimbus.seeds="[\"nimbus\"]"
+    environment:
+      - MUSIC_STORE_EXERCISE_ENVIRONMENT=dev
+    links:
+      - zookeeper
+    labels:
+      io.rancher.container.network: 'true'
+      io.rancher.container.pull_image: always
+      SERVICE_NAME: music_store_exercise-nimbus
+
+  supervisor:
+    image: docker.saritasa.com/music_store_exercise-storm:develop
+    hostname: supervisor
+    container_name: music_store_exercise_storm_supervisor
+    command: storm supervisor -c nimbus.seeds="[\"nimbus\"]"
+    extra_hosts:
+      - postgres:172.31.254.223
+    links:
+      - kafka
+      - nimbus
+      - zookeeper
+    environment:
+      - MUSIC_STORE_EXERCISE_ENVIRONMENT=dev
+    labels:
+      io.rancher.container.network: 'true'
+      io.rancher.container.pull_image: always
+      SERVICE_NAME: music_store_exercise-supervisor
+
+  storm-ui:
+    image: docker.saritasa.com/music_store_exercise-storm:develop
+    hostname: ui
+    container_name: music_store_exercise_storm_ui
+    command: sh -c 'caddy -conf /etc/caddy/caddy.conf & storm ui -c nimbus.seeds="[\"nimbus\"]"'
+    links:
+      - nimbus
+      - zookeeper
+    labels:
+      io.rancher.container.network: 'true'
+      io.rancher.container.pull_image: always
+      SERVICE_TAGS: traefik.frontend.rule=Host:music_store_exercise-storm-ui.saritasa-hosting.com,traefik.port=8080,traefik.tags=app,traefik.backend.loadbalancer=drr
+      SERVICE_NAME: music_store_exercise-storm-ui
+
+  petrel-base:
+    image: docker.saritasa.com/music_store_exercise-petrel:develop
+    hostname: music_store_exercise-petrel
+    container_name: music_store_exercise-petrel
+    extra_hosts:
+      - postgres:172.31.254.223
+    environment:
+      - MUSIC_STORE_EXERCISE_ENVIRONMENT=dev
+    labels:
+      io.rancher.container.start_once: 'true'
+      io.rancher.container.network: 'true'
+      io.rancher.container.pull_image: always
+      SERVICE_NAME: music_store_exercise-petrel
+
+  petrel-deploy:
+    extends:
+      service: petrel-base
+    links:
+      - kafka
+      - nimbus
+      - zookeeper
+      - supervisor
+      - storm-ui
+    command: petrel submit --destjar ../music_store_exercise-persistence-dev --config topology.yaml music_store_exercise-persistence-dev
+
+  petrel-delete:
+    extends:
+      service: petrel-base
+    links:
+      - kafka
+      - nimbus
+      - zookeeper
+      - supervisor
+      - storm-ui
+    command: petrel kill --config=topology.yaml music_store_exercise-persistence-dev
+
+  music_store_exercise-lb:
+    image: rancher/lb-service-haproxy:v0.7.5
+    scale: 1
+    ports:
+    - 9092/tcp
+    - 6627/tcp
+    - 443:443/tcp
+    lb_config:
+      default_cert: _.saritasa-hosting.com
+      port_rules:
+      - protocol: tcp
+        service: music_store_exercise/kafka
+        source_port: 9092
+        target_port: 9092
+      - protocol: tcp
+        service: music_store_exercise/nimbus
+        source_port: 6627
+        target_port: 6627
+      - hostname: music_store_exercise-storm-ui.saritasa-hosting.com
+        protocol: https
+        service: storm-ui
+        source_port: 443
+        target_port: 80
+      - hostname: music_store_exercise-admin.saritasa-hosting.com
+        protocol: https
+        service: frontend-admin
+        source_port: 443
+        target_port: 80
+      - hostname: music_store_exercise-development.saritasa-hosting.com
+        protocol: https
+        service: backend
+        source_port: 443
+        target_port: 80
+      - hostname: music_store_exercise-frontend.saritasa-hosting.com
+        protocol: https
+        service: frontend
+        source_port: 443
+        target_port: 80
+      - hostname: music_store_exercise-development.saritasa-hosting.com
+        protocol: http
+        service: backend
+        source_port: 80
+        target_port: 80

@@ -1,0 +1,48 @@
+post:
+  summary: Register new user in system
+  description: Register new user in system
+  operationId: AuthRegister
+  tags:
+    - auth
+  parameters:
+    - name: RegisterData
+      in: body
+      required: true
+      schema:
+        title: Register Request
+        type: object
+        properties:
+          first_name:
+            type: string
+            description: User's first name
+            example: John
+          last_name:
+            type: string
+            description: User's last name
+            example: Smith
+          email:
+            type: string
+            description: User's email
+            example: john@example.com
+          password1:
+            type: string
+            description: Password
+            example: goodpass11
+          password2:
+            type: string
+            description: Password confirmation
+            example: goodpass11
+        required:
+          - first_name
+          - last_name
+          - email
+          - password1
+          - password2
+  responses:
+    '201':
+      description: Successfully registered
+      schema:
+        $ref: '../../definitions.yaml#/TokenInfo'
+    'default':
+      $ref: "../../responses.yaml#/APIErrorResponse"
+  security: []

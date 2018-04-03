@@ -1,0 +1,32 @@
+swagger: '2.0'
+info:
+  version: 0.0.0
+  title: tst5
+host: localhost:8000
+basePath: /api/v1
+
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+
+securityDefinitions:
+  token:
+    type: apiKey
+    name: Authorization
+    in: header
+    description: Authorization token in format "token <token_key>"
+
+definitions:
+  $ref: 'includes/definitions.yaml'
+
+parameters:
+  $ref: 'includes/parameters.yaml'
+
+responses:
+  $ref: 'includes/responses.yaml'
+
+paths:
+  $ref: 'includes/paths.yaml'

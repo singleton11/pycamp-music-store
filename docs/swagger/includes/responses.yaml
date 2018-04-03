@@ -1,0 +1,12 @@
+APIErrorResponse:
+  description: API Error Response
+  schema:
+    $ref: 'definitions.yaml#/APIErrorDetails'
+
+SuccessAuth:
+  description: Successfully authenticated
+  schema:
+    $ref: 'definitions.yaml#/TokenInfo'
+
+NoContent:
+  description: No content.

@@ -1,0 +1,23 @@
+APIErrorDetails:
+  $ref: 'definitions/APIErrorDetails.yaml#'
+
+OAuthData:
+  $ref: 'definitions/OAuthData.yaml#'
+
+User:
+  $ref: 'definitions/User.yaml#'
+
+ValidationError:
+  $ref: 'definitions/ValidationError.yaml#'
+
+Location:
+  $ref: 'definitions/Location.yaml#'
+
+NotificationSettings:
+  $ref: 'definitions/NotificationSettings.yaml#'
+
+TokenInfo:
+  $ref: 'definitions/TokenInfo.yaml#'
+
+SuccessDetails:
+  $ref: 'definitions/SuccessDetails.yaml#'

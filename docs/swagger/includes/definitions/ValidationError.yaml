@@ -1,0 +1,17 @@
+description: Validation Error
+type: object
+properties:
+  field:
+    type: string
+    description: Field with error
+    example: email
+  errors:
+    type: array
+    description: List of errors in field
+    items:
+      type: string
+      description: Error
+      example: Enter a valid email address
+required:
+  - field
+  - errors
