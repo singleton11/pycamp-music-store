@@ -9,11 +9,11 @@ from . import (
     data,
     django,
     docker,
+    frontend,
     is_local_python,
     rabbitmq,
     system,
     tests,
-    frontend,
 )
 
 ##############################################################################

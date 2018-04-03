@@ -1,10 +1,9 @@
-import factory
-
 from django.contrib.admin.sites import AdminSite
 from django.test import RequestFactory, TestCase, override_settings
 from django.utils import timezone
 from django.utils.html import format_html
 
+import factory
 from faker import Faker
 
 from ..admin import AppUserAdmin

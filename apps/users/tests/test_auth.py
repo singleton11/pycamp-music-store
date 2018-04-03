@@ -1,15 +1,16 @@
-import faker
 import unittest
-from django.test import override_settings
-from django.test.client import RequestFactory
+from unittest.mock import Mock, patch
+
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.contrib.sites.models import Site
+from django.test import override_settings
+from django.test.client import RequestFactory
 
-from allauth.account.tests import TestCase
+import faker
 from allauth.account.models import EmailAddress
-from allauth.socialaccount.models import SocialAccount, SocialLogin
+from allauth.account.tests import TestCase
 from allauth.socialaccount.helpers import complete_social_login
-from unittest.mock import patch, Mock
+from allauth.socialaccount.models import SocialAccount, SocialLogin
 
 from ..adapter import SocialAccountAdapter
 from ..factories import UserFactory

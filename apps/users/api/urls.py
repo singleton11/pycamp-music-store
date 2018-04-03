@@ -3,13 +3,12 @@ from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    UserGeoLocationAPIView,
-    UserUploadAvatarAPIView,
     CheckUsernameView,
-    UsersViewSet,
     LookupUserOptionsView,
+    UserGeoLocationAPIView,
+    UsersViewSet,
+    UserUploadAvatarAPIView,
 )
-
 
 # register URL like
 # router.register(r'users', UsersAPIView)

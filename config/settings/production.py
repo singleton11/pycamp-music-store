@@ -1,4 +1,5 @@
 from app.settings import *
+
 DEBUG = False
 ENVIRONMENT = 'production'
 
