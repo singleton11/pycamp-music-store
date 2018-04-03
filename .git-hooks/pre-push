@@ -7,8 +7,8 @@ shopt -s globstar
 CHECK_MIGRATIONS=true
 RUN_TESTS=true
 CHECK_PEP8=true
-CHECK_JS=true
-CHECK_SASS=true
+CHECK_JS=false
+CHECK_SASS=false
 CHECK_SWAGGER=false
 
 # in the case html/js developer only works on frontend stuff
@@ -23,8 +23,8 @@ if [[ "$pythondev" != 0 ]] ||
   CHECK_MIGRATIONS=false
   RUN_TESTS=false
   CHECK_PEP8=false
-  CHECK_JS=true
-  CHECK_SASS=true
+  CHECK_JS=false
+  CHECK_SASS=false
   CHECK_SWAGGER=false
 fi
 
