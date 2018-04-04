@@ -35,6 +35,14 @@ class MusicTrack(models.Model):
         """Method to take away like from track"""
         pass
 
+    def play_track(self, user):
+        """Method to play music track"""
+        pass
+
+    def buy_track(self, user):
+        """Method to buy music track"""
+        pass
+
     def __str__(self):
         return self.track_name
 
