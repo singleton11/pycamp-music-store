@@ -123,7 +123,7 @@ pep8==1.7.1
 pexpect==4.4.0            # via ipython
 pickleshare==0.7.4        # via ipython
 pilkit==2.0
-pillow==5.1.0             # via blockdiag
+pillow==5.1.0
 pip-tools==1.11.0
 pockets==0.6.2            # via sphinxcontrib-napoleon
 port_for==0.3.1           # via sphinx-autobuild
@@ -168,7 +168,7 @@ snowballstemmer==1.2.1    # via pydocstyle, sphinx
 sphinx-autobuild==0.7.1
 sphinx-py3doc-enhanced-theme==2.4.0
 sphinx-rtd-theme==0.2.4
-sphinx==1.7.2             # via sphinxcontrib-blockdiag
+sphinx==1.7.2
 sphinxcontrib-blockdiag==1.5.5
 sphinxcontrib-napoleon==0.6.1
 sphinxcontrib-websupport==1.0.1  # via sphinx
