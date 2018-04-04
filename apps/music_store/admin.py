@@ -2,7 +2,7 @@ from django.contrib import admin
 from apps.music_store.models import (
     PaymentAccount,
     PaymentMethod,
-    BoughtTrack
+    BoughtTrack,
 )
 
 admin.site.register(PaymentAccount)
