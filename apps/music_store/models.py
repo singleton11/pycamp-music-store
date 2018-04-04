@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 
 AppUser = get_user_model()
@@ -34,8 +35,11 @@ class PaymentAccount(models.Model):
         payment_methods(PaymentMethod[]): saved payment methods
         default_payment_methods(PaymentMethod): default payment method
     """
-    user = models.OneToOneField(AppUser)
-    balance = models.FloatField(default=0.0)
+    user = models.OneToOneField(AppUser, primary_key=True)
+    balance = models.FloatField(
+        default=0.0,
+        validators=[MinValueValidator(0.0)]
+    )
 
     methods_used = models.ManyToManyField(
         PaymentMethod,
@@ -60,7 +64,7 @@ class BoughtTrack(models.Model):
     """
     user = models.ForeignKey(AppUser)
     track = models.ForeignKey(Track)
-    date_purchase = models.DateTimeField()
+    date_purchase = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = (("user", "track"),)
