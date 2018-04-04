@@ -57,8 +57,11 @@ class MusicTrack(models.Model):
 
 class LikeTrack(models.Model):
     """an element to store likes"""
-    track = models.ForeignKey(MusicTrack, blank=True, null=True)
-    user = models.ForeignKey(AppUser, blank=True, null=True)
+    class Meta:
+        unique_together = (('track', 'user'),)
+
+    track = models.ForeignKey(MusicTrack)
+    user = models.ForeignKey(AppUser)
     like_time = models.DateTimeField(auto_now_add=True)
 
 

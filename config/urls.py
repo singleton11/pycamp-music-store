@@ -9,19 +9,19 @@ urlpatterns = [
     # ADMIN urls
     url(r'^admin/', admin.site.urls),
 
-    
 
-    
     # API endpoints
     url(r'^api/v1/auth/', include('rest_auth.urls')),
     url(r'^api/v1/auth/register', RegisterView.as_view()),
     url(r'^api/v1/oauth/', include('apps.users.api.oauth_urls')),
     url(r'^api/v1/', include('apps.users.api.urls')),
-    
 
-    
+
+
     url(r'^users/', include('apps.users.urls')),
-    
+
+    url(r'^', include('apps.music_store.api.urls')),
+
 ]
 
 # for serving uploaded files on dev environment with django

@@ -1,6 +1,10 @@
 from rest_framework import serializers
-from apps.users.models import AppUser
-from apps.music_store.models import MusicAlbum, MusicTrack, LikeTrack, ListenTrack
+from apps.music_store.models import (
+    MusicAlbum,
+    MusicTrack,
+    LikeTrack,
+    ListenTrack
+)
 
 
 class MusicAlbumSerializer(serializers.ModelSerializer):
