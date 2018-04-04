@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.music_store.models import PaymentMethod, PaymentAccount, BoughtTrack
+from ...models import PaymentMethod, PaymentAccount, BoughtTrack
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):

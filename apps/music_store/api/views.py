@@ -1,10 +1,10 @@
 from rest_framework import viewsets
 
-from apps.music_store.api.serializers.payment import (
+from ...music_store.api.serializers.payment import (
     PaymentAccountSerializer,
     PaymentMethodSerializer,
     BoughtTrackSerializer)
-from apps.music_store.models import (
+from ...music_store.models import (
     PaymentAccount,
     PaymentMethod,
     BoughtTrack)
