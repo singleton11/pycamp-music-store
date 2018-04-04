@@ -1,9 +1,10 @@
 from rest_framework import serializers
+
 from apps.music_store.models import (
+    LikeTrack,
+    ListenTrack,
     MusicAlbum,
     MusicTrack,
-    LikeTrack,
-    ListenTrack
 )
 
 
@@ -61,4 +62,3 @@ class ListenTrackSerializer(serializers.ModelSerializer):
             'user',
             'listen_time',
         )
-

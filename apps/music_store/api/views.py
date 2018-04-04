@@ -1,17 +1,17 @@
 from rest_framework import viewsets
-from apps.music_store.models import (
-    MusicTrack,
-    MusicAlbum,
-    LikeTrack,
-    ListenTrack,
-)
+
 from apps.music_store.api.serializers.music_albums_tracks import (
-    MusicAlbumSerializer,
-    MusicTrackSerializer,
     LikeTrackSerializer,
     ListenTrackSerializer,
+    MusicAlbumSerializer,
+    MusicTrackSerializer,
 )
-
+from apps.music_store.models import (
+    LikeTrack,
+    ListenTrack,
+    MusicAlbum,
+    MusicTrack,
+)
 
 # ##############################################################################
 # MUSIC ALBUMS
@@ -63,4 +63,3 @@ class ListenTrackViewSet(viewsets.ModelViewSet):
     """
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
-

@@ -1,4 +1,5 @@
 from django.db import models
+
 from apps.users.models import AppUser
 
 
@@ -70,4 +71,3 @@ class ListenTrack(models.Model):
     track = models.ForeignKey(MusicTrack)
     user = models.ForeignKey(AppUser)
     listen_time = models.DateTimeField(auto_now_add=True)
-
