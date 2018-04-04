@@ -22,29 +22,20 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.google',
     'crispy_forms',
     'opbeat.contrib.django',
-
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_gis',
     'taggit_serializer',
     'rest_auth',
     'rest_auth.registration',
-
-
-
     'push_notifications',
-
-
-
     'django_celery_beat',
-
-
 )
 
 LOCAL_APPS = (
     'libs',
     'apps.users',
-
+    'apps.music_store',
 )
 
 INSTALLED_APPS += LOCAL_APPS
