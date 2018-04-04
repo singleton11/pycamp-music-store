@@ -4,12 +4,12 @@ from django.db import models
 AppUser = get_user_model()
 
 
-class Track:
+class Track(models.Model):
     """Blank model for Track"""
     pass
 
 
-class Album:
+class Album(models.Model):
     """Blank model for Album"""
     pass
 
@@ -34,8 +34,8 @@ class PaymentAccount(models.Model):
     user = models.OneToOneField(AppUser)
     balance = models.FloatField(default=0.0)
 
-    payment_methods = models.ManyToManyField(PaymentMethod)
-    default_payment_methods = models.ForeignKey(PaymentMethod)
+    methods_used = models.ManyToManyField(PaymentMethod, related_name='methods_used')
+    default_method = models.ForeignKey(PaymentMethod, related_name='default_method')
 
 
 class BoughtTrack(models.Model):
