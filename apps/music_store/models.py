@@ -3,11 +3,11 @@ from django.db import models
 from apps.users.models import AppUser
 
 
-class MusicAlbum(models.Model):
+class Album(models.Model):
     """Music album"""
-    album_name = models.CharField(max_length=200)
-    album_image = models.CharField(max_length=200)
-    album_price = models.FloatField()
+    album_name = models.CharField(verbose_name='Title', max_length=200)
+    album_image = models.CharField(verbose_name='Image', max_length=200)
+    album_price = models.FloatField(verbose_name='Price')
 
     created = models.DateTimeField(auto_now_add=True)
 
@@ -22,11 +22,16 @@ class MusicAlbum(models.Model):
         return self.album_name
 
 
-class MusicTrack(models.Model):
+class Track(models.Model):
     """Music track"""
-    track_name = models.CharField(max_length=200)
-    track_album = models.ForeignKey(MusicAlbum, blank=True, null=True)
-    track_price = models.FloatField()
+    track_name = models.CharField(verbose_name='Title', max_length=200)
+    track_album = models.ForeignKey(
+        Album,
+        verbose_name='Album',
+        blank=True,
+        null=True,
+    )
+    track_price = models.FloatField(verbose_name='Price')
 
     # free_version
     # full_version
@@ -61,13 +66,13 @@ class LikeTrack(models.Model):
     class Meta:
         unique_together = (('track', 'user'),)
 
-    track = models.ForeignKey(MusicTrack)
+    track = models.ForeignKey(Track)
     user = models.ForeignKey(AppUser)
     like_time = models.DateTimeField(auto_now_add=True)
 
 
 class ListenTrack(models.Model):
     """an element to store each listening"""
-    track = models.ForeignKey(MusicTrack)
+    track = models.ForeignKey(Track)
     user = models.ForeignKey(AppUser)
     listen_time = models.DateTimeField(auto_now_add=True)

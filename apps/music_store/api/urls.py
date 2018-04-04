@@ -9,9 +9,14 @@ router = DefaultRouter()
 router.register(r'albums', views.AlbumViewSet)
 router.register(r'tracks', views.TrackViewSet)
 router.register(r'likes', views.LikeTrackViewSet)
+# router.register(r'putlikes', views.LikeSomeTrackAPIView)
 router.register(r'listens', views.ListenTrackViewSet)
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
+    url(r'^put_likes/$',
+        views.LikeSomeTrackAPIView.as_view(),
+        name='like'),
+
     url(r'^', include(router.urls)),
 ]
