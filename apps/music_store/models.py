@@ -49,3 +49,6 @@ class BoughtTrack(models.Model):
     user = models.ForeignKey(AppUser)
     track = models.ForeignKey(Track)
     date_purchase = models.DateTimeField()
+
+    class Meta:
+        unique_together = (("user", "track"),)
