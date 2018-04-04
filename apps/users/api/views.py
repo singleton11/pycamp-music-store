@@ -1,35 +1,22 @@
 from django.contrib.auth import get_user_model
 from django.http import Http404
 
+from rest_framework import generics, status, viewsets
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from allauth.socialaccount.providers.facebook.views import (
     FacebookOAuth2Adapter,
 )
-from allauth.socialaccount.providers.google.views import (
-    GoogleOAuth2Adapter,
-)
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from rest_auth.registration.views import SocialLoginView
+
 from libs.api.serializers.serializers import (
     LocationSerializer,
     UploadSerializer,
 )
-from rest_auth.registration.views import (
-    SocialLoginView,
-)
-from rest_framework import (
-    generics,
-    status,
-    viewsets
-)
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-)
-from rest_framework.response import (
-    Response,
-)
-from rest_framework.views import (
-    APIView,
-)
+
 from .serializers import auth
 
 AppUser = get_user_model()

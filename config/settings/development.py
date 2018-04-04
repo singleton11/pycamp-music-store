@@ -112,5 +112,3 @@ CACHEOPS_REDIS = {
                             # is highly recommended
     'socket_timeout': 3     # connection timeout in seconds, optional
 }
-
-

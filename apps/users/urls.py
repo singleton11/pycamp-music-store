@@ -5,7 +5,6 @@ from django.views.generic import TemplateView
 from allauth.account import views as account_views
 from allauth.socialaccount import views as social_views
 
-
 urlpatterns = [
     url('^signup/$', social_views.signup, name='socialaccount_signup'),
     url(r"^email-confirmed/$",
@@ -20,5 +19,3 @@ urlpatterns = [
         account_views.password_reset_from_key_done,
         name="account_reset_password_from_key_done"),
 ]
-
-

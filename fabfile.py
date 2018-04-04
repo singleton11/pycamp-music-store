@@ -8,13 +8,13 @@ from provision import (  # noqa
     django,
     docker,
     docs,
+    frontend,
     linters,
     project,
     storm,
     system,
     tests,
     tools,
-    frontend,
 )
 
 # let's load custom commands defined in

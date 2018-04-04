@@ -4,9 +4,7 @@ import time
 from fabric.api import local, task
 from fabric.colors import green
 
-from . import (
-    common,
-)
+from . import common
 
 ##############################################################################
 # Frontend ops

@@ -18,4 +18,3 @@ ACCOUNT_ADAPTER = 'apps.users.adapter.AccountAdapter'
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = False
 SOCIALACCOUNT_ADAPTER = 'apps.users.adapter.SocialAccountAdapter'
-
