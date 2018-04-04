@@ -1,4 +1,5 @@
 from django.db import models
+from apps.users.models import AppUser
 
 
 class MusicAlbum(models.Model):
@@ -12,6 +13,10 @@ class MusicAlbum(models.Model):
     class Meta:
         ordering = ('created',)
 
+    def buy_album(self, user):
+        """Method to buy music track"""
+        pass
+
     def __str__(self):
         return self.album_name
 
@@ -21,6 +26,9 @@ class MusicTrack(models.Model):
     track_name = models.CharField(max_length=200)
     track_album = models.ForeignKey(MusicAlbum, blank=True, null=True)
     track_price = models.FloatField()
+
+    # free_version
+    # full_version
 
     created = models.DateTimeField(auto_now_add=True)
 
@@ -45,4 +53,18 @@ class MusicTrack(models.Model):
 
     def __str__(self):
         return self.track_name
+
+
+class LikeTrack(models.Model):
+    """an element to store likes"""
+    track = models.ForeignKey(MusicTrack, blank=True, null=True)
+    user = models.ForeignKey(AppUser, blank=True, null=True)
+    like_time = models.DateTimeField(auto_now_add=True)
+
+
+class ListenTrack(models.Model):
+    """an element to store each listening"""
+    track = models.ForeignKey(MusicTrack)
+    user = models.ForeignKey(AppUser)
+    listen_time = models.DateTimeField(auto_now_add=True)
 
