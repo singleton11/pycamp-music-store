@@ -21,6 +21,9 @@ class PaymentMethod(models.Model):
     """
     title = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.title
+
 
 class PaymentAccount(models.Model):
     """Payment account for each user
@@ -34,8 +37,17 @@ class PaymentAccount(models.Model):
     user = models.OneToOneField(AppUser)
     balance = models.FloatField(default=0.0)
 
-    methods_used = models.ManyToManyField(PaymentMethod, related_name='methods_used')
-    default_method = models.ForeignKey(PaymentMethod, related_name='default_method')
+    methods_used = models.ManyToManyField(
+        PaymentMethod,
+        related_name='methods_used'
+    )
+    default_method = models.ForeignKey(
+        PaymentMethod,
+        related_name='default_method'
+    )
+
+    def __str__(self):
+        return f'{self.user} (balance {self.balance})'
 
 
 class BoughtTrack(models.Model):
@@ -52,3 +64,6 @@ class BoughtTrack(models.Model):
 
     class Meta:
         unique_together = (("user", "track"),)
+
+    def __str__(self):
+        return f'{self.user} bought {self.track}'
