@@ -1,11 +1,6 @@
 from rest_framework import serializers
 
-from apps.music_store.models import (
-    LikeTrack,
-    ListenTrack,
-    Album,
-    Track,
-)
+from apps.music_store.models import Album, LikeTrack, ListenTrack, Track
 
 
 class AlbumSerializer(serializers.ModelSerializer):
@@ -40,6 +35,8 @@ class LikeTrackSerializer(serializers.ModelSerializer):
     """Serializer for Music Tracks
 
     """
+    user = serializers.ReadOnlyField(source='user.pk')
+
     class Meta:
         model = LikeTrack
         fields = (
@@ -54,6 +51,8 @@ class ListenTrackSerializer(serializers.ModelSerializer):
     """Serializer for Music Tracks
 
     """
+    user = serializers.ReadOnlyField(source='user.pk')
+
     class Meta:
         model = ListenTrack
         fields = (

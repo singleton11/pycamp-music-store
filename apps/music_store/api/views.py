@@ -1,18 +1,12 @@
-from rest_framework import viewsets, generics, status
-from rest_framework.response import Response
+from rest_framework import viewsets
 
 from apps.music_store.api.serializers.music_albums_tracks import (
+    AlbumSerializer,
     LikeTrackSerializer,
     ListenTrackSerializer,
-    AlbumSerializer,
     TrackSerializer,
 )
-from apps.music_store.models import (
-    LikeTrack,
-    ListenTrack,
-    Album,
-    Track,
-)
+from apps.music_store.models import Album, LikeTrack, ListenTrack, Track
 
 # ##############################################################################
 # MUSIC ALBUMS
@@ -25,6 +19,8 @@ class AlbumViewSet(viewsets.ModelViewSet):
     """
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
+
+    # http_method_names = ['get', 'head']
 
 
 # ##############################################################################
@@ -39,6 +35,8 @@ class TrackViewSet(viewsets.ModelViewSet):
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
 
+    # http_method_names = ['get', 'head']
+
 
 # ##############################################################################
 # Likes
@@ -47,51 +45,20 @@ class TrackViewSet(viewsets.ModelViewSet):
 
 class LikeTrackViewSet(viewsets.ModelViewSet):
     """
-    List all lokes for tracks.
+    List all music tracks, or create a new track.
     """
     queryset = LikeTrack.objects.all()
     serializer_class = LikeTrackSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
-class LikeSomeTrackAPIView(
-        generics.CreateAPIView,
-        generics.DestroyAPIView,
-        generics.GenericAPIView
-):
-    """
-    List all music labels, or create a new album.
-    """
-    serializer_class = LikeTrackSerializer
+    def perform_destroy(self, instance):
+        if self.request.user == instance.user:
+            instance.delete()
 
-    def create(self, request, *args, **kwargs):
-        """Put a like to some track"""
-        serializer = self.get_serializer(data=self.request.data)
-
-        serializer.is_valid(raise_exception=True)
-        user = self.request.user
-        track_id = serializer.validated_data['track']
-
-        like = LikeTrack(
-            track=track_id,
-            user=user,
-        )
-        like.save()
-
-        return Response(
-            status=status.HTTP_201_CREATED
-        )
-
-    def delete(self, request, *args, **kwargs):
-        """Delete like from track"""
-        serializer = self.get_serializer(data=self.request.data)
-
-        serializer.is_valid(raise_exception=True)
-        track_id = serializer.validated_data['track']
-        user = self.request.user
-
-        if LikeTrack.objects.get(pk=track_id, user=user):
-            LikeTrack.objects.get(pk=track_id, user=user).delete()
-        return Response(status=status.HTTP_200_OK)
+    # def get_queryset(self):
+    #     return LikeTrack.objects.filter(user=self.request.user)
 
 
 # ##############################################################################
@@ -105,4 +72,12 @@ class ListenTrackViewSet(viewsets.ModelViewSet):
     """
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
+
+    http_method_names = ['get', 'post', 'head']
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        return ListenTrack.objects.filter(user=self.request.user)
 
