@@ -1,11 +1,12 @@
 from rest_framework import serializers
 
-from ....users.models import AppUser, PaymentMethod
+from apps.users.models import AppUser, PaymentMethod
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentMethod
+        fields = ('title',)
         fields = ('title',)
 
 
@@ -15,4 +16,9 @@ class PaymentAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AppUser
-        fields = ('user', 'balance', 'methods_used', 'default_method')
+        fields = (
+            'user',
+            'balance',
+            'methods_used',
+            'default_method',
+        )

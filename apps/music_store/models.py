@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.conf.global_settings import AUTH_USER_MODEL
 from django.db import models
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
@@ -15,19 +15,14 @@ class Track(TitleDescriptionModel, models.Model):
 
 
 class Album(models.Model):
-    """Blank model for Album"""
-
     def user_has(self, user):
         return BoughtAlbum.objects.filter(user=user, item=self).exists()
-
-
-AppUser = get_user_model()
 
 
 class BoughtItem(TimeStampedModel, models.Model):
     """ An abstract base class model for BoughtTrack and BoughtAlbum
     """
-    user = models.ForeignKey(AppUser)
+    user = models.ForeignKey(AUTH_USER_MODEL)
 
     class Meta:
         abstract = True

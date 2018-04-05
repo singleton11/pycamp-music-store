@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import HStoreField
 from django.db import models
 from imagekit import models as imagekitmodels
 from imagekit.processors import ResizeToFill
+from django.db.models import F
 
 from libs import utils
 
@@ -64,17 +65,18 @@ class AppUser(AbstractUser):
         date_joined (datetime): when user joined
     """
 
-    balance = models.FloatField(
-        default=0.0,
+    balance = models.DecimalField(
+        max_digits=16,
+        decimal_places=2,
     )
 
     methods_used = models.ManyToManyField(
         PaymentMethod,
-        related_name='methods_used',
+        related_name='users',
     )
     default_method = models.ForeignKey(
         PaymentMethod,
-        related_name='default_method',
+        related_name='users_by_default',
         null=True,
     )
 
@@ -128,7 +130,7 @@ class AppUser(AbstractUser):
         # ToDo: block the table
         if self.balance < item.price:
             return False
-        self.balance -= item.price
+        self.balance = F('balance') - item.price
         self.save()
         return True
 

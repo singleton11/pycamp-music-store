@@ -35,14 +35,13 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
                          viewsets.mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     """ View a list of bought users tracks and can buy the track."""
-    model = BoughtTrack
     serializer_class = BoughtTrackSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    queryset = model.objects.all()
+    queryset = BoughtTrack.objects.all()
 
     def get_queryset(self):
         user = self.request.user
-        return self.model.objects.filter(user=user)
+        return super().get_queryset().filter(user=user)
 
     def perform_create(self, serializer):
         """ Check, that user don't have selected track.
@@ -62,4 +61,4 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
 
 class BoughtAlbumViewSet(BoughtTrackViewSet):
     """ View a list of bought albums user and can buy the album. """
-    model = BoughtAlbum
+    queryset = BoughtAlbum.objects.all()
