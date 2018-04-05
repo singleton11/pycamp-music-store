@@ -6,9 +6,12 @@ AppUser = get_user_model()
 
 
 class Track(models.Model):
-    """Blank model for Track"""
-    pass
+    """ part of model for Track"""
+    track_name = models.CharField(max_length=200, default="Undefined")
+    track_price = models.FloatField(default=1.0)
 
+    def __str__(self):
+        return self.track_name
 
 class Album(models.Model):
     """Blank model for Album"""

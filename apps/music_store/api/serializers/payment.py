@@ -16,8 +16,8 @@ class PaymentAccountSerializer(serializers.ModelSerializer):
 
 
 class BoughtTrackSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField()
+    user = serializers.ReadOnlyField(source='user.pk')
 
     class Meta:
         model = BoughtTrack
-        fields = ('user', 'track', 'date_purchase')
+        fields = ('pk', 'user', 'track', 'date_purchase')
