@@ -1,15 +1,32 @@
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from apps.users.models import AppUser
 
 
 class Album(models.Model):
-    """Music album"""
-    album_name = models.CharField(verbose_name='Title', max_length=200)
-    album_image = models.CharField(verbose_name='Image', max_length=200)
-    album_price = models.FloatField(verbose_name='Price')
+    """Music album with its title, image, price and related tracks.
+
+    Attributes:
+        title (CharField): text representation of album's title
+        image (Charfield): text representation of URL to album's image
+        price (FloatField): price of album. Minimal price is 0
+        created (DateTimeField): date of creation. Adds automatically
+
+    """
+    title = models.CharField(verbose_name='Title', max_length=200)
+    image = models.CharField(verbose_name='Image', max_length=200)
+    price = models.FloatField(
+        verbose_name='Price',
+        validators=[MinValueValidator(0.0)]
+    )
 
     created = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_empty(self):
+        """bool: True if no related Tracks"""
+        return not self.tracks.exists()
 
     class Meta:
         ordering = ('created',)
@@ -19,19 +36,31 @@ class Album(models.Model):
         pass
 
     def __str__(self):
-        return self.album_name
+        return self.title
 
 
 class Track(models.Model):
-    """Music track"""
-    track_name = models.CharField(verbose_name='Title', max_length=200)
-    track_album = models.ForeignKey(
+    """Music track with its title, price and album if exists.
+
+    Attributes:
+        title (CharField): text representation of track's title
+        album (Album): album that contains the track
+        price (FloatField): price of album. Minimal price is 0
+        created (DateTimeField): date of creation. Adds automatically
+
+    """
+    title = models.CharField(verbose_name='Title', max_length=200)
+    album = models.ForeignKey(
         Album,
         verbose_name='Album',
         blank=True,
         null=True,
+        related_name='tracks'
     )
-    track_price = models.FloatField(verbose_name='Price')
+    price = models.FloatField(
+        verbose_name='Price',
+        validators=[MinValueValidator(0.0)]
+    )
 
     # free_version
     # full_version
@@ -58,11 +87,13 @@ class Track(models.Model):
         pass
 
     def __str__(self):
-        return self.track_name
+        return self.title
 
 
 class LikeTrack(models.Model):
-    """an element to store likes"""
+    """A 'Like' to music track.
+
+    Unique pair of user who likes track and track, that is liked by user."""
     class Meta:
         unique_together = (('track', 'user'),)
 
@@ -72,7 +103,10 @@ class LikeTrack(models.Model):
 
 
 class ListenTrack(models.Model):
-    """an element to store each listening"""
+    """A note about each listening of any track by any user.
+
+    Each track may be listened multiple times."""
     track = models.ForeignKey(Track)
     user = models.ForeignKey(AppUser)
     listen_time = models.DateTimeField(auto_now_add=True)
+

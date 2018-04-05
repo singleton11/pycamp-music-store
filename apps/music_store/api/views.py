@@ -14,8 +14,8 @@ from apps.music_store.models import Album, LikeTrack, ListenTrack, Track
 
 
 class AlbumViewSet(viewsets.ModelViewSet):
-    """
-    List all music albums, or create a new album.
+    """List all music albums, or create a new album.
+
     """
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
@@ -29,8 +29,8 @@ class AlbumViewSet(viewsets.ModelViewSet):
 
 
 class TrackViewSet(viewsets.ModelViewSet):
-    """
-    List all music tracks, or create a new track.
+    """List all music tracks, or create a new track.
+
     """
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
@@ -44,16 +44,22 @@ class TrackViewSet(viewsets.ModelViewSet):
 
 
 class LikeTrackViewSet(viewsets.ModelViewSet):
-    """
-    List all music tracks, or create a new track.
+    """List likes for all music tracks and users.
+
     """
     queryset = LikeTrack.objects.all()
     serializer_class = LikeTrackSerializer
 
     def perform_create(self, serializer):
+        """Put a Like to some track.
+
+        Allows to save Like only to logged user"""
         serializer.save(user=self.request.user)
 
     def perform_destroy(self, instance):
+        """Put away Like from the track.
+
+        Allows to destroy Like only to user who put that like"""
         if self.request.user == instance.user:
             instance.delete()
 
@@ -67,8 +73,8 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
 
 
 class ListenTrackViewSet(viewsets.ModelViewSet):
-    """
-    List all listens for tracks.
+    """List all listens of all tracks by current user.
+
     """
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
@@ -76,8 +82,11 @@ class ListenTrackViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'head']
 
     def perform_create(self, serializer):
+        """Put a Like to some track.
+
+        Allows to save Like only to logged user"""
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
+        """Show user his history of listening"""
         return ListenTrack.objects.filter(user=self.request.user)
-
