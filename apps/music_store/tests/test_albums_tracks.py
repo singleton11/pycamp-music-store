@@ -1,16 +1,21 @@
 from django.test import TestCase
 
-from ..models import Album, Track, ListenTrack, LikeTrack
-from .factories import AlbumFactory, TrackFactoryNoAlbum
-from ...users.factories import UserFactory
+from ..models import Album, Track
 
 
 class TestAlbumAndTrack(TestCase):
     """"""
 
     def setUp(self):
-        self.album = AlbumFactory()
-        self.track = TrackFactoryNoAlbum()
+        self.album = Album(
+            title='dersdbfcxbfd',
+            image='sdrgdshgb//srgteawrtg/srge',
+            price=199.99
+        )
+        self.track = Track(
+            title='vxdrgdfhbs',
+            price=10.99
+        )
 
     def test_album_str(self):
         self.assertEqual(str(self.album), self.album.title)
@@ -27,10 +32,3 @@ class TestAlbumAndTrack(TestCase):
     def test_add_track_to_album(self):
         self.track.album = self.album
         self.assertEqual(self.track.album, self.album)
-
-
-class TestLike(TestCase):
-    def setUp(self):
-        self.user1 = UserFactory()
-        self.user2 = UserFactory()
-        self.track = TrackFactoryNoAlbum()
