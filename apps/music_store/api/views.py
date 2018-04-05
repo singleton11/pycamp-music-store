@@ -24,7 +24,7 @@ class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class PaymentAccountView(generics.RetrieveUpdateAPIView):
-    """ view for PaymentAccount. Support create, delete, edit methods """
+    """ View for PaymentAccount. Support read and update """
 
     serializer_class = PaymentAccountSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -34,7 +34,7 @@ class PaymentAccountView(generics.RetrieveUpdateAPIView):
 
 
 class BoughtTrackViewSet(viewsets.ModelViewSet):
-    """ View a list of bought tracks user and to buy the track. """
+    """ View a list of bought users tracks and can buy the track."""
     serializer_class = BoughtTrackSerializer
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'post']
@@ -53,17 +53,17 @@ class BoughtTrackViewSet(viewsets.ModelViewSet):
         track = serializer.validated_data['track']
         if BoughtTrack.objects.filter(user=user, track=track).exists():
             # AlreadyExists
-            raise exceptions.ValidationError('Track already bought')
+            raise exceptions.ValidationError("Track already bought")
 
         if not user.paymentaccount.pay_item(track):
-            raise exceptions.ValidationError('You don\'t have money')
+            raise exceptions.ValidationError("You don't have money")
 
         # checking balance and price
         serializer.save(user=user)
 
 
 class BoughtAlbumViewSet(viewsets.ModelViewSet):
-    """ View a list of bought albums user and to buy the album. """
+    """ View a list of bought albums user and can buy the album. """
     serializer_class = BoughtAlbumSerializer
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'post']
@@ -80,12 +80,13 @@ class BoughtAlbumViewSet(viewsets.ModelViewSet):
         """
         user = self.request.user
         album = serializer.validated_data['album']
+
         if BoughtAlbum.objects.filter(user=user, album=album).exists():
             # AlreadyExists
-            raise exceptions.ValidationError('Track already bought')
+            raise exceptions.ValidationError("Track already bought")
 
         if not user.paymentaccount.pay_item(album):
-            raise exceptions.ValidationError('You don\'t have money')
+            raise exceptions.ValidationError("You don't have money")
 
         # checking balance and price
         serializer.save(user=user)

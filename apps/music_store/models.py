@@ -58,6 +58,11 @@ class PaymentAccount(models.Model):
         return f'{self.user} (balance {self.balance})'
 
     def pay_item(self, item):
+        """ Method for subtract cost of item.
+
+        Returns:
+            boolean: True, if success
+        """
         # ToDo: save to history
         # ToDo: block the table
         if self.balance < item.price:
@@ -90,8 +95,8 @@ class BoughtAlbum(models.Model):
     """Model for storing a bought albums after purchase
 
     Attributes:
-        user(AppUser): user who bought the track
-        album(Album): track purchased by the user
+        user(AppUser): user who bought the album
+        album(Album): album purchased by the user
         date_purchase(DateTimeField): date of purchase
     """
     user = models.ForeignKey(AppUser)
