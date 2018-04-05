@@ -13,6 +13,7 @@ class Track(models.Model):
     def __str__(self):
         return self.track_name
 
+
 class Album(models.Model):
     """Blank model for Album"""
     pass
@@ -55,6 +56,15 @@ class PaymentAccount(models.Model):
 
     def __str__(self):
         return f'{self.user} (balance {self.balance})'
+
+    def pay_track(self, track):
+        # ToDo: save to history
+        # ToDo: block the table
+        if self.balance < track.track_price:
+            return False
+        self.balance -= track.track_price
+        self.save()
+        return True
 
 
 class BoughtTrack(models.Model):

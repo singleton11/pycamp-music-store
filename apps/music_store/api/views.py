@@ -1,6 +1,5 @@
-from rest_framework import viewsets, permissions, generics, status
 from rest_framework import exceptions
-from rest_framework.response import Response
+from rest_framework import viewsets, permissions, generics
 
 from ...music_store.api.serializers.payment import (
     PaymentAccountSerializer,
@@ -45,7 +44,7 @@ class BoughtTrackView(generics.ListCreateAPIView):
             # AlreadyExists
             raise exceptions.ValidationError('Track already bought')
 
-        if user.paymentaccount.balance < track.track_price:
+        if not user.paymentaccount.pay_track(track):
             raise exceptions.ValidationError('You don\'t have money')
 
         # checking balance and price
