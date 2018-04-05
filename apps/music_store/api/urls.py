@@ -5,11 +5,13 @@ from apps.music_store.api.views import (
     PaymentAccountView,
     PaymentMethodViewSet,
     BoughtTrackViewSet,
+    BoughtAlbumViewSet
 )
 
 router = DefaultRouter()
 router.register(r'payment_methods', PaymentMethodViewSet)
 router.register(r'bought_tracks', BoughtTrackViewSet)
+router.register(r'bought_albums', BoughtAlbumViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),

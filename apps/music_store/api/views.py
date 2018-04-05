@@ -1,14 +1,20 @@
 from rest_framework import exceptions
 from rest_framework import viewsets, permissions, generics
 
+from ...music_store.api.serializers.bought import (
+    BoughtTrackSerializer,
+    BoughtAlbumSerializer,
+)
 from ...music_store.api.serializers.payment import (
     PaymentAccountSerializer,
     PaymentMethodSerializer,
-    BoughtTrackSerializer)
+)
 from ...music_store.models import (
     PaymentAccount,
     PaymentMethod,
-    BoughtTrack)
+    BoughtTrack,
+    BoughtAlbum,
+)
 
 
 class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
@@ -49,7 +55,36 @@ class BoughtTrackViewSet(viewsets.ModelViewSet):
             # AlreadyExists
             raise exceptions.ValidationError('Track already bought')
 
-        if not user.paymentaccount.pay_track(track):
+        if not user.paymentaccount.pay_item(track):
+            raise exceptions.ValidationError('You don\'t have money')
+
+        # checking balance and price
+        serializer.save(user=user)
+
+
+class BoughtAlbumViewSet(viewsets.ModelViewSet):
+    """ View a list of bought albums user and to buy the album. """
+    serializer_class = BoughtAlbumSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'post']
+    queryset = BoughtAlbum.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        return BoughtAlbum.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        """ Check, that user don't have selected album.
+
+        Also check user balance, and subtract prise from balance.
+        """
+        user = self.request.user
+        album = serializer.validated_data['album']
+        if BoughtAlbum.objects.filter(user=user, album=album).exists():
+            # AlreadyExists
+            raise exceptions.ValidationError('Track already bought')
+
+        if not user.paymentaccount.pay_item(album):
             raise exceptions.ValidationError('You don\'t have money')
 
         # checking balance and price

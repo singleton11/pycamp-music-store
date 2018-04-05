@@ -7,11 +7,11 @@ AppUser = get_user_model()
 
 class Track(models.Model):
     """ part of model for Track"""
-    track_name = models.CharField(max_length=200, default="Undefined")
-    track_price = models.FloatField(default=1.0)
+    title = models.CharField(max_length=200, default="Undefined")
+    price = models.FloatField(default=1.0)
 
     def __str__(self):
-        return self.track_name
+        return self.title
 
 
 class Album(models.Model):
@@ -57,12 +57,12 @@ class PaymentAccount(models.Model):
     def __str__(self):
         return f'{self.user} (balance {self.balance})'
 
-    def pay_track(self, track):
+    def pay_item(self, item):
         # ToDo: save to history
         # ToDo: block the table
-        if self.balance < track.track_price:
+        if self.balance < item.price:
             return False
-        self.balance -= track.track_price
+        self.balance -= item.price
         self.save()
         return True
 
@@ -72,7 +72,7 @@ class BoughtTrack(models.Model):
 
     Attributes:
         user(AppUser): user who bought the track
-        track(AppUser): track purchased by the user
+        track(Track): track purchased by the user
         date_purchase(DateTimeField): date of purchase
     """
     user = models.ForeignKey(AppUser)
@@ -84,3 +84,22 @@ class BoughtTrack(models.Model):
 
     def __str__(self):
         return f'{self.user} bought {self.track}'
+
+
+class BoughtAlbum(models.Model):
+    """Model for storing a bought albums after purchase
+
+    Attributes:
+        user(AppUser): user who bought the track
+        album(Album): track purchased by the user
+        date_purchase(DateTimeField): date of purchase
+    """
+    user = models.ForeignKey(AppUser)
+    album = models.ForeignKey(Album)
+    date_purchase = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (("user", "album"),)
+
+    def __str__(self):
+        return f'{self.user} bought {self.album}'
