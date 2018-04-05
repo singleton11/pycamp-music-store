@@ -11,22 +11,21 @@ class Track(TitleDescriptionModel, models.Model):
         return self.title
 
     def user_has(self, user):
-        return BoughtTrack.objects.filter(user=user, track=self).exists()
+        return BoughtTrack.objects.filter(user=user, item=self).exists()
 
 
 class Album(models.Model):
     """Blank model for Album"""
 
     def user_has(self, user):
-        return BoughtAlbum.objects.filter(user=user, album=self).exists()
+        return BoughtAlbum.objects.filter(user=user, item=self).exists()
 
 
 AppUser = get_user_model()
 
 
 class BoughtItem(TimeStampedModel, models.Model):
-    """ TitleDescriptionModel
-    An abstract base class model that provides title and description fields.
+    """ An abstract base class model for BoughtTrack and BoughtAlbum
     """
     user = models.ForeignKey(AppUser)
 
