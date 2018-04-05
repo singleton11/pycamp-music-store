@@ -28,7 +28,7 @@ class AccountView(generics.RetrieveUpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        return AppUser.objects.get(user=self.request.user)
+        return AppUser.objects.get(pk=self.request.user.pk)
 
 
 class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,

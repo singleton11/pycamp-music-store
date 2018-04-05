@@ -8,7 +8,9 @@ from imagekit.processors import ResizeToFill
 from libs import utils
 
 __all__ = [
-    'AppUser'
+    'AppUser',
+    'PaymentMethod',
+
 ]
 
 # Solution to avoid unique_together for email
