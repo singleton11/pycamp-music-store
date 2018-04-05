@@ -27,20 +27,22 @@ class PaymentAccountView(generics.RetrieveUpdateAPIView):
         return PaymentAccount.objects.get(user=self.request.user)
 
 
-class BoughtTrackView(generics.ListCreateAPIView):
-    """ List Bought tracks of user. Support create, delete, edit methods """
+class BoughtTrackViewSet(viewsets.ModelViewSet):
+    """ View a list of bought tracks user and to buy the track. """
     serializer_class = BoughtTrackSerializer
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'post']
+    queryset = BoughtTrack.objects.all()
 
     def get_queryset(self):
-        """
-        This view should return a list of all the purchases
-        for the currently authenticated user.
-        """
         user = self.request.user
         return BoughtTrack.objects.filter(user=user)
 
     def perform_create(self, serializer):
+        """ Check, that user don't have selected track.
+
+        Also check user balance, and subtract prise from balance.
+        """
         user = self.request.user
         track = serializer.validated_data['track']
         if BoughtTrack.objects.filter(user=user, track=track).exists():
