@@ -1,6 +1,7 @@
 from rest_framework import exceptions
 from rest_framework import viewsets, permissions, generics
 
+from apps.users.models import AppUser, PaymentMethod
 from ...music_store.api.serializers.bought import (
     BoughtTrackSerializer,
     BoughtAlbumSerializer,
@@ -10,8 +11,6 @@ from ...music_store.api.serializers.payment import (
     PaymentMethodSerializer,
 )
 from ...music_store.models import (
-    PaymentAccount,
-    PaymentMethod,
     BoughtTrack,
     BoughtAlbum,
 )
@@ -23,14 +22,14 @@ class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PaymentMethodSerializer
 
 
-class PaymentAccountView(generics.RetrieveUpdateAPIView):
+class AccountView(generics.RetrieveUpdateAPIView):
     """ View for PaymentAccount. Support read and update """
 
     serializer_class = PaymentAccountSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        return PaymentAccount.objects.get(user=self.request.user)
+        return AppUser.objects.get(user=self.request.user)
 
 
 class BoughtTrackViewSet(viewsets.ModelViewSet):
@@ -55,7 +54,7 @@ class BoughtTrackViewSet(viewsets.ModelViewSet):
             # AlreadyExists
             raise exceptions.ValidationError("Track already bought")
 
-        if not user.paymentaccount.pay_item(track):
+        if not user.pay_item(track):
             raise exceptions.ValidationError("You don't have money")
 
         # checking balance and price
@@ -85,7 +84,7 @@ class BoughtAlbumViewSet(viewsets.ModelViewSet):
             # AlreadyExists
             raise exceptions.ValidationError("Track already bought")
 
-        if not user.paymentaccount.pay_item(album):
+        if not user.pay_item(album):
             raise exceptions.ValidationError("You don't have money")
 
         # checking balance and price

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ...models import PaymentMethod, PaymentAccount
+from ....users.models import AppUser, PaymentMethod
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):
@@ -14,5 +14,5 @@ class PaymentAccountSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.pk')
 
     class Meta:
-        model = PaymentAccount
+        model = AppUser
         fields = ('user', 'balance', 'methods_used', 'default_method')
