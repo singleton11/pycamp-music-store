@@ -17,11 +17,14 @@ class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PaymentMethodSerializer
 
 
-class PaymentAccountViewSet(viewsets.ReadOnlyModelViewSet):
+class PaymentAccountView(generics.RetrieveUpdateAPIView):
     """ view for PaymentAccount. Support create, delete, edit methods """
-    queryset = PaymentAccount.objects.all()
+
     serializer_class = PaymentAccountSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return PaymentAccount.objects.get(user=self.request.user)
 
 
 class BoughtTrackView(generics.ListCreateAPIView):
