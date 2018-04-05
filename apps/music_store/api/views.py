@@ -49,12 +49,12 @@ class BoughtTrackViewSet(viewsets.ModelViewSet):
         Also check user balance, and subtract prise from balance.
         """
         user = self.request.user
-        track = serializer.validated_data['track']
-        if track.user_has(user):
+        item = serializer.validated_data['item']
+        if item.user_has(user):
             # AlreadyExists
-            raise exceptions.ValidationError("Track already bought")
+            raise exceptions.ValidationError("Item already bought")
 
-        if not user.pay_item(track):
+        if not user.pay_item(item):
             raise exceptions.ValidationError("You don't have money")
 
         # checking balance and price
@@ -78,13 +78,13 @@ class BoughtAlbumViewSet(viewsets.ModelViewSet):
         Also check user balance, and subtract prise from balance.
         """
         user = self.request.user
-        album = serializer.validated_data['album']
+        item = serializer.validated_data['item']
 
-        if album.user_has(user):
+        if item.user_has(user):
             # AlreadyExists
-            raise exceptions.ValidationError("Track already bought")
+            raise exceptions.ValidationError("Item already bought")
 
-        if not user.pay_item(album):
+        if not user.pay_item(item):
             raise exceptions.ValidationError("You don't have money")
 
         # checking balance and price

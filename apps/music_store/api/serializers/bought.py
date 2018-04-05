@@ -8,7 +8,7 @@ class BoughtTrackSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BoughtTrack
-        fields = ('pk', 'user', 'track', 'date_purchase')
+        fields = ('pk', 'user', 'item', 'created')
 
 
 class BoughtAlbumSerializer(serializers.ModelSerializer):
@@ -16,4 +16,4 @@ class BoughtAlbumSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BoughtAlbum
-        fields = ('pk', 'user', 'album', 'date_purchase')
+        fields = ('pk', 'user', 'item', 'created')

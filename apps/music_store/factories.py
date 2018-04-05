@@ -1,8 +1,8 @@
 import factory
 from factory import fuzzy
 
-from .models import PaymentAccount, Track, PaymentMethod
-from ..users.factories import UserFactory
+from apps.users.models import PaymentMethod
+from .models import Track
 
 
 class PaymentMethodFactory(factory.DjangoModelFactory):
@@ -10,21 +10,6 @@ class PaymentMethodFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = PaymentMethod
-
-
-class PaymentAccountFactory(factory.DjangoModelFactory):
-    """Factory for generates test Payment Account model with random AppUser
-
-    Account balance is random from 0 to 1000.
-    """
-    user = factory.SubFactory(UserFactory)
-
-    class Meta:
-        model = PaymentAccount
-
-    @factory.lazy_attribute
-    def balance(self):
-        return fuzzy.FuzzyFloat(0, 1000).fuzz()
 
 
 class TrackFactory(factory.DjangoModelFactory):

@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from apps.music_store.models import (
     BoughtTrack,
     Track)

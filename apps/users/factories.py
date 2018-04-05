@@ -1,6 +1,7 @@
 import uuid
 
 import factory
+from factory import fuzzy
 
 from .models import AppUser
 
@@ -23,6 +24,10 @@ class UserFactory(factory.DjangoModelFactory):
     def email(self):
         return "{0}@example.com".format(self.username)
 
+    @factory.lazy_attribute
+    def balance(self):
+        return fuzzy.FuzzyFloat(0, 1000).fuzz()
+
 
 class UserWithAvatarFactory(UserFactory):
     """Custom factory for testing user with avatar.
@@ -35,6 +40,7 @@ class UserWithAvatarFactory(UserFactory):
 
 class AdminUserFactory(UserFactory):
     """Factory for generates test User model with admin's privileges """
+
     class Meta:
         model = AppUser
 

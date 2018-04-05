@@ -1,7 +1,7 @@
 from django.test import TestCase
 
+from apps.users.factories import UserFactory
 from ..factories import (
-    PaymentAccountFactory,
     TrackFactory,
     PaymentMethodFactory,
 )
@@ -14,7 +14,7 @@ class TestPaymentAccount(TestCase):
     """
 
     def setUp(self):
-        self.account = PaymentAccountFactory(balance=100)
+        self.account = UserFactory(balance=100)
 
     def test_save_negative_balance_1(self):
         self.account.balance = -1
@@ -23,7 +23,7 @@ class TestPaymentAccount(TestCase):
 
     def test_save_negative_balance_2(self):
         with self.assertRaises(ValueError):
-            PaymentAccountFactory(balance=-10)
+            UserFactory(balance=-10)
 
     def test_not_enough_money(self):
         track = TrackFactory(price=200)
@@ -38,7 +38,7 @@ class TestPaymentAccount(TestCase):
         self.assertEqual(self.account.balance, 90)
 
     def test_select_methods(self):
-        account = PaymentAccountFactory()
+        account = UserFactory()
         count = 5
         methods = [PaymentMethodFactory() for i in range(count)]
         account.methods_used.add(*methods)
@@ -47,7 +47,7 @@ class TestPaymentAccount(TestCase):
         self.assertEqual(len(account.methods_used.all()), count)
 
     def test_set_default_methods(self):
-        account = PaymentAccountFactory()
+        account = UserFactory()
         account.methods_used.add(PaymentMethodFactory())
         account.default_method = PaymentMethodFactory()
         self.assertEqual(account.check_default_method(), False)
