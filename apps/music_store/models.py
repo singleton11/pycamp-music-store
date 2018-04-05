@@ -13,10 +13,15 @@ class Track(models.Model):
     def __str__(self):
         return self.title
 
+    def user_has(self, user):
+        return BoughtTrack.objects.filter(user=user, track=self).exists()
+
 
 class Album(models.Model):
     """Blank model for Album"""
-    pass
+
+    def user_has(self, user):
+        return BoughtAlbum.objects.filter(user=user, album=self).exists()
 
 
 class PaymentMethod(models.Model):

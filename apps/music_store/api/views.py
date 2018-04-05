@@ -51,7 +51,7 @@ class BoughtTrackViewSet(viewsets.ModelViewSet):
         """
         user = self.request.user
         track = serializer.validated_data['track']
-        if BoughtTrack.objects.filter(user=user, track=track).exists():
+        if track.user_has(user):
             # AlreadyExists
             raise exceptions.ValidationError("Track already bought")
 
@@ -81,7 +81,7 @@ class BoughtAlbumViewSet(viewsets.ModelViewSet):
         user = self.request.user
         album = serializer.validated_data['album']
 
-        if BoughtAlbum.objects.filter(user=user, album=album).exists():
+        if album.user_has(user):
             # AlreadyExists
             raise exceptions.ValidationError("Track already bought")
 
