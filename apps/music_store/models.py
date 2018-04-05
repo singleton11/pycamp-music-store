@@ -47,11 +47,12 @@ class PaymentAccount(models.Model):
 
     methods_used = models.ManyToManyField(
         PaymentMethod,
-        related_name='methods_used'
+        related_name='methods_used',
     )
     default_method = models.ForeignKey(
         PaymentMethod,
-        related_name='default_method'
+        related_name='default_method',
+        null=True,
     )
 
     def __str__(self):
@@ -70,6 +71,15 @@ class PaymentAccount(models.Model):
         self.balance -= item.price
         self.save()
         return True
+
+    def check_default_method(self):
+        """ Check, that default method in methods_used """
+        return self.methods_used.filter(pk=self.default_method.pk).exists()
+
+    def save(self, *args, **kwargs):
+        if self.balance < 0:
+            raise ValueError("Balance must be positive")
+        super().save(*args, **kwargs)
 
 
 class BoughtTrack(models.Model):
