@@ -17,4 +17,4 @@ class Migration(migrations.Migration):
             name='location_updated',
             field=models.DateTimeField(blank=True, editable=False, null=True),
         ),
-    ]
+]

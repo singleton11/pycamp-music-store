@@ -2,7 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models as gis_models
 from django.contrib.postgres.fields import HStoreField
 from django.db import models
-from django.db.models import F
+from django.db.models import F, Sum
+from django_extensions.db.models import TimeStampedModel
 from imagekit import models as imagekitmodels
 from imagekit.processors import ResizeToFill
 from rest_framework import exceptions
@@ -45,8 +46,8 @@ class AppUser(AbstractUser):
 
     Attributes:
         balance(float): current balance.
-        payment_methods(PaymentMethod[]): saved payment methods
-        default_payment_methods(PaymentMethod): default payment method
+        methods_used(PaymentMethod[]): saved payment methods
+        default_method(PaymentMethod): default payment method
         avatar (file): user's avatar, cropeed to fill 300x300 px
         location (point): latest known GEO coordinates of the user
         location_updated (datetime): latest time user updated coordinates
@@ -127,13 +128,36 @@ class AppUser(AbstractUser):
         if not self.can_pay(item.price):
             raise exceptions.ValidationError("Not enough money")
 
-        self.balance = F('balance') - item.price
-        self.save(update_fields=['balance'])
-        self.refresh_from_db()
+        PaymentTransaction(
+            user=self,
+            amount=-item.price,
+        ).save()
 
-    def can_pay(self, sum_of_money):
-        return self.balance < sum_of_money
+    def can_pay(self, amount):
+        return self.balance < amount
 
     def check_default_method(self):
         """ Check, that default method in methods_used """
         return self.methods_used.filter(pk=self.default_method.pk).exists()
+
+    def update_balance(self):
+        self.balance = PaymentTransaction.objects\
+            .filter(user=self)\
+            .aggregate(total_amount=Sum('amount')).get('total_amount')
+
+        self.save(update_fields=['balance'])
+        self.refresh_from_db()
+
+
+class PaymentTransaction(TimeStampedModel, models.Model):
+    """Model for storing operations with user balance """
+    user = models.ForeignKey(AppUser)
+    amount = models.DecimalField(
+        max_digits=16,
+        decimal_places=2,
+    )
+    payment_method = models.ForeignKey(PaymentMethod, blank=True, null=True)
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+        self.user.update_balance()

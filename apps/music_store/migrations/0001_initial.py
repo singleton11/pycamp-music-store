@@ -78,4 +78,4 @@ class Migration(migrations.Migration):
             name='boughtalbum',
             unique_together=set([('user', 'item')]),
         ),
-    ]
+]
