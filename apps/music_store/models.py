@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
 
@@ -13,6 +14,7 @@ class Track(TitleDescriptionModel, models.Model):
 
 class Album(models.Model):
     """ part of model for Album"""
+    price = models.FloatField(default=1.0)
     pass
 
 
@@ -21,6 +23,9 @@ AppUser = get_user_model()
 
 class BoughtItem(TimeStampedModel, models.Model):
     """ An abstract base class model for BoughtTrack and BoughtAlbum
+
+    Attributes:
+        user(AppUser): owner of item
     """
     user = models.ForeignKey(AppUser)
 
@@ -38,7 +43,7 @@ class BoughtTrack(BoughtItem, models.Model):
     Attributes:
         item(Track): track purchased by the user
     """
-    item = models.ForeignKey(Track, verbose_name='track')
+    item = models.ForeignKey(Track, verbose_name=_('Track'))
 
 
 class BoughtAlbum(BoughtItem, models.Model):
@@ -47,4 +52,4 @@ class BoughtAlbum(BoughtItem, models.Model):
     Attributes:
         item(Album): album purchased by the user
     """
-    item = models.ForeignKey(Album, verbose_name='album')
+    item = models.ForeignKey(Album, verbose_name=_('Album'))

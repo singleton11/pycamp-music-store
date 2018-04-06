@@ -33,10 +33,7 @@ def upload_user_media_to(instance, filename):
 
 
 class PaymentMethod(models.Model):
-    """Model to store payment methods.
-
-    User can select method Only admin can create methods.
-    """
+    """Model to store payment methods."""
     title = models.CharField(max_length=100)
 
     def __str__(self):
@@ -119,7 +116,7 @@ class AppUser(AbstractUser):
         verbose_name_plural = 'Users'
 
     def __str__(self):
-        return f'{self.username} (balance {self.balance})'
+        return self.username
 
     def pay_item(self, item):
         """ Method for subtract cost of item.

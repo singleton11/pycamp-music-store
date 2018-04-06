@@ -3,7 +3,7 @@ from rest_framework import viewsets, permissions, generics
 from apps.users.models import AppUser, PaymentMethod
 from ...music_store.api.serializers.bought import (
     BoughtTrackSerializer,
-)
+    BoughtAlbumSerializer)
 from ...music_store.api.serializers.payment import (
     PaymentAccountSerializer,
     PaymentMethodSerializer,
@@ -21,19 +21,20 @@ class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class AccountView(generics.RetrieveUpdateAPIView):
-    """ View for PaymentAccount. Support read and update """
+    """ View for AppUser to work with balance and selected payment methods """
 
     serializer_class = PaymentAccountSerializer
     permission_classes = (permissions.IsAuthenticated,)
+    queryset = AppUser.objects.all()
 
     def get_object(self):
-        return AppUser.objects.get(pk=self.request.user.pk)
+        return super().get_queryset().get(pk=self.request.user.pk)
 
 
 class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
                          viewsets.mixins.ListModelMixin,
                          viewsets.GenericViewSet):
-    """ View a list of bought users tracks and can buy the track."""
+    """View to display the list of purchased user tracks and purchase them."""
     serializer_class = BoughtTrackSerializer
     permission_classes = (permissions.IsAuthenticated,)
     queryset = BoughtTrack.objects.all()
@@ -51,5 +52,6 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
 
 
 class BoughtAlbumViewSet(BoughtTrackViewSet):
-    """ View a list of bought albums user and can buy the album. """
+    """View to display the list of purchased user albums and purchase them."""
+    serializer_class = BoughtAlbumSerializer
     queryset = BoughtAlbum.objects.all()

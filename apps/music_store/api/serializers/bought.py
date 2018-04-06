@@ -4,15 +4,18 @@ from rest_framework.validators import UniqueTogetherValidator
 from ...models import BoughtTrack, BoughtAlbum
 
 
-class BoughtTrackSerializer(serializers.ModelSerializer):
+class BoughtItemSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
 
     class Meta:
-        model = BoughtTrack
         fields = ('pk', 'user', 'item', 'created')
 
+
+class BoughtTrackSerializer(BoughtItemSerializer):
+    class Meta(BoughtItemSerializer.Meta):
+        model = BoughtTrack
         validators = [
             UniqueTogetherValidator(
                 queryset=model.objects.all(),
@@ -22,15 +25,9 @@ class BoughtTrackSerializer(serializers.ModelSerializer):
         ]
 
 
-class BoughtAlbumSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault(),
-    )
-
-    class Meta:
+class BoughtAlbumSerializer(BoughtItemSerializer):
+    class Meta(BoughtItemSerializer.Meta):
         model = BoughtAlbum
-        fields = ('pk', 'user', 'item', 'created')
-
         validators = [
             UniqueTogetherValidator(
                 queryset=model.objects.all(),
