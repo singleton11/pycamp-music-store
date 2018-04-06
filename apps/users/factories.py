@@ -1,8 +1,8 @@
 import uuid
 
 import factory
-from factory import fuzzy
 
+from apps.users.models import PaymentTransaction
 from .models import AppUser
 
 
@@ -24,9 +24,25 @@ class UserFactory(factory.DjangoModelFactory):
     def email(self):
         return "{0}@example.com".format(self.username)
 
-    @factory.lazy_attribute
-    def balance(self):
-        return fuzzy.FuzzyFloat(0, 1000).fuzz()
+
+class PaymentTransactionFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = PaymentTransaction
+
+    def __init__(self, user, amount):
+        self.user = user
+        self.amount = amount
+
+
+class UserWithBalanceFactory(UserFactory):
+
+    def __init__(self, balance):
+        self.balance = balance
+
+    @classmethod
+    def _after_postgeneration(cls, instance, create, results=None):
+        PaymentTransactionFactory(user=instance, amount=instance.balance)
+        super()._after_postgeneration(instance, create, results)
 
 
 class UserWithAvatarFactory(UserFactory):

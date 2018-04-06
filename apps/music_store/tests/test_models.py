@@ -1,6 +1,7 @@
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from apps.users.factories import UserFactory
+from apps.users.factories import UserFactory, UserWithBalanceFactory
 from ..factories import (
     TrackFactory,
     PaymentMethodFactory,
@@ -14,27 +15,21 @@ class TestPaymentAccount(TestCase):
     """
 
     def setUp(self):
-        self.account = UserFactory(balance=100)
-
-    def test_save_negative_balance_1(self):
-        self.account.balance = -1
-        with self.assertRaises(ValueError):
-            self.account.save()
-
-    def test_save_negative_balance_2(self):
-        with self.assertRaises(ValueError):
-            UserFactory(balance=-10)
+        self.account = UserWithBalanceFactory(balance=100)
 
     def test_not_enough_money(self):
         track = TrackFactory(price=200)
-        result = self.account.pay_item(track)
-        self.assertEqual(result, False)
+        with self.assertRaises(ValidationError):
+            self.account.pay_item(track)
         self.assertEqual(self.account.balance, 100)
+
+    def test_save_negative_balance(self):
+        with self.assertRaises(ValidationError):
+            UserWithBalanceFactory(balance=-10)
 
     def test_enough_money(self):
         track = TrackFactory(price=10)
-        result = self.account.pay_item(track)
-        self.assertEqual(result, True)
+        self.account.pay_item(track)
         self.assertEqual(self.account.balance, 90)
 
     def test_select_methods(self):
@@ -50,4 +45,4 @@ class TestPaymentAccount(TestCase):
         account = UserFactory()
         account.methods_used.add(PaymentMethodFactory())
         account.default_method = PaymentMethodFactory()
-        self.assertEqual(account.check_default_method(), False)
+        self.assertFalse(account.check_default_method())

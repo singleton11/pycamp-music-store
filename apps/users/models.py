@@ -1,12 +1,13 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models as gis_models
 from django.contrib.postgres.fields import HStoreField
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Sum
+from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
 from imagekit import models as imagekitmodels
 from imagekit.processors import ResizeToFill
-from rest_framework import exceptions
 
 from libs import utils
 
@@ -38,6 +39,10 @@ class PaymentMethod(models.Model):
     """Model to store payment methods."""
     title = models.CharField(max_length=100)
 
+    class Meta:
+        verbose_name = _('Payment method')
+        verbose_name_plural = _('Payment methods')
+
     def __str__(self):
         return self.title
 
@@ -46,7 +51,7 @@ class AppUser(AbstractUser):
     """Custom user model.
 
     Attributes:
-        balance(float): current balance.
+        balance(BigInteger): current balance in cents.
         methods_used(PaymentMethod[]): saved payment methods
         default_method(PaymentMethod): default payment method
         avatar (file): user's avatar, cropeed to fill 300x300 px
@@ -63,21 +68,21 @@ class AppUser(AbstractUser):
             treated as active
         date_joined (datetime): when user joined
     """
-
-    balance = models.DecimalField(
+    balance = models.BigIntegerField(
         default=0,
-        max_digits=16,
-        decimal_places=2,
+        verbose_name=_('balance'),
     )
 
     methods_used = models.ManyToManyField(
         PaymentMethod,
         related_name='users',
+        verbose_name=_('methods used'),
     )
     default_method = models.ForeignKey(
         PaymentMethod,
         related_name='users_by_default',
         null=True,
+        verbose_name=_('default method'),
     )
 
     avatar = imagekitmodels.ProcessedImageField(
@@ -114,8 +119,8 @@ class AppUser(AbstractUser):
     REQUIRED_FIELDS = ['username']
 
     class Meta:
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
+        verbose_name = _('User')
+        verbose_name_plural = _('Users')
 
     def __str__(self):
         return self.username
@@ -127,13 +132,13 @@ class AppUser(AbstractUser):
             exceptions.ValidationError: User does not have enough money
         """
         if not self.can_pay(item.price):
-            raise exceptions.ValidationError("Not enough money")
+            raise ValidationError("Not enough money")
 
         # create new negative transaction
-        PaymentTransaction(
+        PaymentTransaction.objects.create(
             user=self,
             amount=-item.price,
-        ).save()
+        )
 
     def can_pay(self, amount):
         """ Checking that user have 'amount' of money"""
@@ -141,7 +146,7 @@ class AppUser(AbstractUser):
 
     def check_default_method(self):
         """ Checking that default method in methods_used """
-        return self.methods_used.filter(pk=self.default_method.pk).exists()
+        return self.default_method in self.methods_used.all()
 
     def update_balance(self):
         """ Method to recalculated user balance. """
@@ -153,16 +158,30 @@ class AppUser(AbstractUser):
         self.refresh_from_db()
 
 
-class PaymentTransaction(TimeStampedModel, models.Model):
+class PaymentTransaction(TimeStampedModel):
     """Model for storing operations with user balance """
-    user = models.ForeignKey(AppUser)
-    amount = models.DecimalField(
-        max_digits=16,
-        decimal_places=2,
+
+    user = models.ForeignKey(AppUser, verbose_name=_('user'))
+    amount = models.BigIntegerField(verbose_name=_('amount'))
+    payment_method = models.ForeignKey(
+        PaymentMethod,
+        blank=True,
+        null=True,
+        verbose_name=_('payment method')
     )
-    payment_method = models.ForeignKey(PaymentMethod, blank=True, null=True)
+
+    class Meta:
+        verbose_name = _('Payment transaction')
+        verbose_name_plural = _('Payment transactions')
 
     def save(self, **kwargs):
+        if self.amount < 0 and not self.user.can_pay(-self.amount):
+            raise ValidationError("Not enough money")
         super().save(**kwargs)
         # after creating a new transaction, the user balance will be updated
         self.user.update_balance()
+
+    def __str__(self):
+        if self.amount < 0:
+            return f'{self.user} has spent {-self.amount}'
+        return f'{self.user} received {self.amount}'

@@ -1,12 +1,16 @@
-from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
 
-class Track(TitleDescriptionModel, models.Model):
+class Track(TitleDescriptionModel):
     """ part of model for Track"""
-    price = models.FloatField(default=1.0)
+    price = models.BigIntegerField(default=1.0, verbose_name=_('price'))
+
+    class Meta:
+        verbose_name = _('Track')
+        verbose_name_plural = _('Tracks')
 
     def __str__(self):
         return self.title
@@ -14,42 +18,50 @@ class Track(TitleDescriptionModel, models.Model):
 
 class Album(models.Model):
     """ part of model for Album"""
-    price = models.FloatField(default=1.0)
-    pass
+    price = models.BigIntegerField(default=0, verbose_name=_('price'))
+
+    class Meta:
+        verbose_name = _('Album')
+        verbose_name_plural = _('Albums')
 
 
-AppUser = get_user_model()
-
-
-class BoughtItem(TimeStampedModel, models.Model):
+class BoughtItem(TimeStampedModel):
     """ An abstract base class model for BoughtTrack and BoughtAlbum
 
     Attributes:
         user(AppUser): owner of item
     """
-    user = models.ForeignKey(AppUser)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('user'))
 
     class Meta:
         abstract = True
-        unique_together = (("user", "item"),)
+        unique_together = (('user', 'item'),)
 
     def __str__(self):
         return f'{self.user} bought {self.item}'
 
 
-class BoughtTrack(BoughtItem, models.Model):
+class BoughtTrack(BoughtItem):
     """Model for storing a bought track after purchase
 
     Attributes:
         item(Track): track purchased by the user
     """
-    item = models.ForeignKey(Track, verbose_name=_('Track'))
+    item = models.ForeignKey(Track, verbose_name=_('track'))
+
+    class Meta:
+        verbose_name = _('Bought track')
+        verbose_name_plural = _('Bought tracks')
 
 
-class BoughtAlbum(BoughtItem, models.Model):
+class BoughtAlbum(BoughtItem):
     """Model for storing a bought albums after purchase
 
     Attributes:
         item(Album): album purchased by the user
     """
-    item = models.ForeignKey(Album, verbose_name=_('Album'))
+    item = models.ForeignKey(Album, verbose_name=_('album'))
+
+    class Meta:
+        verbose_name = _('Bought album')
+        verbose_name_plural = _('Bought albums')
