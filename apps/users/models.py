@@ -2,16 +2,16 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models as gis_models
 from django.contrib.postgres.fields import HStoreField
 from django.db import models
+from django.db.models import F
 from imagekit import models as imagekitmodels
 from imagekit.processors import ResizeToFill
-from django.db.models import F
+from rest_framework import exceptions
 
 from libs import utils
 
 __all__ = [
     'AppUser',
     'PaymentMethod',
-
 ]
 
 # Solution to avoid unique_together for email
@@ -66,6 +66,7 @@ class AppUser(AbstractUser):
     """
 
     balance = models.DecimalField(
+        default=0,
         max_digits=16,
         decimal_places=2,
     )
@@ -113,32 +114,29 @@ class AppUser(AbstractUser):
     # is done by email
     REQUIRED_FIELDS = ['username']
 
-    def __str__(self):
-        return f'{self.username} (balance {self.balance})'
-
     class Meta:
         verbose_name = 'User'
         verbose_name_plural = 'Users'
 
+    def __str__(self):
+        return f'{self.username} (balance {self.balance})'
+
     def pay_item(self, item):
         """ Method for subtract cost of item.
 
-        Returns:
-            boolean: True, if success
+        Raises:
+            exceptions.ValidationError: User does not have enough money
         """
-        # ToDo: save to history
-        # ToDo: block the table
-        if self.balance < item.price:
-            return False
+        if not self.can_pay(item.price):
+            raise exceptions.ValidationError("Not enough money")
+
         self.balance = F('balance') - item.price
-        self.save()
-        return True
+        self.save(update_fields=['balance'])
+        self.refresh_from_db()
+
+    def can_pay(self, sum_of_money):
+        return self.balance < sum_of_money
 
     def check_default_method(self):
         """ Check, that default method in methods_used """
         return self.methods_used.filter(pk=self.default_method.pk).exists()
-
-    def save(self, *args, **kwargs):
-        if self.balance < 0:
-            raise ValueError("Balance must be positive")
-        super().save(*args, **kwargs)

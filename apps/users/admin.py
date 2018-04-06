@@ -49,6 +49,13 @@ class AppUserAdmin(UserAdmin):
             'fields': (
                 'notifications',
             )
+        }),
+        (_('Payment'), {
+            'fields': (
+                'balance',
+                'methods_used',
+                'default_method',
+            )
         })
     )
     readonly_fields = UserAdmin.readonly_fields + (

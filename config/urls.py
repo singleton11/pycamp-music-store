@@ -16,7 +16,7 @@ urlpatterns = [
     url(r'^api/v1/', include('apps.users.api.urls')),
 
     url(r'^users/', include('apps.users.urls')),
-    url(r'^music_store/', include('apps.music_store.api.urls')),
+    url(r'^api/v1/music_store/', include('apps.music_store.api.urls')),
 ]
 
 # for serving uploaded files on dev environment with django

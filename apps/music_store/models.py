@@ -1,4 +1,4 @@
-from django.conf.global_settings import AUTH_USER_MODEL
+from django.contrib.auth import get_user_model
 from django.db import models
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
@@ -10,19 +10,19 @@ class Track(TitleDescriptionModel, models.Model):
     def __str__(self):
         return self.title
 
-    def user_has(self, user):
-        return BoughtTrack.objects.filter(user=user, item=self).exists()
-
 
 class Album(models.Model):
-    def user_has(self, user):
-        return BoughtAlbum.objects.filter(user=user, item=self).exists()
+    """ part of model for Album"""
+    pass
+
+
+AppUser = get_user_model()
 
 
 class BoughtItem(TimeStampedModel, models.Model):
     """ An abstract base class model for BoughtTrack and BoughtAlbum
     """
-    user = models.ForeignKey(AUTH_USER_MODEL)
+    user = models.ForeignKey(AppUser)
 
     class Meta:
         abstract = True
@@ -38,7 +38,7 @@ class BoughtTrack(BoughtItem, models.Model):
     Attributes:
         item(Track): track purchased by the user
     """
-    item = models.ForeignKey(Track)
+    item = models.ForeignKey(Track, verbose_name='track')
 
 
 class BoughtAlbum(BoughtItem, models.Model):
@@ -47,4 +47,4 @@ class BoughtAlbum(BoughtItem, models.Model):
     Attributes:
         item(Album): album purchased by the user
     """
-    item = models.ForeignKey(Album)
+    item = models.ForeignKey(Album, verbose_name='album')

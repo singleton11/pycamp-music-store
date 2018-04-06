@@ -1,4 +1,3 @@
-from rest_framework import exceptions
 from rest_framework import viewsets, permissions, generics
 
 from apps.users.models import AppUser, PaymentMethod
@@ -25,7 +24,7 @@ class AccountView(generics.RetrieveUpdateAPIView):
     """ View for PaymentAccount. Support read and update """
 
     serializer_class = PaymentAccountSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_object(self):
         return AppUser.objects.get(pk=self.request.user.pk)
@@ -39,24 +38,16 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
     permission_classes = (permissions.IsAuthenticated,)
     queryset = BoughtTrack.objects.all()
 
-    def get_queryset(self):
+    def filter_queryset(self, queryset):
         user = self.request.user
-        return super().get_queryset().filter(user=user)
+        return super().filter_queryset(queryset).filter(user=user)
 
     def perform_create(self, serializer):
-        """ Check, that user don't have selected track.
-
-        Also check user balance, and subtract prise from balance.
-        """
+        """ Pay for item and save bought item """
         user = self.request.user
         item = serializer.validated_data['item']
-        if item.user_has(user):
-            raise exceptions.ValidationError("Item already bought")
-
-        if not user.pay_item(item):
-            raise exceptions.ValidationError("You don't have money")
-
-        serializer.save(user=user)
+        user.pay_item(item)
+        serializer.save()
 
 
 class BoughtAlbumViewSet(BoughtTrackViewSet):
