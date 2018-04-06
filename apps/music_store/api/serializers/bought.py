@@ -1,14 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from apps.users.models import PaymentMethod
 from ...models import BoughtTrack, BoughtAlbum
-
-
-class PaymentMethodSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PaymentMethod
-        fields = ('pk', 'title',)
 
 
 class BoughtItemSerializer(serializers.ModelSerializer):

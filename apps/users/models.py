@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models as gis_models
 from django.contrib.postgres.fields import HStoreField
 from django.db import models
-from django.db.models import F, Sum
+from django.db.models import Sum
 from django_extensions.db.models import TimeStampedModel
 from imagekit import models as imagekitmodels
 from imagekit.processors import ResizeToFill
@@ -13,6 +13,7 @@ from libs import utils
 __all__ = [
     'AppUser',
     'PaymentMethod',
+    'PaymentTransaction'
 ]
 
 # Solution to avoid unique_together for email
@@ -128,21 +129,24 @@ class AppUser(AbstractUser):
         if not self.can_pay(item.price):
             raise exceptions.ValidationError("Not enough money")
 
+        # create new negative transaction
         PaymentTransaction(
             user=self,
             amount=-item.price,
         ).save()
 
     def can_pay(self, amount):
-        return self.balance < amount
+        """ Checking that user have 'amount' of money"""
+        return self.balance >= amount
 
     def check_default_method(self):
-        """ Check, that default method in methods_used """
+        """ Checking that default method in methods_used """
         return self.methods_used.filter(pk=self.default_method.pk).exists()
 
     def update_balance(self):
-        self.balance = PaymentTransaction.objects\
-            .filter(user=self)\
+        """ Method to recalculated user balance. """
+        self.balance = PaymentTransaction.objects \
+            .filter(user=self) \
             .aggregate(total_amount=Sum('amount')).get('total_amount')
 
         self.save(update_fields=['balance'])
@@ -160,4 +164,5 @@ class PaymentTransaction(TimeStampedModel, models.Model):
 
     def save(self, **kwargs):
         super().save(**kwargs)
+        # after creating a new transaction, the user balance will be updated
         self.user.update_balance()
