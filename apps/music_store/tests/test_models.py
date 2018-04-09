@@ -16,6 +16,10 @@ class TestPaymentAccount(TestCase):
 
     def setUp(self):
         self.account = UserWithBalanceFactory(balance=100)
+        self.count_methods = 5
+        self.methods = [
+            PaymentMethodFactory() for i in range(self.count_methods)
+        ]
 
     def test_not_enough_money(self):
         track = TrackFactory(price=200)
@@ -34,12 +38,10 @@ class TestPaymentAccount(TestCase):
 
     def test_select_methods(self):
         account = UserFactory()
-        count = 5
-        methods = [PaymentMethodFactory() for i in range(count)]
-        account.methods_used.add(*methods)
-        account.default_method = methods[1]
+        account.methods_used.add(*self.methods)
+        account.default_method = self.methods[0]
         account.save()
-        self.assertEqual(len(account.methods_used.all()), count)
+        self.assertEqual(len(account.methods_used.all()), self.count_methods)
 
     def test_set_default_methods(self):
         account = UserFactory()

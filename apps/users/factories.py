@@ -1,7 +1,7 @@
-import uuid
-
 import factory
+from factory import fuzzy
 
+from apps.music_store.factories import PaymentMethodFactory
 from apps.users.models import PaymentTransaction
 from .models import AppUser
 
@@ -13,12 +13,10 @@ class UserFactory(factory.DjangoModelFactory):
 
     """
 
+    username = factory.Faker('user_name')
+
     class Meta:
         model = AppUser
-
-    @factory.lazy_attribute
-    def username(self):
-        return "user_{0}".format(uuid.uuid4())
 
     @factory.lazy_attribute
     def email(self):
@@ -26,23 +24,28 @@ class UserFactory(factory.DjangoModelFactory):
 
 
 class PaymentTransactionFactory(factory.DjangoModelFactory):
+    """ Factory to create payment transaction for 'user' with 'amount' """
+
+    user = factory.SubFactory(UserFactory)
+    amount = fuzzy.FuzzyInteger(1, 1000)
+
     class Meta:
         model = PaymentTransaction
 
-    def __init__(self, user, amount):
-        self.user = user
-        self.amount = amount
+
+class UserWithDefaultPaymentMethodFactory(UserFactory):
+    """ Factory to create payment method with one payment_method """
+
+    default_method = factory.SubFactory(PaymentMethodFactory)
 
 
 class UserWithBalanceFactory(UserFactory):
-
-    def __init__(self, balance):
-        self.balance = balance
-
-    @classmethod
-    def _after_postgeneration(cls, instance, create, results=None):
-        PaymentTransactionFactory(user=instance, amount=instance.balance)
-        super()._after_postgeneration(instance, create, results)
+    """ Factory to create User with balance. """
+    transactions = factory.RelatedFactory(
+        PaymentTransactionFactory,
+        'user',
+        amount=factory.SelfAttribute('user.balance')
+    )
 
 
 class UserWithAvatarFactory(UserFactory):

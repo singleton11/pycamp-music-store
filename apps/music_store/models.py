@@ -6,7 +6,7 @@ from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
 class Track(TitleDescriptionModel):
     """ part of model for Track"""
-    price = models.BigIntegerField(default=1.0, verbose_name=_('price'))
+    price = models.BigIntegerField(default=1, verbose_name=_('price'))
 
     class Meta:
         verbose_name = _('Track')
@@ -18,7 +18,7 @@ class Track(TitleDescriptionModel):
 
 class Album(models.Model):
     """ part of model for Album"""
-    price = models.BigIntegerField(default=0, verbose_name=_('price'))
+    price = models.BigIntegerField(default=1, verbose_name=_('price'))
 
     class Meta:
         verbose_name = _('Album')
@@ -31,7 +31,10 @@ class BoughtItem(TimeStampedModel):
     Attributes:
         user(AppUser): owner of item
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('user'))
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('user'),
+    )
 
     class Meta:
         abstract = True
@@ -47,7 +50,11 @@ class BoughtTrack(BoughtItem):
     Attributes:
         item(Track): track purchased by the user
     """
-    item = models.ForeignKey(Track, verbose_name=_('track'))
+    item = models.ForeignKey(
+        'Track',
+        verbose_name=_('track'),
+        related_name='purchased',
+    )
 
     class Meta:
         verbose_name = _('Bought track')
@@ -60,7 +67,11 @@ class BoughtAlbum(BoughtItem):
     Attributes:
         item(Album): album purchased by the user
     """
-    item = models.ForeignKey(Album, verbose_name=_('album'))
+    item = models.ForeignKey(
+        'Album',
+        verbose_name=_('album'),
+        related_name='purchased',
+    )
 
     class Meta:
         verbose_name = _('Bought album')

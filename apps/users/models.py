@@ -74,12 +74,12 @@ class AppUser(AbstractUser):
     )
 
     methods_used = models.ManyToManyField(
-        PaymentMethod,
+        'PaymentMethod',
         related_name='users',
         verbose_name=_('methods used'),
     )
     default_method = models.ForeignKey(
-        PaymentMethod,
+        'PaymentMethod',
         related_name='users_by_default',
         null=True,
         verbose_name=_('default method'),
@@ -161,27 +161,33 @@ class AppUser(AbstractUser):
 class PaymentTransaction(TimeStampedModel):
     """Model for storing operations with user balance """
 
-    user = models.ForeignKey(AppUser, verbose_name=_('user'))
+    user = models.ForeignKey(
+        'AppUser',
+        verbose_name=_('user'),
+        related_name='transactions',
+    )
     amount = models.BigIntegerField(verbose_name=_('amount'))
     payment_method = models.ForeignKey(
-        PaymentMethod,
+        'PaymentMethod',
         blank=True,
         null=True,
-        verbose_name=_('payment method')
+        verbose_name=_('payment method'),
+        related_name='transactions',
     )
 
     class Meta:
         verbose_name = _('Payment transaction')
         verbose_name_plural = _('Payment transactions')
 
-    def save(self, **kwargs):
-        if self.amount < 0 and not self.user.can_pay(-self.amount):
-            raise ValidationError("Not enough money")
-        super().save(**kwargs)
-        # after creating a new transaction, the user balance will be updated
-        self.user.update_balance()
-
     def __str__(self):
         if self.amount < 0:
-            return f'{self.user} has spent {-self.amount}'
+            return f'{self.user} has spent {abs(self.amount)}'
         return f'{self.user} received {self.amount}'
+
+    def save(self, **kwargs):
+        if self.amount < 0 and not self.user.can_pay(abs(self.amount)):
+            raise ValidationError("Not enough money")
+        super().save(**kwargs)
+
+        # after creating a new transaction, the user balance will be updated
+        self.user.update_balance()
