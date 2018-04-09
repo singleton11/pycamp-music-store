@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 
-from ...music_store.api.serializers.serializer import (
+from apps.music_store.api.serializers import (
     AlbumSerializer,
     LikeTrackSerializer,
     ListenTrackSerializer,
@@ -14,11 +14,10 @@ from ...music_store.models import Album, LikeTrack, ListenTrack, Track
 
 
 class AlbumViewSet(viewsets.ModelViewSet):
-    """List all music albums, or create a new album."""
+    """Operations on music albums
+    """
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
-
-    # http_method_names = ['get', 'head']
 
 
 # ##############################################################################
@@ -27,11 +26,10 @@ class AlbumViewSet(viewsets.ModelViewSet):
 
 
 class TrackViewSet(viewsets.ModelViewSet):
-    """List all music tracks, or create a new track."""
+    """Operations on music tracks
+    """
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
-
-    # http_method_names = ['get', 'head']
 
 
 # ##############################################################################
@@ -40,7 +38,8 @@ class TrackViewSet(viewsets.ModelViewSet):
 
 
 class LikeTrackViewSet(viewsets.ModelViewSet):
-    """List likes for all music tracks and users."""
+    """List likes for all music tracks and users.
+    """
     queryset = LikeTrack.objects.all()
     serializer_class = LikeTrackSerializer
 
@@ -59,9 +58,6 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
         if self.request.user == instance.user:
             instance.delete()
 
-    # def get_queryset(self):
-    #     return LikeTrack.objects.filter(user=self.request.user)
-
 
 # ##############################################################################
 # Listens
@@ -69,7 +65,8 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
 
 
 class ListenTrackViewSet(viewsets.ModelViewSet):
-    """List all listens of all tracks by current user."""
+    """List all listens of all tracks by current user.
+    """
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
 
