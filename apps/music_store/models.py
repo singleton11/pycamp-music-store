@@ -56,7 +56,7 @@ class BoughtTrack(BoughtItem):
         related_name='purchased',
     )
 
-    class Meta:
+    class Meta(BoughtItem.Meta):
         verbose_name = _('Bought track')
         verbose_name_plural = _('Bought tracks')
 
@@ -73,6 +73,6 @@ class BoughtAlbum(BoughtItem):
         related_name='purchased',
     )
 
-    class Meta:
+    class Meta(BoughtItem.Meta):
         verbose_name = _('Bought album')
         verbose_name_plural = _('Bought albums')

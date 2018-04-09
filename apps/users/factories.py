@@ -1,8 +1,7 @@
 import factory
 from factory import fuzzy
 
-from apps.music_store.factories import PaymentMethodFactory
-from apps.users.models import PaymentTransaction
+from apps.users.models import PaymentTransaction, PaymentMethod
 from .models import AppUser
 
 
@@ -21,6 +20,15 @@ class UserFactory(factory.DjangoModelFactory):
     @factory.lazy_attribute
     def email(self):
         return "{0}@example.com".format(self.username)
+
+
+class PaymentMethodFactory(factory.DjangoModelFactory):
+    """ Factory to create payment method with random title """
+
+    title = factory.Sequence(lambda n: "Method %03d" % n)
+
+    class Meta:
+        model = PaymentMethod
 
 
 class PaymentTransactionFactory(factory.DjangoModelFactory):

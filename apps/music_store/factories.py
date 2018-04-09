@@ -1,17 +1,8 @@
 import factory
 from factory import fuzzy
 
-from apps.users.models import PaymentMethod
-from .models import Track
-
-
-class PaymentMethodFactory(factory.DjangoModelFactory):
-    """ Factory to create payment method with random title """
-
-    title = factory.Sequence(lambda n: "Method %03d" % n)
-
-    class Meta:
-        model = PaymentMethod
+from apps.users.factories import UserWithBalanceFactory
+from .models import Track, BoughtTrack
 
 
 class TrackFactory(factory.DjangoModelFactory):
@@ -22,3 +13,19 @@ class TrackFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Track
+
+
+class BoughtTrackFactory(factory.DjangoModelFactory):
+    """Factory for generates test Track model with random price and title """
+
+    item = factory.SubFactory(
+        TrackFactory,
+        price=fuzzy.FuzzyInteger(1, 10),
+    )
+    user = factory.SubFactory(
+        UserWithBalanceFactory,
+        balance=fuzzy.FuzzyInteger(11, 20)
+    )
+
+    class Meta:
+        model = BoughtTrack

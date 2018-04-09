@@ -1,10 +1,13 @@
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TestCase
 
-from apps.users.factories import UserFactory, UserWithBalanceFactory
+from apps.music_store.factories import BoughtTrackFactory
+from apps.music_store.models import BoughtTrack
+from apps.users.factories import UserFactory, UserWithBalanceFactory, \
+    PaymentMethodFactory
 from ..factories import (
     TrackFactory,
-    PaymentMethodFactory,
 )
 
 
@@ -48,3 +51,29 @@ class TestPaymentAccount(TestCase):
         account.methods_used.add(PaymentMethodFactory())
         account.default_method = PaymentMethodFactory()
         self.assertFalse(account.check_default_method())
+
+
+class TestBought(TestCase):
+    """Test for buy tracks and albums and his methods
+
+    This test is testing AppUser model.
+    """
+
+    def setUp(self):
+        self.account = UserWithBalanceFactory(balance=100)
+        self.count_tracks = 5
+        self.tracks = [
+            TrackFactory() for i in range(self.count_tracks)
+        ]
+
+    def test_dublicate(self):
+        track = self.tracks[0]
+        BoughtTrackFactory(user=self.account, item=track)
+        with self.assertRaises(IntegrityError):
+            BoughtTrackFactory(user=self.account, item=track)
+
+    def test_more_buy(self):
+        for track in self.tracks:
+            BoughtTrackFactory(user=self.account, item=track)
+        count_bought = self.account.boughttrack_set.count()
+        self.assertEqual(count_bought, self.count_tracks)
