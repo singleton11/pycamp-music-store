@@ -63,7 +63,7 @@ class TestAlbumAndTrack(TestCase):
 
         self.assertEqual(
             self.long_track.free_version,
-            self.long_track.full_version[:100]
+            self.long_track.full_version[:25]
         )
 
 

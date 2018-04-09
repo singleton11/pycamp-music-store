@@ -15,6 +15,7 @@ from ...music_store.models import Album, LikeTrack, ListenTrack, Track
 
 class AlbumViewSet(viewsets.ModelViewSet):
     """Operations on music albums
+
     """
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
@@ -27,6 +28,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
 
 class TrackViewSet(viewsets.ModelViewSet):
     """Operations on music tracks
+
     """
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
@@ -39,6 +41,7 @@ class TrackViewSet(viewsets.ModelViewSet):
 
 class LikeTrackViewSet(viewsets.ModelViewSet):
     """List likes for all music tracks and users.
+
     """
     queryset = LikeTrack.objects.all()
     serializer_class = LikeTrackSerializer
@@ -47,6 +50,7 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
         """Put a Like to some track.
 
         Allows to save Like only to logged user
+
         """
         serializer.save(user=self.request.user)
 
@@ -54,6 +58,7 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
         """Put away Like from the track.
 
         Allows to destroy Like only to user who put that like
+
         """
         if self.request.user == instance.user:
             instance.delete()
@@ -66,6 +71,7 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
 
 class ListenTrackViewSet(viewsets.ModelViewSet):
     """List all listens of all tracks by current user.
+
     """
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
@@ -76,6 +82,7 @@ class ListenTrackViewSet(viewsets.ModelViewSet):
         """Put a Like to some track.
 
         Allows to save Like only to logged user
+
         """
         serializer.save(user=self.request.user)
 

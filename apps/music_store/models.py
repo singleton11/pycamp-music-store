@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
-from ..users.models import AppUser
+from ..users.models import AppUser, upload_user_media_to
 
 
 class Album(
@@ -17,6 +17,7 @@ class Album(
         title (str): text representation of album's title
         image (str): text representation of URL to album's image
         price (int): price of album. Minimal price is 0
+
     """
     image = models.CharField(
         verbose_name=_('Image'),
@@ -29,6 +30,8 @@ class Album(
 
     class Meta:
         ordering = ('created',)
+        verbose_name = _('Music Album')
+        verbose_name_plural = _('Music Albums')
 
     def __str__(self):
         return self.title
@@ -56,6 +59,7 @@ class Track(
         full_version (str): full version of track content
         free_version (str): free shortened version of track content.
             Equal to full_version[:25]
+
     """
     album = models.ForeignKey(
         'Album',
@@ -77,6 +81,8 @@ class Track(
 
     class Meta:
         ordering = ('created',)
+        verbose_name = _('Audio Track')
+        verbose_name_plural = _('Audio Tracks')
 
     def __str__(self):
         return self.title
@@ -88,22 +94,6 @@ class Track(
         self.free_version = self.full_version[:25]
         super(Track, self).save(*args, **kwargs)
 
-    def set_like(self, user):
-        """Method to put like on track"""
-        pass
-
-    def del_like(self, user):
-        """Method to take away like from track"""
-        pass
-
-    def play_track(self, user):
-        """Method to play music track"""
-        pass
-
-    def buy_track(self, user):
-        """Method to buy music track"""
-        pass
-
 
 class LikeTrack(
     TimeStampedModel,
@@ -111,12 +101,21 @@ class LikeTrack(
     """A 'Like' to music track.
 
     Unique pair of user who likes track and track, that is liked by user.
+
     """
-    track = models.ForeignKey(Track)
-    user = models.ForeignKey(AppUser)
+    track = models.ForeignKey(
+        Track,
+        verbose_name=_('Track'),
+    )
+    user = models.ForeignKey(
+        AppUser,
+        verbose_name=_('User liked'),
+    )
 
     class Meta:
         unique_together = (('track', 'user'),)
+        verbose_name = _('Like')
+        verbose_name_plural = _('Likes')
 
 
 class ListenTrack(
@@ -125,6 +124,17 @@ class ListenTrack(
     """A note about each listening of any track by any user.
 
     Each track may be listened multiple times.
+
     """
-    track = models.ForeignKey(Track)
-    user = models.ForeignKey(AppUser)
+    track = models.ForeignKey(
+        Track,
+        verbose_name=_('Track'),
+    )
+    user = models.ForeignKey(
+        AppUser,
+        verbose_name=_('User listened'),
+    )
+
+    class Meta:
+        verbose_name = _('Listen')
+        verbose_name_plural = _('Listens')
