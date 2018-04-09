@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
-from ..users.models import AppUser, upload_user_media_to
+from ..users.models import AppUser
 
 
 class Album(
@@ -92,7 +92,7 @@ class Track(
 
         """
         self.free_version = self.full_version[:25]
-        super(Track, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class LikeTrack(
