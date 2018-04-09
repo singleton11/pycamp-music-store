@@ -42,9 +42,9 @@ class TestPaymentAccount(TestCase):
     def test_select_methods(self):
         account = UserFactory()
         account.methods_used.add(*self.methods)
-        account.default_method = self.methods[0]
+        account.default_method, *_ = self.methods
         account.save()
-        self.assertEqual(len(account.methods_used.all()), self.count_methods)
+        self.assertEqual(account.methods_used.count(), self.count_methods)
 
     def test_set_default_methods(self):
         account = UserFactory()
@@ -62,9 +62,7 @@ class TestBought(TestCase):
     def setUp(self):
         self.account = UserWithBalanceFactory(balance=100)
         self.count_tracks = 5
-        self.tracks = [
-            TrackFactory() for i in range(self.count_tracks)
-        ]
+        self.tracks = TrackFactory.create_batch(self.count_tracks)
 
     def test_dublicate(self):
         track = self.tracks[0]
