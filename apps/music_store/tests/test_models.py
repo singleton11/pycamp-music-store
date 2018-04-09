@@ -1,4 +1,3 @@
-from django.db.utils import IntegrityError
 from django.test import TestCase
 
 from ...users.factories import UserFactory
@@ -12,10 +11,11 @@ from ..tests.factories import (
 
 class TestAlbumAndTrack(TestCase):
 
-    def setUp(self):
-        self.album = AlbumFactory()
-        self.track = TrackFactory()
-        self.long_track = TrackFactoryLongFullVersion()
+    @classmethod
+    def setUpTestData(cls):
+        cls.album = AlbumFactory()
+        cls.track = TrackFactory()
+        cls.long_track = TrackFactoryLongFullVersion()
 
     def test_album_str(self):
         self.assertEqual(str(self.album), self.album.title)
@@ -28,21 +28,8 @@ class TestAlbumAndTrack(TestCase):
         )
         self.assertTrue(album.is_empty)
 
-    def test_album_has_tracks(self):
-        self.assertTrue(self.album.tracks)
-
     def test_track_str(self):
         self.assertEqual(str(self.track), self.track.title)
-
-    def test_track_no_album(self):
-        track = Track(
-            title='vxdrgdfhbs',
-            price=1099
-        )
-        self.assertFalse(track.album)
-
-    def test_track_has_album(self):
-        self.assertTrue(self.track.album)
 
     def test_add_track_to_album(self):
         track = Track(
@@ -68,43 +55,35 @@ class TestAlbumAndTrack(TestCase):
 
 
 class TestLike(TestCase):
-    def setUp(self):
-        self.user1 = UserFactory()
-        self.user2 = UserFactory()
-        self.track = TrackFactory()
-        self.like1 = LikeTrack(user=self.user1, track=self.track)
-        self.like2 = LikeTrack(user=self.user2, track=self.track)
-        self.like1.save()
-        self.like2.save()
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user1 = UserFactory()
+        cls.user2 = UserFactory()
+        cls.track = TrackFactory()
+        cls.like1 = LikeTrack(user=cls.user1, track=cls.track)
+        cls.like2 = LikeTrack(user=cls.user2, track=cls.track)
+        cls.like1.save()
+        cls.like2.save()
 
     def test_create_like(self):
-        self.assertEqual(2, LikeTrack.objects.all().count())
-
-    def test_user_cannot_add_second_like(self):
-        second_like = LikeTrack(user=self.user1, track=self.track)
-        with self.assertRaises(IntegrityError):
-            second_like.save()
+        self.assertEqual(2, LikeTrack.objects.count())
 
 
 class TestListen(TestCase):
-    def setUp(self):
-        self.user1 = UserFactory()
-        self.user2 = UserFactory()
-        self.track = TrackFactory()
-        self.listen1 = ListenTrack(user=self.user1, track=self.track)
-        self.listen2 = ListenTrack(user=self.user2, track=self.track)
 
-        self.listen1.save()
-        self.listen2.save()
+    @classmethod
+    def setUpTestData(cls):
+        cls.user1 = UserFactory()
+        cls.user2 = UserFactory()
+        cls.track = TrackFactory()
+        cls.listen1 = ListenTrack(user=cls.user1, track=cls.track)
+        cls.listen2 = ListenTrack(user=cls.user2, track=cls.track)
+        cls.listen3 = ListenTrack(user=cls.user2, track=cls.track)
+
+        cls.listen1.save()
+        cls.listen2.save()
+        cls.listen3.save()
 
     def test_create_listens(self):
-        self.assertEqual(2, len(ListenTrack.objects.all()))
-
-    def test_user_can_add_second_listen(self):
-        second_listen = ListenTrack(user=self.user1, track=self.track)
-        second_listen.save()
-        self.assertEqual(2, ListenTrack.objects.filter(user=self.user1).count())
-
-        another_listen = ListenTrack(user=self.user2, track=self.track)
-        another_listen.save()
-        self.assertEqual(2, ListenTrack.objects.filter(user=self.user2).count())
+        self.assertEqual(3, ListenTrack.objects.count())
