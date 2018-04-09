@@ -8,15 +8,15 @@ class AlbumFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Album
 
-    title = factory.fuzzy.FuzzyText(length=12).fuzz()
-    image = factory.fuzzy.FuzzyText(length=30).fuzz()
-    price = factory.fuzzy.FuzzyFloat(0, 5.0).fuzz()
+    title = factory.Faker('sentence', nb_words=2)
+    image = factory.Faker('sentence', nb_words=2)
+    price = factory.fuzzy.FuzzyFloat(0, 5.0)
 
 
-class TrackFactoryNoAlbum(factory.django.DjangoModelFactory):
+class TrackFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Track
 
-    title = factory.fuzzy.FuzzyText(length=10).fuzz()
-    # album = factory.SubFactory(AlbumFactory)
-    price = factory.fuzzy.FuzzyFloat(0, 5.0).fuzz()
+    title = factory.Faker('sentence', nb_words=2)
+    price = factory.fuzzy.FuzzyFloat(0, 5.0)
+    album = factory.SubFactory(AlbumFactory)
