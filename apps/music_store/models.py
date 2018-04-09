@@ -57,14 +57,14 @@ class Track(
         price (FloatField): price of album. Minimal price is 0
     """
     album = models.ForeignKey(
-        Album,
-        verbose_name='Album',
+        'Album',
+        verbose_name=_('Album'),
         blank=True,
         null=True,
         related_name='tracks'
     )
     price = models.FloatField(
-        verbose_name='Price',
+        verbose_name=_('Price'),
         validators=[MinValueValidator(0.0)]
     )
 
