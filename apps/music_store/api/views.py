@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -21,6 +22,8 @@ class AlbumViewSet(viewsets.ModelViewSet):
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
 
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
 
 # ##############################################################################
 # MUSIC TRACKS
@@ -34,6 +37,8 @@ class TrackViewSet(viewsets.ModelViewSet):
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
 
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
 
 # ##############################################################################
 # Likes
@@ -46,6 +51,8 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
     """
     queryset = LikeTrack.objects.all()
     serializer_class = LikeTrackSerializer
+
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
         """Put a Like to some track.
