@@ -1,13 +1,13 @@
-from django.test import TestCase
 from django.db.utils import IntegrityError
+from django.test import TestCase
 
-from ..models import Album, Track, ListenTrack, LikeTrack
+from ...users.factories import UserFactory
+from ..models import Album, LikeTrack, ListenTrack, Track
 from ..tests.factories import (
     AlbumFactory,
     TrackFactory,
-    TrackFactoryLongFullVersion
+    TrackFactoryLongFullVersion,
 )
-from ...users.factories import UserFactory
 
 
 class TestAlbumAndTrack(TestCase):
