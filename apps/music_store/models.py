@@ -10,22 +10,21 @@ from ..users.models import AppUser
 class Album(
     TitleDescriptionModel,
     TimeStampedModel,
-    models.Model,
 ):
     """Music album with its title, image, price and related tracks.
 
     Attributes:
-        title (CharField): text representation of album's title
-        image (Charfield): text representation of URL to album's image
-        price (FloatField): price of album. Minimal price is 0
+        title (str): text representation of album's title
+        image (str): text representation of URL to album's image
+        price (int): price of album. Minimal price is 0
     """
     image = models.CharField(
         verbose_name=_('Image'),
         max_length=200
     )
-    price = models.FloatField(
+    price = models.BigIntegerField(
         verbose_name=_('Price'),
-        validators=[MinValueValidator(0.0)]
+        validators=[MinValueValidator(0)]
     )
 
     class Meta:
@@ -47,14 +46,16 @@ class Album(
 class Track(
     TitleDescriptionModel,
     TimeStampedModel,
-    models.Model,
 ):
     """Music track with its title, price and album if exists.
 
     Attributes:
-        title (CharField): text representation of track's title
+        title (str): text representation of track's title
         album (Album): album that contains the track
-        price (FloatField): price of album. Minimal price is 0
+        price (int): price of album. Minimal price is 0
+        full_version (str): full version of track content
+        free_version (str): free shortened version of track content.
+            Equal to full_version[:25]
     """
     album = models.ForeignKey(
         'Album',
@@ -63,9 +64,15 @@ class Track(
         null=True,
         related_name='tracks'
     )
-    price = models.FloatField(
+    price = models.BigIntegerField(
         verbose_name=_('Price'),
-        validators=[MinValueValidator(0.0)]
+        validators=[MinValueValidator(0)]
+    )
+    full_version = models.TextField(
+        verbose_name=_('Full version'),
+    )
+    free_version = models.TextField(
+        verbose_name=_('Free version'),
     )
 
     class Meta:
@@ -73,6 +80,13 @@ class Track(
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        """Saves reduced data to free_version field
+
+        """
+        self.free_version = self.full_version[:25]
+        super(Track, self).save(*args, **kwargs)
 
     def set_like(self, user):
         """Method to put like on track"""
@@ -93,7 +107,6 @@ class Track(
 
 class LikeTrack(
     TimeStampedModel,
-    models.Model,
 ):
     """A 'Like' to music track.
 
@@ -108,7 +121,6 @@ class LikeTrack(
 
 class ListenTrack(
     TimeStampedModel,
-    models.Model
 ):
     """A note about each listening of any track by any user.
 

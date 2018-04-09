@@ -2,7 +2,11 @@ from django.test import TestCase
 from django.db.utils import IntegrityError
 
 from ..models import Album, Track, ListenTrack, LikeTrack
-from ..tests.factories import AlbumFactory, TrackFactory
+from ..tests.factories import (
+    AlbumFactory,
+    TrackFactory,
+    TrackFactoryLongFullVersion
+)
 from ...users.factories import UserFactory
 
 
@@ -11,6 +15,7 @@ class TestAlbumAndTrack(TestCase):
     def setUp(self):
         self.album = AlbumFactory()
         self.track = TrackFactory()
+        self.long_track = TrackFactoryLongFullVersion()
 
     def test_album_str(self):
         self.assertEqual(str(self.album), self.album.title)
@@ -18,10 +23,13 @@ class TestAlbumAndTrack(TestCase):
     def test_album_is_empty(self):
         album = Album(
             title='dersdbfcxbfd',
-            image='sdrgdshgb//srgteawrtg/srge',
-            price=199.99
+            image='sdrgdshgb srgteawrtg srge',
+            price=19999
         )
         self.assertTrue(album.is_empty)
+
+    def test_album_has_tracks(self):
+        self.assertTrue(self.album.tracks)
 
     def test_track_str(self):
         self.assertEqual(str(self.track), self.track.title)
@@ -29,7 +37,7 @@ class TestAlbumAndTrack(TestCase):
     def test_track_no_album(self):
         track = Track(
             title='vxdrgdfhbs',
-            price=10.99
+            price=1099
         )
         self.assertFalse(track.album)
 
@@ -39,10 +47,24 @@ class TestAlbumAndTrack(TestCase):
     def test_add_track_to_album(self):
         track = Track(
             title='vxdrgdfhbs',
-            price=10.99,
+            price=10,
             album=self.album,
         )
         self.assertEqual(track.album, self.album)
+
+    def test_free_version_equal_to_short_full_version(self):
+        self.assertEqual(self.track.free_version, self.track.full_version)
+
+    def test_free_version_not_equal_to_long_full_version(self):
+        self.assertNotEqual(
+            self.long_track.free_version,
+            self.long_track.full_version
+        )
+
+        self.assertEqual(
+            self.long_track.free_version,
+            self.long_track.full_version[:100]
+        )
 
 
 class TestLike(TestCase):
