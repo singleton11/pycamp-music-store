@@ -78,7 +78,7 @@ class TestLike(TestCase):
         self.like2.save()
 
     def test_create_like(self):
-        self.assertEqual(2, len(LikeTrack.objects.all()))
+        self.assertEqual(2, LikeTrack.objects.all().count())
 
     def test_user_cannot_add_second_like(self):
         second_like = LikeTrack(user=self.user1, track=self.track)
@@ -103,8 +103,8 @@ class TestListen(TestCase):
     def test_user_can_add_second_listen(self):
         second_listen = ListenTrack(user=self.user1, track=self.track)
         second_listen.save()
-        self.assertEqual(2, len(ListenTrack.objects.filter(user=self.user1)))
+        self.assertEqual(2, ListenTrack.objects.filter(user=self.user1).count())
 
         another_listen = ListenTrack(user=self.user2, track=self.track)
         another_listen.save()
-        self.assertEqual(2, len(ListenTrack.objects.filter(user=self.user2)))
+        self.assertEqual(2, ListenTrack.objects.filter(user=self.user2).count())
