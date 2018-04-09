@@ -1,5 +1,8 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    IsAuthenticated,
+)
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -21,7 +24,6 @@ class AlbumViewSet(viewsets.ModelViewSet):
     """
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
-
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
@@ -36,7 +38,6 @@ class TrackViewSet(viewsets.ModelViewSet):
     """
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
-
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
@@ -51,7 +52,6 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
     """
     queryset = LikeTrack.objects.all()
     serializer_class = LikeTrackSerializer
-
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
@@ -83,6 +83,7 @@ class ListenTrackViewSet(viewsets.ModelViewSet):
     """
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
+    permission_classes = (IsAuthenticated,)
 
     http_method_names = ['get', 'post', 'head']
 
