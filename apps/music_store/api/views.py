@@ -118,14 +118,6 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
     serializer_class = LikeTrackSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    def perform_create(self, serializer):
-        """Put a Like to some track.
-
-        Allows to save Like only to logged user
-
-        """
-        serializer.save(user=self.request.user)
-
     def perform_destroy(self, instance):
         """Put away Like from the track.
 
@@ -150,14 +142,6 @@ class ListenTrackViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
 
     http_method_names = ['get', 'post', 'head']
-
-    def perform_create(self, serializer):
-        """Put a Like to some track.
-
-        Allows to save Like only to logged user
-
-        """
-        serializer.save(user=self.request.user)
 
     def get_queryset(self):
         """Show user his history of listening"""

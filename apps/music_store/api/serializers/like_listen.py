@@ -7,7 +7,9 @@ class LikeTrackSerializer(serializers.ModelSerializer):
     """Serializer for Likes of music tracks
 
     """
-    user = serializers.ReadOnlyField(source='user.pk')
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
 
     class Meta:
         model = LikeTrack
@@ -23,7 +25,9 @@ class ListenTrackSerializer(serializers.ModelSerializer):
     """Serializer for Listennings of Music tracks
 
     """
-    user = serializers.ReadOnlyField(source='user.pk')
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
 
     class Meta:
         model = ListenTrack
