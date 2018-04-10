@@ -30,8 +30,8 @@ class Migration(migrations.Migration):
                 ('price', models.BigIntegerField(validators=[django.core.validators.MinValueValidator(0)], verbose_name='Price')),
             ],
             options={
-                'verbose_name': 'Album',
-                'verbose_name_plural': 'Albums',
+                'verbose_name': 'Music Album',
+                'verbose_name_plural': 'Music Albums',
                 'ordering': ('created',),
             },
         ),

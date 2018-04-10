@@ -1,32 +1,33 @@
 from django.core.exceptions import ValidationError
-from rest_framework import viewsets, permissions, generics, exceptions
 
-from apps.users.models import AppUser, PaymentMethod
+from rest_framework import exceptions, generics, permissions, viewsets
+
+from apps.music_store.api.serializers.album_track import (
+    AlbumSerializer,
+    TrackSerializer,
+)
+from apps.music_store.api.serializers.like_listen import (
+    LikeTrackSerializer,
+    ListenTrackSerializer,
+)
 from ...music_store.api.serializers.bought import (
+    BoughtAlbumSerializer,
     BoughtTrackSerializer,
-    BoughtAlbumSerializer)
+)
 from ...music_store.api.serializers.payment import (
     PaymentAccountSerializer,
     PaymentMethodSerializer,
 )
 from ...music_store.models import (
-    BoughtTrack,
+    Album,
     BoughtAlbum,
-)
-from rest_framework.permissions import (
-    IsAuthenticatedOrReadOnly,
-    IsAuthenticated,
-)
-
-from apps.music_store.api.serializers import (
-    AlbumSerializer,
-    LikeTrackSerializer,
-    ListenTrackSerializer,
-    TrackSerializer,
+    BoughtTrack,
+    LikeTrack,
+    ListenTrack,
+    Track,
 )
 
-from ...music_store.models import Album, LikeTrack, ListenTrack, Track
-
+from apps.users.models import AppUser, PaymentMethod
 
 
 class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
@@ -87,7 +88,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
     """
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 # ##############################################################################
@@ -101,7 +102,7 @@ class TrackViewSet(viewsets.ModelViewSet):
     """
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 # ##############################################################################
@@ -115,7 +116,7 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
     """
     queryset = LikeTrack.objects.all()
     serializer_class = LikeTrackSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
         """Put a Like to some track.
@@ -146,7 +147,7 @@ class ListenTrackViewSet(viewsets.ModelViewSet):
     """
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     http_method_names = ['get', 'post', 'head']
 

@@ -1,19 +1,18 @@
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-
-from apps.music_store.factories import BoughtTrackFactory
-from apps.music_store.models import Album, LikeTrack, ListenTrack, Track
-from apps.users.factories import UserFactory, UserWithBalanceFactory, \
-    PaymentMethodFactory
-from ..factories import (
-    TrackFactory,
-)
 from django.test import TestCase
 
-from ..tests.factories import (
+from apps.music_store.factories import (
     AlbumFactory,
+    BoughtTrackFactory,
     TrackFactory,
     TrackFactoryLongFullVersion,
+)
+from apps.music_store.models import Album, LikeTrack, ListenTrack, Track
+from apps.users.factories import (
+    PaymentMethodFactory,
+    UserFactory,
+    UserWithBalanceFactory,
 )
 
 

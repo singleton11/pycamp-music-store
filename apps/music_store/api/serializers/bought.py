@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from ...models import BoughtTrack, BoughtAlbum
+from ...models import BoughtAlbum, BoughtTrack
 
 
 class BoughtItemSerializer(serializers.ModelSerializer):
