@@ -17,11 +17,11 @@ tests run faster.
 from django.test.client import MULTIPART_CONTENT, Client
 from django.utils.http import urlencode
 
-from bravado_core.response import IncomingResponse
 from inflection import underscore
 
 from bravado.http_client import HttpClient
 from bravado.http_future import FutureAdapter, HttpFuture
+from bravado_core.response import IncomingResponse
 
 
 class DjangoClient(HttpClient):

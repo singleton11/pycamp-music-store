@@ -7,6 +7,7 @@ from django.test import override_settings
 from django.test.client import RequestFactory
 
 import faker
+
 from allauth.account.models import EmailAddress
 from allauth.account.tests import TestCase
 from allauth.socialaccount.helpers import complete_social_login

@@ -13,6 +13,7 @@ from rest_framework.test import (
 )
 
 from faker import Faker
+
 from PIL import Image
 
 from ..api.views import (

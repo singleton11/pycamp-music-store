@@ -4,11 +4,10 @@ import pprint
 from django.conf import settings
 from django.test import TestCase, tag
 
-from bravado_core.schema import collapsed_properties
-
 from bravado.client import SwaggerClient
 from bravado.exception import HTTPBadRequest
 from bravado.swagger_model import load_file, load_url
+from bravado_core.schema import collapsed_properties
 
 from .django_client import DjangoClient
 
