@@ -1,7 +1,8 @@
 import factory
 from factory import fuzzy
 
-from apps.users.models import PaymentTransaction, PaymentMethod
+from apps.users.models import PaymentMethod, PaymentTransaction
+
 from .models import AppUser
 
 
