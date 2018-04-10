@@ -2,19 +2,13 @@ from django.core.exceptions import ValidationError
 
 from rest_framework import exceptions, generics, permissions, viewsets
 
-from apps.music_store.api.serializers.album_track import (
+from apps.music_store.api.serializers import (
     AlbumSerializer,
     TrackSerializer,
-)
-from apps.music_store.api.serializers.like_listen import (
     LikeTrackSerializer,
     ListenTrackSerializer,
-)
-from ...music_store.api.serializers.bought import (
     BoughtAlbumSerializer,
     BoughtTrackSerializer,
-)
-from ...music_store.api.serializers.payment import (
     PaymentAccountSerializer,
     PaymentMethodSerializer,
 )
