@@ -54,10 +54,6 @@ class TestAPITrack(APITestCase):
         response = self.client.post(url_tracks, track, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_forbidden_create_album_without_auth(self):
-        response = self.client.post(url_albums, album, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-
     def test_create_track_with_auth(self):
         self.client.force_authenticate(user=self.user)
         response = self.client.post(url_tracks, track, format='json')
@@ -72,7 +68,7 @@ class TestAPITrack(APITestCase):
             track['full_version'][:25]
         )
 
-    def test_update_album_filed_of_track_instance(self):
+    def test_update_album_field_of_track_instance(self):
         self.client.force_authenticate(user=self.user)
         self.client.post(url_tracks, track, format='json')
         self.client.post(url_albums, album, format='json')
@@ -126,11 +122,31 @@ class TestAPIAlbum(APITestCase):
         response = self.client.post(url_albums, album, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_create_album_with_auth(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(url_albums, album, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+    def test_forbidden_delete_album_without_login(self):
+        self.client.force_authenticate(user=self.user)
+        self.client.post(url_albums, album, format='json')
+        self.client.logout()
 
+        album_to_del = Album.objects.get()
+        response = self.client.delete(
+            f'{url_albums}{album_to_del.id}/',
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_delete_album_with_login(self):
+        self.client.force_authenticate(user=self.user)
+        self.client.post(url_albums, album, format='json')
 
-
+        album_to_del = Album.objects.get()
+        response = self.client.delete(
+            f'{url_albums}{album_to_del.id}/',
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
 
 
