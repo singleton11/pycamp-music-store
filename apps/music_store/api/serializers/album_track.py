@@ -17,6 +17,7 @@ class AlbumSerializer(serializers.ModelSerializer):
         model = Album
         fields = (
             'id',
+            'author',
             'title',
             'image',
             'price',
@@ -34,6 +35,7 @@ class TrackSerializer(serializers.ModelSerializer):
         model = Track
         fields = (
             'id',
+            'author',
             'title',
             'album',
             'price',

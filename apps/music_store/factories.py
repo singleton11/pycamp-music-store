@@ -8,6 +8,7 @@ from .models import Album, BoughtTrack, Track, LikeTrack, ListenTrack
 
 class AlbumFactory(factory.django.DjangoModelFactory):
 
+    author = factory.Faker('name')
     title = factory.Faker('sentence', nb_words=2)
     image = factory.Faker('sentence', nb_words=2)
     price = factory.fuzzy.FuzzyInteger(0, 50)
@@ -18,6 +19,7 @@ class AlbumFactory(factory.django.DjangoModelFactory):
 
 class TrackFactory(factory.django.DjangoModelFactory):
 
+    author = factory.Faker('name')
     title = factory.Faker('sentence', nb_words=2)
     price = factory.fuzzy.FuzzyInteger(0, 50)
     album = factory.SubFactory(AlbumFactory)

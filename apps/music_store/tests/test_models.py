@@ -91,7 +91,10 @@ class TestAlbumAndTrack(TestCase):
         cls.long_track = TrackFactoryLongFullVersion()
 
     def test_album_str(self):
-        self.assertEqual(str(self.album), self.album.title)
+        self.assertEqual(
+            str(self.album),
+            f'{self.album.author} - {self.album.title}'
+        )
 
     def test_album_is_empty(self):
         album = Album(
@@ -102,7 +105,10 @@ class TestAlbumAndTrack(TestCase):
         self.assertTrue(album.is_empty)
 
     def test_track_str(self):
-        self.assertEqual(str(self.track), self.track.title)
+        self.assertEqual(
+            str(self.track),
+            f'{self.track.author} - {self.track.title}'
+        )
 
     def test_add_track_to_album(self):
         track = Track(
