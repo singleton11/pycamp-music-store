@@ -64,6 +64,15 @@ class Album(MusicItem):
         """bool: True if no related Tracks"""
         return not self.tracks.exists()
 
+    def is_bought(self, user):
+        """Check if the album is bought by the user.
+
+        Args:
+            user (AppUser): probable owner of album.
+
+        """
+        return BoughtAlbum.objects.filter(user=user, item=self).exists()
+
 
 class Track(MusicItem):
     """Music track with its title, price and album if exists.
@@ -101,13 +110,22 @@ class Track(MusicItem):
         super().save()
 
     def is_bought(self, user):
-        """Check if the track is bought by some user.
+        """Check if the track is bought by the user.
 
         Args:
             user (AppUser): probable owner of track.
 
         """
         return BoughtTrack.objects.filter(user=user, item=self).exists()
+
+    def is_liked(self, user):
+        """Check if the track is liked by the user.
+
+        Args:
+            user (AppUser): probable owner of track.
+
+        """
+        return LikeTrack.objects.filter(user=user, track=self).exists()
 
 
 class BoughtItem(TimeStampedModel):

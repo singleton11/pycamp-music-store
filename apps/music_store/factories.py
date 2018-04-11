@@ -3,7 +3,14 @@ from factory import fuzzy
 
 from apps.users.factories import UserFactory, UserWithBalanceFactory
 
-from .models import Album, BoughtTrack, LikeTrack, ListenTrack, Track
+from .models import (
+    Album,
+    BoughtAlbum,
+    BoughtTrack,
+    LikeTrack,
+    ListenTrack,
+    Track,
+)
 
 
 class AlbumFactory(factory.django.DjangoModelFactory):
@@ -50,6 +57,22 @@ class BoughtTrackFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = BoughtTrack
+
+
+class BoughtAlbumFactory(factory.DjangoModelFactory):
+    """Factory for generates test Track model with random price and title """
+
+    item = factory.SubFactory(
+        AlbumFactory,
+        price=fuzzy.FuzzyInteger(1, 10),
+    )
+    user = factory.SubFactory(
+        UserWithBalanceFactory,
+        balance=fuzzy.FuzzyInteger(11, 20)
+    )
+
+    class Meta:
+        model = BoughtAlbum
 
 
 class LikeTrackFactory(factory.DjangoModelFactory):

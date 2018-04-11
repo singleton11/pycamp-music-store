@@ -5,6 +5,8 @@ from django.test import TestCase
 from apps.music_store.factories import (
     AlbumFactory,
     BoughtTrackFactory,
+    BoughtAlbumFactory,
+    LikeTrackFactory,
     TrackFactory,
     TrackFactoryLongFullVersion,
 )
@@ -86,6 +88,7 @@ class TestAlbumAndTrack(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        cls.user = UserFactory()
         cls.album = AlbumFactory()
         cls.track = TrackFactory()
         cls.long_track = TrackFactoryLongFullVersion()
@@ -104,6 +107,13 @@ class TestAlbumAndTrack(TestCase):
         )
         self.assertTrue(album.is_empty)
 
+    def test_album_is_not_bought(self):
+        self.assertFalse(self.album.is_bought(self.user))
+
+    def test_album_is_bought(self):
+        BoughtAlbumFactory(item=self.album, user=self.user)
+        self.assertTrue(self.album.is_bought(self.user))
+
     def test_track_str(self):
         self.assertEqual(
             str(self.track),
@@ -118,10 +128,24 @@ class TestAlbumAndTrack(TestCase):
         )
         self.assertEqual(track.album, self.album)
 
-    def test_free_version_equal_to_short_full_version(self):
+    def test_track_is_not_bought(self):
+        self.assertFalse(self.track.is_bought(self.user))
+
+    def test_track_is_bought(self):
+        BoughtTrackFactory(item=self.track, user=self.user)
+        self.assertTrue(self.track.is_bought(self.user))
+
+    def test_track_is_not_liked(self):
+        self.assertFalse(self.track.is_liked(self.user))
+
+    def test_track_is_liked(self):
+        LikeTrackFactory(track=self.track, user=self.user)
+        self.assertTrue(self.track.is_liked(self.user))
+
+    def test_free_version_of_track_equal_to_short_full_version(self):
         self.assertEqual(self.track.free_version, self.track.full_version)
 
-    def test_free_version_not_equal_to_long_full_version(self):
+    def test_free_version_of_track_not_equal_to_long_full_version(self):
         self.assertNotEqual(
             self.long_track.free_version,
             self.long_track.full_version
