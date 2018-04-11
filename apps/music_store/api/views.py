@@ -21,11 +21,20 @@ from ...music_store.models import (
     Track,
 )
 
+# ##############################################################################
+# PAYMENT METHODS
+# ##############################################################################
+
 
 class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
     """ ReadOnly view for PaymentMethods """
     queryset = PaymentMethod.objects.all()
     serializer_class = PaymentMethodSerializer
+
+
+# ##############################################################################
+# ACCOUNTS
+# ##############################################################################
 
 
 class AccountView(generics.RetrieveUpdateAPIView):
@@ -37,6 +46,11 @@ class AccountView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return super().get_queryset().get(pk=self.request.user.pk)
+
+
+# ##############################################################################
+# BOUGHT TRACKS
+# ##############################################################################
 
 
 class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
@@ -63,6 +77,11 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
         serializer.save()
 
 
+# ##############################################################################
+# BOUGHT ALBUMS
+# ##############################################################################
+
+
 class BoughtAlbumViewSet(BoughtTrackViewSet):
     """View to display the list of purchased user albums and purchase them."""
     serializer_class = BoughtAlbumSerializer
@@ -70,87 +89,60 @@ class BoughtAlbumViewSet(BoughtTrackViewSet):
 
 
 # ##############################################################################
-# MUSIC ALBUMS
+# ALBUMS
 # ##############################################################################
 
 
-class AlbumViewSet(viewsets.ModelViewSet):
+class AlbumViewSet(viewsets.mixins.ListModelMixin,
+                   viewsets.mixins.RetrieveModelMixin,
+                   viewsets.GenericViewSet):
     """Operations on music albums
 
     """
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 # ##############################################################################
-# MUSIC TRACKS
+# TRACKS
 # ##############################################################################
 
 
-class TrackViewSet(viewsets.ModelViewSet):
+class TrackViewSet(viewsets.mixins.ListModelMixin,
+                   viewsets.mixins.RetrieveModelMixin,
+                   viewsets.GenericViewSet):
     """Operations on music tracks
 
     """
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 # ##############################################################################
-# Likes
+# LIKES
 # ##############################################################################
 
 
-class LikeTrackViewSet(viewsets.ModelViewSet):
-    """List likes for all music tracks and users.
+class LikeTrackViewSet(viewsets.mixins.ListModelMixin,
+                       viewsets.GenericViewSet):
+    """Authorised user sees list of liked tracks.
 
     """
     queryset = LikeTrack.objects.all()
     serializer_class = LikeTrackSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-
-    def perform_create(self, serializer):
-        """Put a Like to some track.
-
-        Allows to save Like only to logged user
-
-        """
-        serializer.save(user=self.request.user)
-
-    def perform_destroy(self, instance):
-        """Put away Like from the track.
-
-        Allows to destroy Like only to user who put that like
-
-        """
-        if self.request.user == instance.user:
-            instance.delete()
+    permission_classes = (permissions.IsAuthenticated,)
 
 
 # ##############################################################################
-# Listens
+# LISTENS
 # ##############################################################################
 
 
-class ListenTrackViewSet(viewsets.ModelViewSet):
-    """List all listens of all tracks by current user.
+class ListenTrackViewSet(viewsets.mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
+    """Authorised user sees list of listened tracks.
 
     """
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
     permission_classes = (permissions.IsAuthenticated,)
-
-    http_method_names = ['get', 'post', 'head']
-
-    def perform_create(self, serializer):
-        """Put a Like to some track.
-
-        Allows to save Like only to logged user
-
-        """
-        serializer.save(user=self.request.user)
-
-    def get_queryset(self):
-        """Show user his history of listening"""
-        return ListenTrack.objects.filter(user=self.request.user)

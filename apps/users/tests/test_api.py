@@ -107,7 +107,7 @@ class TestAPIUser(APITestCase):
 
     @unittest.skip("FIX")
     def test_username_api(self):
-        """Test for username existance.
+        """Test for username existence.
 
         Raise http 404 if username already registered and 200 if does not.
 

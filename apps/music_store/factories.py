@@ -1,13 +1,14 @@
 import factory
 from factory import fuzzy
 
-from apps.users.factories import UserWithBalanceFactory
+from apps.users.factories import UserFactory, UserWithBalanceFactory
 
-from .models import Album, BoughtTrack, Track
+from .models import Album, BoughtTrack, LikeTrack, ListenTrack, Track
 
 
 class AlbumFactory(factory.django.DjangoModelFactory):
 
+    author = factory.Faker('name')
     title = factory.Faker('sentence', nb_words=2)
     image = factory.Faker('sentence', nb_words=2)
     price = factory.fuzzy.FuzzyInteger(0, 50)
@@ -18,6 +19,7 @@ class AlbumFactory(factory.django.DjangoModelFactory):
 
 class TrackFactory(factory.django.DjangoModelFactory):
 
+    author = factory.Faker('name')
     title = factory.Faker('sentence', nb_words=2)
     price = factory.fuzzy.FuzzyInteger(0, 50)
     album = factory.SubFactory(AlbumFactory)
@@ -48,3 +50,23 @@ class BoughtTrackFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = BoughtTrack
+
+
+class LikeTrackFactory(factory.DjangoModelFactory):
+    """Factory for ListenTrack instances"""
+
+    track = factory.SubFactory(TrackFactory)
+    user = factory.SubFactory(UserFactory)
+
+    class Meta:
+        model = LikeTrack
+
+
+class ListenTrackFactory(factory.DjangoModelFactory):
+    """Factory for ListenTrack instances"""
+
+    track = factory.SubFactory(TrackFactory)
+    user = factory.SubFactory(UserFactory)
+
+    class Meta:
+        model = ListenTrack

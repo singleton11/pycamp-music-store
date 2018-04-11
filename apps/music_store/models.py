@@ -8,58 +8,71 @@ from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 from ..users.models import AppUser
 
 
-class Album(
+class MusicItem(
     TitleDescriptionModel,
     TimeStampedModel,
 ):
-    """Music album with its title, image, price and related tracks.
+    """Abstract base class for Album and Track.
 
     Attributes:
-        title (str): text representation of album's title
-        image (str): text representation of URL to album's image
-        price (int): price of album. Minimal price is 0
+        title (str): text representation of items's title.
+        author (str): text representation of author's name.
+        price (int): price of item. Minimal price is 0.
 
     """
-    image = models.CharField(
-        verbose_name=_('Image'),
-        max_length=200
+    author = models.CharField(
+        verbose_name=_('Author'),
+        blank=True,
+        null=True,
+        max_length=200,
     )
+
     price = models.BigIntegerField(
         verbose_name=_('Price'),
         validators=[MinValueValidator(0)]
     )
 
     class Meta:
+        abstract = True
         ordering = ('created',)
-        verbose_name = _('Music Album')
-        verbose_name_plural = _('Music Albums')
 
     def __str__(self):
-        return self.title
+        return f'{self.author} - {self.title}'
+
+
+class Album(MusicItem):
+    """Music album with its title, image, price and related tracks.
+
+    Attributes:
+        image (str): text representation of URL to album's image.
+
+    Properties:
+        is_empty (bool): True if album does not have related tracks.
+
+    """
+    image = models.CharField(
+        verbose_name=_('Image'),
+        max_length=200
+    )
+
+    class Meta(MusicItem.Meta):
+        verbose_name = _('Music Album')
+        verbose_name_plural = _('Music Albums')
 
     @property
     def is_empty(self):
         """bool: True if no related Tracks"""
         return not self.tracks.exists()
 
-    def buy_album(self, user):
-        """Method to buy music track"""
-        pass
 
-
-class Track(
-    TitleDescriptionModel,
-    TimeStampedModel,
-):
+class Track(MusicItem):
     """Music track with its title, price and album if exists.
 
     Attributes:
-        title (str): text representation of track's title
-        album (Album): album that contains the track
-        price (int): price of album. Minimal price is 0
-        full_version (str): full version of track content
+        album (Album): album that contains the track.
+        full_version (str): full version of track content.
         free_version (str): free shortened version of track content.
-            Equal to full_version[:25]
+            Equal to full_version[:25].
 
     """
     album = models.ForeignKey(
@@ -69,10 +82,6 @@ class Track(
         null=True,
         related_name='tracks'
     )
-    price = models.BigIntegerField(
-        verbose_name=_('Price'),
-        validators=[MinValueValidator(0)]
-    )
     full_version = models.TextField(
         verbose_name=_('Full version'),
     )
@@ -80,27 +89,32 @@ class Track(
         verbose_name=_('Free version'),
     )
 
-    class Meta:
-        ordering = ('created',)
+    class Meta(MusicItem.Meta):
         verbose_name = _('Audio Track')
         verbose_name_plural = _('Audio Tracks')
 
-    def __str__(self):
-        return self.title
-
     def save(self, *args, **kwargs):
-        """Saves reduced data to free_version field
+        """Saves reduced data to free_version field.
 
         """
         self.free_version = self.full_version[:25]
-        super().save(*args, **kwargs)
+        super().save()
+
+    def is_bought(self, user):
+        """Check if the track is bought by some user.
+
+        Args:
+            user (AppUser): probable owner of track.
+
+        """
+        return BoughtTrack.objects.filter(user=user, item=self).exists()
 
 
 class BoughtItem(TimeStampedModel):
-    """ An abstract base class model for BoughtTrack and BoughtAlbum
+    """ An abstract base class model for BoughtTrack and BoughtAlbum.
 
     Attributes:
-        user(AppUser): owner of item
+        user(AppUser): owner of item.
     """
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
+
 from django_extensions.db.models import TimeStampedModel
 from imagekit import models as imagekitmodels
 from imagekit.processors import ResizeToFill

@@ -9,8 +9,8 @@ router.register(r'albums', views.AlbumViewSet)
 router.register(r'bought_albums', views.BoughtAlbumViewSet)
 router.register(r'bought_tracks', views.BoughtTrackViewSet)
 router.register(r'tracks', views.TrackViewSet)
-router.register(r'likes', views.LikeTrackViewSet)
-router.register(r'listens', views.ListenTrackViewSet)
+router.register(r'liked', views.LikeTrackViewSet)
+router.register(r'listened', views.ListenTrackViewSet)
 router.register(r'payment_methods', views.PaymentMethodViewSet)
 
 urlpatterns = [
