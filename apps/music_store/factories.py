@@ -1,9 +1,9 @@
 import factory
 from factory import fuzzy
 
-from apps.users.factories import UserWithBalanceFactory
+from apps.users.factories import UserFactory, UserWithBalanceFactory
 
-from .models import Album, BoughtTrack, Track
+from .models import Album, BoughtTrack, Track, LikeTrack, ListenTrack
 
 
 class AlbumFactory(factory.django.DjangoModelFactory):
@@ -48,3 +48,23 @@ class BoughtTrackFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = BoughtTrack
+
+
+class LikeTrackFactory(factory.DjangoModelFactory):
+    """Factory for ListenTrack instances"""
+
+    track = factory.SubFactory(TrackFactory)
+    user = factory.SubFactory(UserFactory)
+
+    class Meta:
+        model = LikeTrack
+
+
+class ListenTrackFactory(factory.DjangoModelFactory):
+    """Factory for ListenTrack instances"""
+
+    track = factory.SubFactory(TrackFactory)
+    user = factory.SubFactory(UserFactory)
+
+    class Meta:
+        model = ListenTrack

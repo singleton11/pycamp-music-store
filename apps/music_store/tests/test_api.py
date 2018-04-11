@@ -7,16 +7,16 @@ from rest_framework.test import (
 
 from faker import Faker
 
-from ..api.views import (
-    LikeTrackViewSet,
-    ListenTrackViewSet,
-    AlbumViewSet,
-    TrackViewSet,
-)
-
 from ..models import (
     Track,
     Album,
+    LikeTrack,
+)
+
+from ..factories import (
+    TrackFactory,
+    LikeTrackFactory,
+    ListenTrackFactory,
 )
 
 from apps.users.factories import UserFactory, UserWithBalanceFactory
@@ -42,7 +42,7 @@ album = {
 class TestAPITrack(APITestCase):
     """Test for API of 'Music Store' app.
 
-
+    Tests for create, update and delete Tracks
 
     """
     def setUp(self):
@@ -110,7 +110,7 @@ class TestAPITrack(APITestCase):
 class TestAPIAlbum(APITestCase):
     """Test for API of 'Music Store' app.
 
-
+    Tests for create and delete Albums
 
     """
     def setUp(self):
@@ -147,6 +147,91 @@ class TestAPIAlbum(APITestCase):
             f'{url_albums}{album_to_del.id}/',
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class TestAPILikeTrack(APITestCase):
+    """Test for API of 'Music Store' app.
+
+    Tests for LikeTrack
+
+    """
+    url = '/api/v1/music_store/likes/'
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = UserFactory()
+
+    def test_watch_likes_forbidden_without_auth(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_watch_likes_allowed_with_auth(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_like_forbidden_without_auth(self):
+        track_to_like = TrackFactory()
+        response = self.client.post(self.url, {'track': track_to_like.id})
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_like_allowed_with_auth(self):
+        self.client.force_authenticate(user=self.user)
+        track_to_like = TrackFactory()
+        response = self.client.post(self.url, {'track': track_to_like.id})
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_cannot_like_track_second_time(self):
+        self.client.force_authenticate(user=self.user)
+        track_to_like = TrackFactory()
+        LikeTrackFactory(user=self.user, track=track_to_like)
+
+        response = self.client.post(self.url, {'track': track_to_like.id})
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_delete_like(self):
+        self.client.force_authenticate(user=self.user)
+        track_to_like = TrackFactory()
+        like = LikeTrackFactory(user=self.user, track=track_to_like)
+
+        response = self.client.delete(f'{self.url}{like.id}/')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class TestAPIListenTrack(APITestCase):
+    """Test for API of 'Music Store' app.
+
+    Tests for LikeTrack
+
+    """
+    url = '/api/v1/music_store/listens/'
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = UserFactory()
+
+    def test_watch_listens_forbidden_without_auth(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_watch_listens_allowed_with_auth(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

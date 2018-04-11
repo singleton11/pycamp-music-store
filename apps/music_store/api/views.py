@@ -30,10 +30,20 @@ from ...music_store.models import (
 from apps.users.models import AppUser, PaymentMethod
 
 
+# ##############################################################################
+# PAYMENT METHODS
+# ##############################################################################
+
+
 class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
     """ ReadOnly view for PaymentMethods """
     queryset = PaymentMethod.objects.all()
     serializer_class = PaymentMethodSerializer
+
+
+# ##############################################################################
+# ACCOUNTS
+# ##############################################################################
 
 
 class AccountView(generics.RetrieveUpdateAPIView):
@@ -45,6 +55,11 @@ class AccountView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return super().get_queryset().get(pk=self.request.user.pk)
+
+
+# ##############################################################################
+# BOUGHT TRACKS
+# ##############################################################################
 
 
 class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
@@ -71,6 +86,11 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
         serializer.save()
 
 
+# ##############################################################################
+# BOUGHT ALBUMS
+# ##############################################################################
+
+
 class BoughtAlbumViewSet(BoughtTrackViewSet):
     """View to display the list of purchased user albums and purchase them."""
     serializer_class = BoughtAlbumSerializer
@@ -78,7 +98,7 @@ class BoughtAlbumViewSet(BoughtTrackViewSet):
 
 
 # ##############################################################################
-# MUSIC ALBUMS
+# ALBUMS
 # ##############################################################################
 
 
@@ -92,7 +112,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
 
 
 # ##############################################################################
-# MUSIC TRACKS
+# TRACKS
 # ##############################################################################
 
 
@@ -106,7 +126,7 @@ class TrackViewSet(viewsets.ModelViewSet):
 
 
 # ##############################################################################
-# Likes
+# LIKES
 # ##############################################################################
 
 
@@ -116,7 +136,7 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
     """
     queryset = LikeTrack.objects.all()
     serializer_class = LikeTrackSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def perform_destroy(self, instance):
         """Put away Like from the track.
@@ -129,7 +149,7 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
 
 
 # ##############################################################################
-# Listens
+# LISTENS
 # ##############################################################################
 
 
