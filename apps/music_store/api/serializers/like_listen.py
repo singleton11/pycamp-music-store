@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 from apps.music_store.models import LikeTrack, ListenTrack
 
+__all__ = ('LikeTrackSerializer', 'ListenTrackSerializer',)
+
 
 class LikeTrackSerializer(serializers.ModelSerializer):
     """Serializer for Likes of music tracks

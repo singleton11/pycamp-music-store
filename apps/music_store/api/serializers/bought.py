@@ -3,6 +3,8 @@ from rest_framework.validators import UniqueTogetherValidator
 
 from ...models import BoughtAlbum, BoughtTrack
 
+__all__ = ('BoughtTrackSerializer', 'BoughtAlbumSerializer',)
+
 
 class BoughtItemSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(

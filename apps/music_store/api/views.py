@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-
 from rest_framework import exceptions, generics, permissions, viewsets
 
 from apps.music_store.api.serializers import (
@@ -12,6 +11,7 @@ from apps.music_store.api.serializers import (
     PaymentAccountSerializer,
     PaymentMethodSerializer,
 )
+from apps.users.models import AppUser, PaymentMethod
 from ...music_store.models import (
     Album,
     BoughtAlbum,
@@ -20,8 +20,6 @@ from ...music_store.models import (
     ListenTrack,
     Track,
 )
-
-from apps.users.models import AppUser, PaymentMethod
 
 
 class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
