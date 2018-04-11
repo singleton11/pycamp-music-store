@@ -124,7 +124,7 @@ class TestAPILikeTrack(APITestCase):
     Tests for LikeTrack
 
     """
-    url_liked = '/api/v1/music_store/likes/'
+    url_liked = '/api/v1/music_store/liked/'
 
     def setUp(self):
         self.client = APIClient()
