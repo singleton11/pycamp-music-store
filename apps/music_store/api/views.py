@@ -130,7 +130,10 @@ class TrackViewSet(viewsets.ModelViewSet):
 # ##############################################################################
 
 
-class LikeTrackViewSet(viewsets.ModelViewSet):
+class LikeTrackViewSet(viewsets.mixins.CreateModelMixin,
+                       viewsets.mixins.DestroyModelMixin,
+                       viewsets.mixins.ListModelMixin,
+                       viewsets.GenericViewSet):
     """List likes for all music tracks and users.
 
     """
@@ -153,15 +156,15 @@ class LikeTrackViewSet(viewsets.ModelViewSet):
 # ##############################################################################
 
 
-class ListenTrackViewSet(viewsets.ModelViewSet):
+class ListenTrackViewSet(viewsets.mixins.CreateModelMixin,
+                         viewsets.mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
     """List all listens of all tracks by current user.
 
     """
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
     permission_classes = (permissions.IsAuthenticated,)
-
-    http_method_names = ['get', 'post', 'head']
 
     def get_queryset(self):
         """Show user his history of listening"""
