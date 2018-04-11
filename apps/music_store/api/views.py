@@ -133,7 +133,7 @@ class TrackViewSet(viewsets.mixins.ListModelMixin,
 
 class LikeTrackViewSet(viewsets.mixins.ListModelMixin,
                        viewsets.GenericViewSet):
-    """List likes for all music tracks and users.
+    """Authorised user seed list of liked tracks.
 
     """
     queryset = LikeTrack.objects.all()
@@ -148,7 +148,7 @@ class LikeTrackViewSet(viewsets.mixins.ListModelMixin,
 
 class ListenTrackViewSet(viewsets.mixins.ListModelMixin,
                          viewsets.GenericViewSet):
-    """List all listens of all tracks by current user.
+    """Authorised user seed list of listened tracks.
 
     """
     queryset = ListenTrack.objects.all()

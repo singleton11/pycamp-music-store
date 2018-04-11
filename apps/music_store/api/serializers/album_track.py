@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.music_store.models import Album, BoughtTrack, Track
+from apps.music_store.models import Album, Track
 
 
 class AlbumSerializer(serializers.ModelSerializer):
