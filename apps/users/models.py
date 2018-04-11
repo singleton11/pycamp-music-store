@@ -37,14 +37,31 @@ def upload_user_media_to(instance, filename):
 
 class PaymentMethod(models.Model):
     """Model to store payment methods."""
+    owner = models.ForeignKey(
+        'AppUser',
+        verbose_name=_('user'),
+        related_name='payment_methods',
+    )
     title = models.CharField(max_length=100)
+    is_default = models.BooleanField(
+        default=False,
+        verbose_name=_('is default'),
+    )
 
     class Meta:
         verbose_name = _('Payment method')
         verbose_name_plural = _('Payment methods')
 
     def __str__(self):
-        return self.title
+        return f'{self.owner}\'s method {self.title}'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # if this method is default, set all other methods not default
+        if self.is_default:
+            default_methods = PaymentMethod.objects.filter(is_default=True)
+            default_methods.exclude(pk=self.pk).update(is_default=False)
 
 
 class AppUser(AbstractUser):
@@ -71,18 +88,6 @@ class AppUser(AbstractUser):
     balance = models.BigIntegerField(
         default=0,
         verbose_name=_('balance'),
-    )
-
-    methods_used = models.ManyToManyField(
-        'PaymentMethod',
-        related_name='users',
-        verbose_name=_('methods used'),
-    )
-    default_method = models.ForeignKey(
-        'PaymentMethod',
-        related_name='users_by_default',
-        null=True,
-        verbose_name=_('default method'),
     )
 
     avatar = imagekitmodels.ProcessedImageField(
@@ -143,10 +148,6 @@ class AppUser(AbstractUser):
     def can_pay(self, amount):
         """ Checking that user have 'amount' of money"""
         return self.balance >= amount
-
-    def check_default_method(self):
-        """ Checking that default method in methods_used """
-        return self.default_method in self.methods_used.all()
 
     def update_balance(self):
         """ Method to recalculated user balance. """
