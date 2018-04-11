@@ -3,7 +3,7 @@ from factory import fuzzy
 
 from apps.users.factories import UserFactory, UserWithBalanceFactory
 
-from .models import Album, BoughtTrack, Track, LikeTrack, ListenTrack
+from .models import Album, BoughtTrack, LikeTrack, ListenTrack, Track
 
 
 class AlbumFactory(factory.django.DjangoModelFactory):

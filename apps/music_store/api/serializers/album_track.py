@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.music_store.models import Album, Track, BoughtTrack
+from apps.music_store.models import Album, BoughtTrack, Track
 
 
 class AlbumSerializer(serializers.ModelSerializer):
@@ -59,4 +59,3 @@ class TrackSerializer(serializers.ModelSerializer):
         if user.is_authenticated and obj.is_bought(user):
             return obj.full_version
         return obj.free_version
-

@@ -10,6 +10,8 @@ from apps.music_store.api.serializers.like_listen import (
     LikeTrackSerializer,
     ListenTrackSerializer,
 )
+from apps.users.models import AppUser, PaymentMethod
+
 from ...music_store.api.serializers.bought import (
     BoughtAlbumSerializer,
     BoughtTrackSerializer,
@@ -26,9 +28,6 @@ from ...music_store.models import (
     ListenTrack,
     Track,
 )
-
-from apps.users.models import AppUser, PaymentMethod
-
 
 # ##############################################################################
 # PAYMENT METHODS
