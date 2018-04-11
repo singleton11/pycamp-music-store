@@ -22,9 +22,7 @@ class TestPaymentAccount(TestCase):
     def setUp(self):
         self.account = UserWithBalanceFactory(balance=100)
         self.count_methods = 5
-        self.methods = [
-            PaymentMethodFactory() for i in range(self.count_methods)
-        ]
+        self.methods = PaymentMethodFactory.create_batch(self.count_methods)
 
     def test_not_enough_money(self):
         track = TrackFactory(price=200)
