@@ -110,7 +110,6 @@ class AlbumViewSet(viewsets.mixins.ListModelMixin,
     """
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 # ##############################################################################
@@ -126,7 +125,6 @@ class TrackViewSet(viewsets.mixins.ListModelMixin,
     """
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 # ##############################################################################
@@ -134,9 +132,7 @@ class TrackViewSet(viewsets.mixins.ListModelMixin,
 # ##############################################################################
 
 
-class LikeTrackViewSet(viewsets.mixins.CreateModelMixin,
-                       viewsets.mixins.DestroyModelMixin,
-                       viewsets.mixins.ListModelMixin,
+class LikeTrackViewSet(viewsets.mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     """List likes for all music tracks and users.
 
@@ -145,23 +141,13 @@ class LikeTrackViewSet(viewsets.mixins.CreateModelMixin,
     serializer_class = LikeTrackSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
-    def perform_destroy(self, instance):
-        """Put away Like from the track.
-
-        Allows to destroy Like only to user who put that like
-
-        """
-        if self.request.user == instance.user:
-            instance.delete()
-
 
 # ##############################################################################
 # LISTENS
 # ##############################################################################
 
 
-class ListenTrackViewSet(viewsets.mixins.CreateModelMixin,
-                         viewsets.mixins.ListModelMixin,
+class ListenTrackViewSet(viewsets.mixins.ListModelMixin,
                          viewsets.GenericViewSet):
     """List all listens of all tracks by current user.
 
@@ -169,7 +155,3 @@ class ListenTrackViewSet(viewsets.mixins.CreateModelMixin,
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
     permission_classes = (permissions.IsAuthenticated,)
-
-    def get_queryset(self):
-        """Show user his history of listening"""
-        return ListenTrack.objects.filter(user=self.request.user)

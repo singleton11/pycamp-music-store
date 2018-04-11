@@ -100,6 +100,15 @@ class Track(MusicItem):
         self.free_version = self.full_version[:25]
         super().save()
 
+    def is_bought(self, user):
+        """Check if the track is bought by some user.
+
+        Args:
+            user (AppUser): probable owner of track.
+
+        """
+        return BoughtTrack.objects.filter(user=user, item=self).exists()
+
 
 class BoughtItem(TimeStampedModel):
     """ An abstract base class model for BoughtTrack and BoughtAlbum.

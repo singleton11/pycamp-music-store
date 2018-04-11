@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.music_store.models import Album, Track
+from apps.music_store.models import Album, Track, BoughtTrack
 
 
 class AlbumSerializer(serializers.ModelSerializer):
@@ -26,10 +26,9 @@ class AlbumSerializer(serializers.ModelSerializer):
 
 
 class TrackSerializer(serializers.ModelSerializer):
-    """Serializer for Music Tracks
-    """
-    # free_version gets data from full_version inside model
-    free_version = serializers.ReadOnlyField()
+    """Serializer for Music Tracks"""
+
+    content = serializers.SerializerMethodField()
 
     class Meta:
         model = Track
@@ -39,6 +38,25 @@ class TrackSerializer(serializers.ModelSerializer):
             'title',
             'album',
             'price',
-            'full_version',
-            'free_version',
+            'content',
         )
+
+    def get_content(self, obj):
+        """Get free or full version of track.
+
+        Full version is provided when track is bought by user.
+        Otherwise free version is provided.
+
+        Args:
+            obj (Track): an instance of Track.
+
+        """
+        request = self.context.get('request', None)
+        if not request:
+            return obj.free_version
+
+        user = request.user
+        if user.is_authenticated and obj.is_bought(user):
+            return obj.full_version
+        return obj.free_version
+
