@@ -26,7 +26,7 @@ class TestAPIMusicStoreBoughtItems(APITestCase):
     def _api_bougth_track(self, data, user=None, method="post"):
         """ Method for send request to BoughtTrack Api """
         if user:
-            self.client.force_authenticate(user=self.user)
+            self.client.force_authenticate(user=user)
 
         url = self._url('bought_tracks/')
         caller = methodcaller(method, url, data)
@@ -35,7 +35,7 @@ class TestAPIMusicStoreBoughtItems(APITestCase):
     def _api_bougth_album(self, data, user=None, method="post"):
         """ Method for send request to BoughtAlbum Api """
         if user:
-            self.client.force_authenticate(user=self.user)
+            self.client.force_authenticate(user=user)
 
         url = self._url('bought_albums/')
         caller = methodcaller(method, url, data)
