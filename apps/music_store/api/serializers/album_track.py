@@ -2,7 +2,10 @@ from rest_framework import serializers
 
 from apps.music_store.models import Album, Track
 
-__all__ = ('AlbumSerializer', 'TrackSerializer',)
+__all__ = (
+    'AlbumSerializer',
+    'TrackSerializer',
+)
 
 
 class AlbumSerializer(serializers.ModelSerializer):
