@@ -13,7 +13,8 @@ from apps.users.factories import (
     PaymentMethodFactory,
     UserFactory,
     UserWithBalanceFactory,
-)
+    UserWithDefaultPaymentMethodFactory, UserWithPaymentMethodFactory,
+    PaymentDefaultMethodFactory)
 
 
 class TestPaymentAccount(TestCase):
@@ -45,17 +46,24 @@ class TestPaymentAccount(TestCase):
         self.assertEqual(self.account.balance, 90)
 
     def test_select_methods(self):
-        account = UserFactory()
-        account.methods_used.add(*self.methods)
-        account.default_method, *_ = self.methods
-        account.save()
-        self.assertEqual(account.methods_used.count(), self.count_methods)
+        account = UserWithPaymentMethodFactory()
+        self.assertEqual(account.payment_methods.count(), 1)
 
-    def test_set_default_methods(self):
-        account = UserFactory()
-        account.methods_used.add(PaymentMethodFactory())
-        account.default_method = PaymentMethodFactory()
-        self.assertFalse(account.check_default_method())
+    def test_set_default_method(self):
+        account = UserWithDefaultPaymentMethodFactory()
+        self.assertEqual(account.payment_methods.count(), 1)
+        self.assertTrue(account.payment_methods.first().is_default)
+
+    def test_set_new_default_method(self):
+        account = UserWithDefaultPaymentMethodFactory()
+        PaymentDefaultMethodFactory(owner=account)
+        PaymentDefaultMethodFactory(owner=account)
+
+        self.assertEqual(account.payment_methods.count(), 3)
+        self.assertEqual(
+            account.payment_methods.filter(is_default=True).count(),
+            1,
+        )
 
 
 class TestBought(TestCase):

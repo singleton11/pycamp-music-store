@@ -25,10 +25,17 @@ class UserFactory(factory.DjangoModelFactory):
 class PaymentMethodFactory(factory.DjangoModelFactory):
     """ Factory to create payment method with random title """
 
+    owner = factory.SubFactory(UserFactory)
     title = factory.Sequence(lambda n: "Method %03d" % n)
+    is_default = False
 
     class Meta:
         model = PaymentMethod
+
+
+class PaymentDefaultMethodFactory(PaymentMethodFactory):
+    """ Factory to create payment method with random title """
+    is_default = True
 
 
 class PaymentTransactionFactory(factory.DjangoModelFactory):
@@ -41,10 +48,23 @@ class PaymentTransactionFactory(factory.DjangoModelFactory):
         model = PaymentTransaction
 
 
-class UserWithDefaultPaymentMethodFactory(UserFactory):
-    """ Factory to create payment method with one payment_method """
+class UserWithPaymentMethodFactory(UserFactory):
+    """ Factory to create user with one payment method set by dafault """
 
-    default_method = factory.SubFactory(PaymentMethodFactory)
+    payment_methods = factory.RelatedFactory(
+        PaymentMethodFactory,
+        'owner',
+    )
+
+
+class UserWithDefaultPaymentMethodFactory(UserFactory):
+    """ Factory to create user with one payment method """
+
+    payment_methods = factory.RelatedFactory(
+        PaymentDefaultMethodFactory,
+        'owner',
+        is_default=True,
+    )
 
 
 class UserWithBalanceFactory(UserFactory):

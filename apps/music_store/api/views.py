@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-
 from rest_framework import exceptions, generics, permissions, viewsets
 
 from apps.music_store.api.serializers.album_track import (
@@ -10,6 +9,7 @@ from apps.music_store.api.serializers.like_listen import (
     LikeTrackSerializer,
     ListenTrackSerializer,
 )
+from apps.users.models import AppUser, PaymentMethod
 from ...music_store.api.serializers.bought import (
     BoughtAlbumSerializer,
     BoughtTrackSerializer,
@@ -27,20 +27,21 @@ from ...music_store.models import (
     Track,
 )
 
-from apps.users.models import AppUser, PaymentMethod
 
-
-class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
+class PaymentMethodViewSet(viewsets.ModelViewSet):
     """ ReadOnly view for PaymentMethods """
-    queryset = PaymentMethod.objects.all()
     serializer_class = PaymentMethodSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = PaymentMethod.objects.all()
+
+    def get_object(self):
+        return super().get_queryset().get(owner=self.request.user)
 
 
 class AccountView(generics.RetrieveUpdateAPIView):
     """ View for AppUser to work with balance and selected payment methods """
 
     serializer_class = PaymentAccountSerializer
-    permission_classes = (permissions.IsAuthenticated,)
     queryset = AppUser.objects.all()
 
     def get_object(self):

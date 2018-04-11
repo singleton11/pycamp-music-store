@@ -4,9 +4,13 @@ from apps.users.models import AppUser, PaymentMethod
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(
+        default=serializers.CurrentUserDefault(),
+    )
+
     class Meta:
         model = PaymentMethod
-        fields = ('title',)
+        fields = ('owner', 'title', 'is_default')
 
 
 class PaymentAccountSerializer(serializers.ModelSerializer):
