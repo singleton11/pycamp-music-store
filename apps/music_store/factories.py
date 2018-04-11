@@ -26,9 +26,7 @@ class TrackFactory(factory.django.DjangoModelFactory):
 
 
 class TrackFactoryLongFullVersion(TrackFactory):
-    """For tracks with long full_version text
-
-    """
+    """For tracks with long full_version text """
     full_version = factory.Faker('sentence', nb_words=30)
 
 
@@ -44,7 +42,7 @@ class PaymentMethodFactory(factory.DjangoModelFactory):
 
 
 class PaymentDefaultMethodFactory(PaymentMethodFactory):
-    """ Factory to create payment method with random title """
+    """ Factory to create default payment method"""
     is_default = True
 
 
@@ -78,7 +76,7 @@ class UserWithDefaultPaymentMethodFactory(UserFactory):
 
 
 class UserWithBalanceFactory(UserWithDefaultPaymentMethodFactory):
-    """ Factory to create User with balance. """
+    """ Factory to create AppUser with balance. """
     transactions = factory.RelatedFactory(
         PaymentTransactionFactory,
         'user',
