@@ -1,11 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.gis.db import models as gis_models
 from django.contrib.postgres.fields import HStoreField
-from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
-from django_extensions.db.models import TimeStampedModel
 from imagekit import models as imagekitmodels
 from imagekit.processors import ResizeToFill
 
@@ -13,8 +10,6 @@ from libs import utils
 
 __all__ = [
     'AppUser',
-    'PaymentMethod',
-    'PaymentTransaction'
 ]
 
 # Solution to avoid unique_together for email
@@ -33,35 +28,6 @@ def upload_user_media_to(instance, filename):
         id=instance.id,
         filename=utils.get_random_filename(filename)
     )
-
-
-class PaymentMethod(models.Model):
-    """Model to store payment methods."""
-    owner = models.ForeignKey(
-        'AppUser',
-        verbose_name=_('user'),
-        related_name='payment_methods',
-    )
-    title = models.CharField(max_length=100)
-    is_default = models.BooleanField(
-        default=False,
-        verbose_name=_('is default'),
-    )
-
-    class Meta:
-        verbose_name = _('Payment method')
-        verbose_name_plural = _('Payment methods')
-
-    def __str__(self):
-        return f'{self.owner}\'s method {self.title}'
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        # if this method is default, set all other methods not default
-        if self.is_default:
-            default_methods = PaymentMethod.objects.filter(is_default=True)
-            default_methods.exclude(pk=self.pk).update(is_default=False)
 
 
 class AppUser(AbstractUser):
@@ -130,65 +96,8 @@ class AppUser(AbstractUser):
     def __str__(self):
         return self.username
 
-    def pay_item(self, item):
-        """ Method for subtract cost of item.
-
-        Raises:
-            exceptions.ValidationError: User does not have enough money
-        """
-        if not self.can_pay(item.price):
-            raise ValidationError("Not enough money")
-
-        # create new negative transaction
-        PaymentTransaction.objects.create(
-            user=self,
-            amount=-item.price,
-        )
-
-    def can_pay(self, amount):
-        """ Checking that user have 'amount' of money"""
-        return self.balance >= amount
-
-    def update_balance(self):
-        """ Method to recalculated user balance. """
-        self.balance = PaymentTransaction.objects \
-            .filter(user=self) \
-            .aggregate(total_amount=Sum('amount')).get('total_amount')
-
-        self.save(update_fields=['balance'])
-        self.refresh_from_db()
-
-
-class PaymentTransaction(TimeStampedModel):
-    """Model for storing operations with user balance """
-
-    user = models.ForeignKey(
-        'AppUser',
-        verbose_name=_('user'),
-        related_name='transactions',
-    )
-    amount = models.BigIntegerField(verbose_name=_('amount'))
-    payment_method = models.ForeignKey(
-        'PaymentMethod',
-        blank=True,
-        null=True,
-        verbose_name=_('payment method'),
-        related_name='transactions',
-    )
-
-    class Meta:
-        verbose_name = _('Payment transaction')
-        verbose_name_plural = _('Payment transactions')
-
-    def __str__(self):
-        if self.amount < 0:
-            return f'{self.user} has spent {abs(self.amount)}'
-        return f'{self.user} received {self.amount}'
-
-    def save(self, **kwargs):
-        if self.amount < 0 and not self.user.can_pay(abs(self.amount)):
-            raise ValidationError("Not enough money")
-        super().save(**kwargs)
-
-        # after creating a new transaction, the user balance will be updated
-        self.user.update_balance()
+    @property
+    def default_payment(self):
+        q = self.payment_methods.filter(is_default=True)
+        if q.exists():
+            return q.first()

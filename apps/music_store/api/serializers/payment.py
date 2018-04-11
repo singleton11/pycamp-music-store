@@ -1,6 +1,7 @@
 from rest_framework import exceptions, serializers
 
-from apps.users.models import AppUser, PaymentMethod
+from apps.music_store.models import PaymentMethod
+from apps.users.models import AppUser
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):

@@ -1,11 +1,100 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
-
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
 from ..users.models import AppUser
+
+
+class PaymentMethod(models.Model):
+    """Model to store payment methods."""
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('user'),
+        related_name='payment_methods',
+    )
+    title = models.CharField(max_length=100)
+    is_default = models.BooleanField(
+        default=False,
+        verbose_name=_('is default'),
+    )
+
+    class Meta:
+        verbose_name = _('Payment method')
+        verbose_name_plural = _('Payment methods')
+
+    def __str__(self):
+        return f'{self.owner}\'s method {self.title}'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # if this method is default, set all other methods not default
+        if self.is_default:
+            default_methods = PaymentMethod.objects.filter(is_default=True)
+            default_methods.exclude(pk=self.pk).update(is_default=False)
+
+    def pay_item(self, item):
+        """ Method for subtract cost of item from owner balance
+
+        Raises:
+            exceptions.ValidationError: User does not have enough money
+        """
+        if self.owner.balance < item.price:
+            raise ValidationError("Not enough money")
+
+        PaymentTransaction.objects.create(
+            user=self.owner,
+            amount=-item.price,
+            payment_method=self,
+        )
+
+
+class PaymentTransaction(TimeStampedModel):
+    """Model for storing operations with user balance """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('user'),
+        related_name='transactions',
+    )
+    amount = models.BigIntegerField(verbose_name=_('amount'))
+    payment_method = models.ForeignKey(
+        'PaymentMethod',
+        blank=True,
+        null=True,
+        verbose_name=_('payment method'),
+        related_name='transactions',
+    )
+
+    class Meta:
+        verbose_name = _('Payment transaction')
+        verbose_name_plural = _('Payment transactions')
+
+    def __str__(self):
+        if self.amount < 0:
+            return f'{self.user} has spent {abs(self.amount)}'
+        return f'{self.user} received {self.amount}'
+
+    def update_user_balance(self, user):
+        """ Method for update user balance """
+        total_balance = self.__class__.objects.filter(user=user) \
+            .aggregate(total_amount=Sum('amount')) \
+            .get('total_amount')
+
+        user.balance = total_balance
+        user.save(update_fields=['balance'])
+        user.refresh_from_db()
+
+    def save(self, **kwargs):
+        if self.amount < 0 and self.user.balance < abs(self.amount):
+            raise ValidationError("Not enough money")
+
+        super().save(**kwargs)
+        self.update_user_balance(self.user)
 
 
 class Album(

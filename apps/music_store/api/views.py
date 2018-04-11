@@ -9,7 +9,7 @@ from apps.music_store.api.serializers.like_listen import (
     LikeTrackSerializer,
     ListenTrackSerializer,
 )
-from apps.users.models import AppUser, PaymentMethod
+from apps.users.models import AppUser
 from ...music_store.api.serializers.bought import (
     BoughtAlbumSerializer,
     BoughtTrackSerializer,
@@ -25,7 +25,7 @@ from ...music_store.models import (
     LikeTrack,
     ListenTrack,
     Track,
-)
+    PaymentMethod)
 
 
 class PaymentMethodViewSet(viewsets.ModelViewSet):
@@ -34,8 +34,8 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     queryset = PaymentMethod.objects.all()
 
-    def get_object(self):
-        return super().get_queryset().get(owner=self.request.user)
+    def get_queryset(self):
+        return super().get_queryset().filter(owner=self.request.user)
 
 
 class AccountView(generics.RetrieveUpdateAPIView):
@@ -56,16 +56,21 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
     permission_classes = (permissions.IsAuthenticated,)
     queryset = BoughtTrack.objects.all()
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         user = self.request.user
-        return super().filter_queryset(queryset).filter(user=user)
+        return super().get_queryset().filter(user=user)
 
     def perform_create(self, serializer):
         """ Pay for item and save bought item """
         user = self.request.user
         item = serializer.validated_data['item']
+        payment_method = user.default_payment
+
+        if payment_method is None:
+            raise exceptions.ValidationError("Payment method not found")
+
         try:
-            user.pay_item(item)
+            payment_method.pay_item(item)
         except ValidationError as e:
             raise exceptions.ValidationError(e.message)
 
