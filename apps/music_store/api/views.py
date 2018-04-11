@@ -102,7 +102,9 @@ class BoughtAlbumViewSet(BoughtTrackViewSet):
 # ##############################################################################
 
 
-class AlbumViewSet(viewsets.ModelViewSet):
+class AlbumViewSet(viewsets.mixins.ListModelMixin,
+                   viewsets.mixins.RetrieveModelMixin,
+                   viewsets.GenericViewSet):
     """Operations on music albums
 
     """
@@ -116,7 +118,9 @@ class AlbumViewSet(viewsets.ModelViewSet):
 # ##############################################################################
 
 
-class TrackViewSet(viewsets.ModelViewSet):
+class TrackViewSet(viewsets.mixins.ListModelMixin,
+                   viewsets.mixins.RetrieveModelMixin,
+                   viewsets.GenericViewSet):
     """Operations on music tracks
 
     """
