@@ -8,7 +8,7 @@ from apps.music_store.factories import (
     UserWithPaymentMethodFactory,
     PaymentMethodFactory,
     UserWithBalanceFactory,
-)
+    TrackWithoutAlbumFactory)
 from apps.users.factories import UserFactory
 from ..factories import (
     AlbumFactory,
@@ -245,7 +245,7 @@ class TestAPILikeTrack(APITestCase):
 class TestAPIListenTrack(APITestCase):
     """Test for API of 'Music Store' app.
 
-    Tests for LikeTrack
+    Tests for ListenTrack
 
     """
     url_listened = '/api/v1/music_store/listened/'
@@ -274,3 +274,102 @@ class TestAPIListenTrack(APITestCase):
 
     def test_can_listen_track_multiple_times(self):
         pass
+
+
+class TestAPISearch(APITestCase):
+    """Test for API of 'Music Store' app.
+
+    Tests for search tracks and albums
+
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = APIClient()
+        cls.track_1 = TrackWithoutAlbumFactory(
+            title="one two",
+            author="three four",
+        )
+        cls.track_2 = TrackWithoutAlbumFactory(
+            title="one",
+            author="five",
+        )
+        cls.track_3 = TrackWithoutAlbumFactory(
+            title="six",
+            author="two",
+        )
+        cls.track_4 = TrackWithoutAlbumFactory(
+            title="unique1",
+            author="unique2",
+        )
+
+        cls.album_1 = AlbumFactory(
+            title="one two",
+            author="three four",
+        )
+        cls.album_2 = AlbumFactory(
+            title="one",
+            author="five",
+        )
+        cls.album_3 = AlbumFactory(
+            title="six",
+            author="two",
+        )
+        cls.album_4 = AlbumFactory(
+            title="unique3",
+            author="unique4",
+        )
+
+        cls.url = '/api/v1/music_store/'
+
+    def test_search_tracks_many_1(self):
+        response = self.client.get(self.url + 'tracks/?search=one')
+        self.assertEqual(len(response.data), 2)
+
+    def test_search_tracks_many_2(self):
+        response = self.client.get(self.url + 'tracks/?search=two')
+        self.assertEqual(len(response.data), 2)
+
+    def test_search_tracks_one_1(self):
+        response = self.client.get(self.url + 'tracks/?search=ix')
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0].get('id'), self.track_3.id)
+
+    def test_search_tracks_one_2(self):
+        response = self.client.get(self.url + 'tracks/?search=ive')
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0].get('id'), self.track_2.id)
+
+    def test_search_albums_many_1(self):
+        response = self.client.get(self.url + 'albums/?search=one')
+        self.assertEqual(len(response.data), 2)
+
+    def test_search_albums_many_2(self):
+        response = self.client.get(self.url + 'albums/?search=two')
+        self.assertEqual(len(response.data), 2)
+
+    def test_search_albums_one_1(self):
+        response = self.client.get(self.url + 'albums/?search=ix')
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0].get('id'), self.album_3.id)
+
+    def test_search_albums_one_2(self):
+        response = self.client.get(self.url + 'albums/?search=ive')
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0].get('id'), self.album_2.id)
+
+    def test_global_search_unique_track(self):
+        response = self.client.get(self.url + 'search/?query=unique1')
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0].get('id'), self.track_4.id)
+        self.assertEqual(response.data[0].get('type'), 'Track')
+
+    def test_global_search_unique_album(self):
+        response = self.client.get(self.url + 'search/?query=unique3')
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0].get('id'), self.album_4.id)
+        self.assertEqual(response.data[0].get('type'), 'Album')
+
+    def test_global_search_many(self):
+        response = self.client.get(self.url + 'search/?query=one')
+        self.assertEqual(len(response.data), 4)

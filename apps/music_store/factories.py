@@ -1,9 +1,9 @@
 import factory
 from factory import fuzzy
 
-from .models import PaymentTransaction, PaymentMethod
 from apps.users.factories import UserFactory
 from .models import Album, BoughtTrack, LikeTrack, ListenTrack, Track
+from .models import PaymentTransaction, PaymentMethod
 
 
 class AlbumFactory(factory.django.DjangoModelFactory):
@@ -16,15 +16,20 @@ class AlbumFactory(factory.django.DjangoModelFactory):
         model = Album
 
 
-class TrackFactory(factory.django.DjangoModelFactory):
+class TrackWithoutAlbumFactory(factory.django.DjangoModelFactory):
+    """Track factory without album"""
     author = factory.Faker('name')
     title = factory.Faker('sentence', nb_words=2)
     price = factory.fuzzy.FuzzyInteger(0, 50)
-    album = factory.SubFactory(AlbumFactory)
     full_version = factory.Faker('sentence', nb_words=2)
 
     class Meta:
         model = Track
+
+
+class TrackFactory(TrackWithoutAlbumFactory):
+    """Track factory with album"""
+    album = factory.SubFactory(AlbumFactory)
 
 
 class TrackFactoryLongFullVersion(TrackFactory):
