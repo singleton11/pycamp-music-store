@@ -130,35 +130,32 @@ class TrackViewSet(viewsets.mixins.ListModelMixin,
         url_name='like',
     )
     def put_like(self, request, **kwargs):
-
         user = request.user
         track = self.get_object()
 
-        if request.method == 'POST':
-            try:
+        try:
+            if request.method == 'POST':
                 track.like(user=user)
                 return Response(
                     data={'message': 'You liked track! Great!'},
                     status=status.HTTP_201_CREATED
                 )
-            except LikeAlreadyExistsError:
-                return Response(
-                    data={'message': 'Track is already liked.'},
-                    status=status.HTTP_200_OK
-                )
-
-        if request.method == 'DELETE':
-            try:
+            if request.method == 'DELETE':
                 track.unlike(user=user)
                 return Response(
                     data={'message': 'You disliked track! SAD!'},
                     status=status.HTTP_200_OK
                 )
-            except LikeNotExistsError:
-                return Response(
-                    data={'message': 'There was no like here, dude!'},
-                    status=status.HTTP_204_NO_CONTENT
-                )
+        except LikeAlreadyExistsError:
+            return Response(
+                data={'message': 'Track is already liked.'},
+                status=status.HTTP_200_OK
+            )
+        except LikeNotExistsError:
+            return Response(
+                data={'message': 'There was no like here, dude!'},
+                status=status.HTTP_204_NO_CONTENT
+            )
 
     @detail_route(
         methods=['post'],
@@ -167,7 +164,6 @@ class TrackViewSet(viewsets.mixins.ListModelMixin,
         url_name='listen',
     )
     def listen(self, request, **kwargs):
-
         user = request.user
         track = self.get_object()
 
