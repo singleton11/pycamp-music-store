@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from rest_framework import exceptions, generics, permissions, viewsets
 
 from apps.music_store.api.serializers import (
@@ -11,7 +10,7 @@ from apps.music_store.api.serializers import (
     PaymentAccountSerializer,
     PaymentMethodSerializer,
 )
-from apps.users.models import AppUser, PaymentMethod
+from apps.users.models import AppUser
 from ...music_store.models import (
     Album,
     BoughtAlbum,
@@ -19,17 +18,24 @@ from ...music_store.models import (
     LikeTrack,
     ListenTrack,
     Track,
+    PaymentMethod,
+    NotEnoughMoney,
+    PaymentNotFound
 )
+
 
 # ##############################################################################
 # PAYMENT METHODS
 # ##############################################################################
 
-
-class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
-    """ ReadOnly view for PaymentMethods """
-    queryset = PaymentMethod.objects.all()
+class PaymentMethodViewSet(viewsets.ModelViewSet):
+    """ View for PaymentMethods """
     serializer_class = PaymentMethodSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = PaymentMethod.objects.all()
+
+    def get_queryset(self):
+        return super().get_queryset().filter(owner=self.request.user)
 
 
 # ##############################################################################
@@ -61,17 +67,19 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
     permission_classes = (permissions.IsAuthenticated,)
     queryset = BoughtTrack.objects.all()
 
-    def filter_queryset(self, queryset):
+    def get_queryset(self):
         user = self.request.user
-        return super().filter_queryset(queryset).filter(user=user)
+        return super().get_queryset().filter(user=user)
 
     def perform_create(self, serializer):
         """ Pay for item and save bought item """
         user = self.request.user
-        item = serializer.validated_data['item']
+        item = serializer.validated_data.get('item')
+        payment_method = serializer.validated_data.get('payment')
+
         try:
-            user.pay_item(item)
-        except ValidationError as e:
+            item.buy(user, payment_method)
+        except (PaymentNotFound, NotEnoughMoney)  as e:
             raise exceptions.ValidationError(e.message)
 
         serializer.save()

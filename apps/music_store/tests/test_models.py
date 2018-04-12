@@ -7,13 +7,10 @@ from apps.music_store.factories import (
     BoughtTrackFactory,
     TrackFactory,
     TrackFactoryLongFullVersion,
-)
+    UserWithBalanceFactory, PaymentMethodFactory, PaymentDefaultMethodFactory,
+    UserWithDefaultPaymentMethodFactory, UserWithPaymentMethodFactory)
 from apps.music_store.models import Album, LikeTrack, ListenTrack, Track
-from apps.users.factories import (
-    PaymentMethodFactory,
-    UserFactory,
-    UserWithBalanceFactory,
-)
+from apps.users.factories import UserFactory
 
 
 class TestPaymentAccount(TestCase):
@@ -25,14 +22,12 @@ class TestPaymentAccount(TestCase):
     def setUp(self):
         self.account = UserWithBalanceFactory(balance=100)
         self.count_methods = 5
-        self.methods = [
-            PaymentMethodFactory() for i in range(self.count_methods)
-        ]
+        self.methods = PaymentMethodFactory.create_batch(self.count_methods)
 
     def test_not_enough_money(self):
         track = TrackFactory(price=200)
         with self.assertRaises(ValidationError):
-            self.account.pay_item(track)
+            track.buy(self.account)
         self.assertEqual(self.account.balance, 100)
 
     def test_save_negative_balance(self):
@@ -41,21 +36,28 @@ class TestPaymentAccount(TestCase):
 
     def test_enough_money(self):
         track = TrackFactory(price=10)
-        self.account.pay_item(track)
+        track.buy(self.account)
         self.assertEqual(self.account.balance, 90)
 
     def test_select_methods(self):
-        account = UserFactory()
-        account.methods_used.add(*self.methods)
-        account.default_method, *_ = self.methods
-        account.save()
-        self.assertEqual(account.methods_used.count(), self.count_methods)
+        account = UserWithPaymentMethodFactory()
+        self.assertEqual(account.payment_methods.count(), 1)
 
-    def test_set_default_methods(self):
-        account = UserFactory()
-        account.methods_used.add(PaymentMethodFactory())
-        account.default_method = PaymentMethodFactory()
-        self.assertFalse(account.check_default_method())
+    def test_set_default_method(self):
+        account = UserWithDefaultPaymentMethodFactory()
+        self.assertEqual(account.payment_methods.count(), 1)
+        self.assertTrue(account.payment_methods.first().is_default)
+
+    def test_set_new_default_method(self):
+        account = UserWithDefaultPaymentMethodFactory()
+        PaymentDefaultMethodFactory(owner=account)
+        PaymentDefaultMethodFactory(owner=account)
+
+        self.assertEqual(account.payment_methods.count(), 3)
+        self.assertEqual(
+            account.payment_methods.filter(is_default=True).count(),
+            1,
+        )
 
 
 class TestBought(TestCase):

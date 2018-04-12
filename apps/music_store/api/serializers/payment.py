@@ -1,14 +1,19 @@
 from rest_framework import exceptions, serializers
 
-from apps.users.models import AppUser, PaymentMethod
+from apps.music_store.models import PaymentMethod
+from apps.users.models import AppUser
 
 __all__ = ('PaymentMethodSerializer', 'PaymentAccountSerializer',)
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(
+        default=serializers.CurrentUserDefault(),
+    )
+
     class Meta:
         model = PaymentMethod
-        fields = ('title',)
+        fields = ('owner', 'title', 'is_default')
 
 
 class PaymentAccountSerializer(serializers.ModelSerializer):

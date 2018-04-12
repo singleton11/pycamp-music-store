@@ -7,9 +7,9 @@ from apps.music_store.models import (
     LikeTrack,
     ListenTrack,
     Track,
+    PaymentTransaction,
+    PaymentMethod,
 )
-from apps.users.models import PaymentMethod, PaymentTransaction
-
 admin.site.register(Album)
 admin.site.register(BoughtAlbum)
 admin.site.register(BoughtTrack)

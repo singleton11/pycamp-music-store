@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
+from apps.music_store.models import PaymentMethod
 from ...models import BoughtAlbum, BoughtTrack
 
 __all__ = ('BoughtTrackSerializer', 'BoughtAlbumSerializer',)
@@ -10,9 +11,20 @@ class BoughtItemSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
+    payment = serializers.PrimaryKeyRelatedField(
+        queryset=PaymentMethod.objects.all(),
+        required=False,
+    )
 
     class Meta:
-        fields = ('pk', 'user', 'item', 'created')
+        fields = ('pk', 'user', 'item', 'created', 'payment')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        user = request.user
+        qs = self.fields['payment'].queryset
+        self.fields['payment'].queryset = qs.filter(owner=user)
 
 
 class BoughtTrackSerializer(BoughtItemSerializer):
