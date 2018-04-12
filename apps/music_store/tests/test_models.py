@@ -7,6 +7,7 @@ from apps.music_store.factories import (
     BoughtTrackFactory,
     BoughtAlbumFactory,
     LikeTrackFactory,
+    ListenTrackFactory,
     TrackFactory,
     TrackFactoryLongFullVersion,
 )
@@ -159,34 +160,39 @@ class TestAlbumAndTrack(TestCase):
 
 class TestLike(TestCase):
 
-    @classmethod
-    def setUpTestData(cls):
-        cls.user1 = UserFactory()
-        cls.user2 = UserFactory()
-        cls.track = TrackFactory()
-        cls.like1 = LikeTrack(user=cls.user1, track=cls.track)
-        cls.like2 = LikeTrack(user=cls.user2, track=cls.track)
-        cls.like1.save()
-        cls.like2.save()
+    def test_create_likes(self):
+        count = 2
+        users = [UserFactory() for i in range(count)]
+        track = TrackFactory()
+        for i in range(count):
+            LikeTrackFactory(user=users[i], track=track)
 
-    def test_create_like(self):
-        self.assertEqual(2, LikeTrack.objects.count())
+        self.assertEqual(count, LikeTrack.objects.count())
 
 
 class TestListen(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user1 = UserFactory()
-        cls.user2 = UserFactory()
+        cls.count = 3
+        cls.users = [UserFactory() for i in range(cls.count)]
         cls.track = TrackFactory()
-        cls.listen1 = ListenTrack(user=cls.user1, track=cls.track)
-        cls.listen2 = ListenTrack(user=cls.user2, track=cls.track)
-        cls.listen3 = ListenTrack(user=cls.user2, track=cls.track)
-
-        cls.listen1.save()
-        cls.listen2.save()
-        cls.listen3.save()
+        cls.listens = [
+            ListenTrackFactory(user=cls.users[i], track=cls.track)
+            for i in range(cls.count)
+        ]
 
     def test_create_listens(self):
-        self.assertEqual(3, ListenTrack.objects.count())
+        self.assertEqual(self.count, ListenTrack.objects.count())
+
+    def test_listen_track_many_times(self):
+        repeat_listens = 3
+        repeat_user = UserFactory()
+        for i in range(repeat_listens):
+            ListenTrackFactory(user=repeat_user, track=self.track)
+
+        self.assertEqual(
+            ListenTrack.objects.filter(user=repeat_user).count(),
+            repeat_listens
+        )
+

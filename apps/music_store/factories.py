@@ -60,7 +60,7 @@ class BoughtTrackFactory(factory.DjangoModelFactory):
 
 
 class BoughtAlbumFactory(factory.DjangoModelFactory):
-    """Factory for generates test Track model with random price and title """
+    """Factory for generates test Album model with random price and title """
 
     item = factory.SubFactory(
         AlbumFactory,

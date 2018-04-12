@@ -57,7 +57,7 @@ class TrackSerializer(serializers.ModelSerializer):
 
         """
         request = self.context.get('request', None)
-        if not request:
+        if request is None:
             return obj.free_version
 
         user = request.user
