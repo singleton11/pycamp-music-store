@@ -10,7 +10,12 @@ SERIALIZER_MODELS = (
 
 
 class GlobalSearchSerializer(serializers.Serializer):
-    """Serializer of queryset with objects mixed types"""
+    """Serializer of queryset with objects mixed types.
+
+    Support types defined in SERIALIZER_MODELS
+    
+    """
+
     def to_representation(self, obj):
         for model, serializer in SERIALIZER_MODELS:
             if not isinstance(obj, model):

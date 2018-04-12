@@ -173,6 +173,12 @@ class ListenTrackViewSet(viewsets.mixins.ListModelMixin,
 
 class GlobalSearchList(viewsets.mixins.ListModelMixin,
                        viewsets.GenericViewSet):
+    """View for global searching.
+
+    Displays the found items in the general list with an additional "type"
+    parameter for each item
+
+    """
     serializer_class = GlobalSearchSerializer
     queryset = Track.objects.all()  # Just to avoid error
 
@@ -181,6 +187,4 @@ class GlobalSearchList(viewsets.mixins.ListModelMixin,
         search_filter = Q(author__icontains=query) | Q(title__icontains=query)
         tracks = Track.objects.filter(search_filter)
         albums = Album.objects.filter(search_filter)
-        all_results = list(chain(tracks, albums))
-        return all_results
-
+        return list(chain(tracks, albums))
