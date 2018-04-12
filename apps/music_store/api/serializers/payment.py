@@ -21,13 +21,14 @@ class PaymentAccountSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
+    default_method = serializers.SerializerMethodField()
 
     class Meta:
         model = AppUser
         fields = (
             'user',
             'balance',
-            'methods_used',
+            'payment_methods',
             'default_method',
         )
 
