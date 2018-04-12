@@ -1,5 +1,6 @@
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
+from unittest import skip
 
 from faker import Faker
 
@@ -125,10 +126,15 @@ class TestAPILikeTrack(APITestCase):
 
     """
     url_liked = '/api/v1/music_store/liked/'
+    url_tracks = '/api/v1/music_store/tracks/'
 
-    def setUp(self):
-        self.client = APIClient()
-        self.user = UserFactory()
+    @classmethod
+    def setUpTestData(cls):
+        cls.count = 2
+        cls.client = APIClient()
+        cls.user = UserFactory()
+        cls.likes = [LikeTrackFactory(user=cls.user) for i in range(cls.count)]
+        cls.track_to_like = TrackFactoryLongFullVersion()
 
     def test_watch_likes_forbidden_without_auth(self):
         response = self.client.get(self.url_liked)
@@ -140,15 +146,29 @@ class TestAPILikeTrack(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_like_forbidden_without_auth(self):
-        pass
+        response = self.client.post(
+            f'{self.url_tracks}{self.track_to_like.id}/like/'
+        )
+        self.assertTrue(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN
+        )
 
     def test_like_allowed_with_auth(self):
-        pass
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            f'{self.url_tracks}{self.track_to_like.id}/like/'
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED
+        )
+        self.assertTrue(self.track_to_like.is_liked(self.user))
 
     def test_cannot_like_track_second_time(self):
         pass
 
-    def test_dislike(self):
+    def test_unlike(self):
         pass
 
 

@@ -11,7 +11,14 @@ from apps.music_store.factories import (
     TrackFactory,
     TrackFactoryLongFullVersion,
 )
-from apps.music_store.models import Album, LikeTrack, ListenTrack, Track
+from apps.music_store.models import (
+    Album,
+    LikeTrack,
+    ListenTrack,
+    Track,
+    LikeNotExistsError,
+    LikeAlreadyExistsError,
+)
 from apps.users.factories import (
     PaymentMethodFactory,
     UserFactory,
@@ -156,6 +163,24 @@ class TestAlbumAndTrack(TestCase):
             self.long_track.free_version,
             self.long_track.full_version[:25]
         )
+
+    def test_like_track(self):
+        self.track.like(user=self.user)
+        self.assertTrue(self.track.is_liked(user=self.user))
+
+    def test_like_track_second_time(self):
+        self.track.like(user=self.user)
+        with self.assertRaises(LikeAlreadyExistsError):
+            self.track.like(user=self.user)
+
+    def test_unlike_track(self):
+        LikeTrackFactory(user=self.user, track=self.track)
+        self.track.unlike(user=self.user)
+        self.assertFalse(self.track.is_liked(user=self.user))
+
+    def test_unlike_track_that_not_liked(self):
+        with self.assertRaises(LikeNotExistsError):
+            self.track.unlike(user=self.user)
 
 
 class TestLike(TestCase):

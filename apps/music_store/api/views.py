@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
-from rest_framework import exceptions, generics, permissions, viewsets
-from rest_framework.decorators import detail_route, list_route
+from rest_framework import exceptions, generics, permissions, viewsets, status
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -20,7 +21,11 @@ from ...music_store.models import (
     LikeTrack,
     ListenTrack,
     Track,
+
+    LikeAlreadyExistsError,
+    LikeNotExistsError,
 )
+
 
 # ##############################################################################
 # PAYMENT METHODS
@@ -117,6 +122,43 @@ class TrackViewSet(viewsets.mixins.ListModelMixin,
     """
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
+
+    @detail_route(
+        methods=['post', 'delete'],
+        permission_classes=[permissions.IsAuthenticated],
+        url_path='like',
+        url_name='like',
+    )
+    def put_like(self, request, **kwargs):
+
+        user = request.user
+        track = self.get_object()
+
+        if request.method == 'POST':
+            try:
+                track.like(user=user)
+                return Response(
+                    data={'message': 'You liked track! Great!'},
+                    status=status.HTTP_201_CREATED
+                )
+            except LikeAlreadyExistsError:
+                return Response(
+                    data={'message': 'Track is already liked.'},
+                    status=status.HTTP_200_OK
+                )
+
+        if request.method == 'DELETE':
+            try:
+                track.unlike(user=user)
+                return Response(
+                    data={'message': 'You disliked track! SAD!'},
+                    status=status.HTTP_200_OK
+                )
+            except LikeNotExistsError:
+                return Response(
+                    data={'message': 'There was no like here, dude!'},
+                    status=status.HTTP_204_NO_CONTENT
+                )
 
 
 # ##############################################################################
