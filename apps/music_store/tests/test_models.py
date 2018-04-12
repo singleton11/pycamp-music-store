@@ -7,8 +7,12 @@ from apps.music_store.factories import (
     BoughtTrackFactory,
     TrackFactory,
     TrackFactoryLongFullVersion,
-    UserWithBalanceFactory, PaymentMethodFactory, PaymentDefaultMethodFactory,
-    UserWithDefaultPaymentMethodFactory, UserWithPaymentMethodFactory)
+    UserWithBalanceFactory,
+    PaymentMethodFactory,
+    PaymentDefaultMethodFactory,
+    UserWithDefaultPaymentMethodFactory,
+    UserWithPaymentMethodFactory
+)
 from apps.music_store.models import Album, LikeTrack, ListenTrack, Track
 from apps.users.factories import UserFactory
 
