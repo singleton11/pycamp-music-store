@@ -1,4 +1,4 @@
-from rest_framework import exceptions, generics, permissions, viewsets
+from rest_framework import exceptions, generics, permissions, viewsets, filters
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -110,6 +110,9 @@ class AlbumViewSet(viewsets.mixins.ListModelMixin,
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
 
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('title', 'author',)
+
 
 # ##############################################################################
 # TRACKS
@@ -124,6 +127,9 @@ class TrackViewSet(viewsets.mixins.ListModelMixin,
     """
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('title', 'author',)
 
 
 # ##############################################################################
