@@ -25,7 +25,7 @@ from ...music_store.models import (
     LikeTrack,
     ListenTrack,
     Track,
-    PaymentMethod)
+    PaymentMethod, NotEnoughMoney)
 
 
 class PaymentMethodViewSet(viewsets.ModelViewSet):
@@ -70,6 +70,9 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
             item.buy(user, payment_method)
         except ValidationError as e:
             raise exceptions.ValidationError(e.message)
+        except NotEnoughMoney as e:
+            raise exceptions.ValidationError(e.message)
+
 
         serializer.save()
 
