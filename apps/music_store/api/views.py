@@ -29,7 +29,7 @@ from ...music_store.models import (
 
 
 class PaymentMethodViewSet(viewsets.ModelViewSet):
-    """ ReadOnly view for PaymentMethods """
+    """ View for PaymentMethods """
     serializer_class = PaymentMethodSerializer
     permission_classes = (permissions.IsAuthenticated,)
     queryset = PaymentMethod.objects.all()
