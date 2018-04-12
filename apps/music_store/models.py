@@ -11,12 +11,10 @@ from ..users.models import AppUser
 
 class LikeAlreadyExistsError(IntegrityError):
     """Error when user try to like track that is already liked."""
-    pass
 
 
 class LikeNotExistsError(IntegrityError):
     """Error when user try to remove like from track that is not liked."""
-    pass
 
 
 class MusicItem(

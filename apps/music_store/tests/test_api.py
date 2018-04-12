@@ -166,10 +166,48 @@ class TestAPILikeTrack(APITestCase):
         self.assertTrue(self.track_to_like.is_liked(self.user))
 
     def test_cannot_like_track_second_time(self):
-        pass
+        LikeTrackFactory(user=self.user, track=self.track_to_like)
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            f'{self.url_tracks}{self.track_to_like.id}/like/'
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
 
-    def test_unlike(self):
-        pass
+    def test_unlike_forbidden_without_auth(self):
+        LikeTrackFactory(user=self.user, track=self.track_to_like)
+        response = self.client.delete(
+            f'{self.url_tracks}{self.track_to_like.id}/like/'
+        )
+        self.assertTrue(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN
+        )
+
+    def test_unlike_allowed_with_auth(self):
+        LikeTrackFactory(user=self.user, track=self.track_to_like)
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(
+            f'{self.url_tracks}{self.track_to_like.id}/like/'
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertFalse(self.track_to_like.is_liked(self.user))
+
+    def test_cannot_unlike_not_liked_track(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(
+            f'{self.url_tracks}{self.track_to_like.id}/like/'
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_204_NO_CONTENT
+        )
 
 
 class TestAPIListenTrack(APITestCase):
@@ -179,10 +217,13 @@ class TestAPIListenTrack(APITestCase):
 
     """
     url_listened = '/api/v1/music_store/listened/'
+    url_tracks = '/api/v1/music_store/tracks/'
 
-    def setUp(self):
-        self.client = APIClient()
-        self.user = UserFactory()
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = APIClient()
+        cls.user = UserFactory()
+        cls.track_to_listen = TrackFactoryLongFullVersion()
 
     def test_watch_listens_forbidden_without_auth(self):
         response = self.client.get(self.url_listened)
@@ -194,13 +235,34 @@ class TestAPIListenTrack(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_listen_forbidden_without_auth(self):
-        pass
+        response = self.client.post(
+            f'{self.url_tracks}{self.track_to_listen.id}/listen/'
+        )
+        self.assertTrue(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN
+        )
 
     def test_listen_allowed_with_auth(self):
-        pass
-
-    def test_can_listen_track_second_time(self):
-        pass
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            f'{self.url_tracks}{self.track_to_listen.id}/listen/'
+        )
+        self.assertTrue(
+            response.status_code,
+            status.HTTP_201_CREATED
+        )
 
     def test_can_listen_track_multiple_times(self):
-        pass
+        self.client.force_authenticate(user=self.user)
+        listens = 3
+        for i in range(listens):
+            self.client.post(
+                f'{self.url_tracks}{self.track_to_listen.id}/listen/'
+            )
+
+        self.assertEqual(
+            listens,
+            ListenTrack.objects.filter(user=self.user,
+                                       track=self.track_to_listen).count()
+        )

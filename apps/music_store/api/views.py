@@ -160,6 +160,24 @@ class TrackViewSet(viewsets.mixins.ListModelMixin,
                     status=status.HTTP_204_NO_CONTENT
                 )
 
+    @detail_route(
+        methods=['post'],
+        permission_classes=[permissions.IsAuthenticated],
+        url_path='listen',
+        url_name='listen',
+    )
+    def listen(self, request, **kwargs):
+
+        user = request.user
+        track = self.get_object()
+
+        if request.method == 'POST':
+            track.listen(user)
+            return Response(
+                data={'message': 'You liked track! Great!'},
+                status=status.HTTP_201_CREATED
+            )
+
 
 # ##############################################################################
 # LIKES

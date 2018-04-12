@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
+import factory
 
 from apps.music_store.factories import (
     AlbumFactory,
@@ -182,15 +183,35 @@ class TestAlbumAndTrack(TestCase):
         with self.assertRaises(LikeNotExistsError):
             self.track.unlike(user=self.user)
 
+    def test_listen_to_track(self):
+        self.track.listen(user=self.user)
+        self.assertTrue(
+            ListenTrack.objects.filter(user=self.user,
+                                       track=self.track).exists()
+        )
+
+    def test_listen_multiple_times(self):
+        listens = 3
+        for i in range(listens):
+            self.track.listen(user=self.user)
+        self.assertEqual(
+            listens,
+            ListenTrack.objects.filter(user=self.user,
+                                       track=self.track).count()
+        )
+
 
 class TestLike(TestCase):
 
     def test_create_likes(self):
         count = 2
-        users = [UserFactory() for i in range(count)]
+        users = UserFactory.create_batch(count)
         track = TrackFactory()
-        for i in range(count):
-            LikeTrackFactory(user=users[i], track=track)
+        LikeTrackFactory.create_batch(
+            count,
+            user=factory.Iterator(users),
+            track=track
+        )
 
         self.assertEqual(count, LikeTrack.objects.count())
 
@@ -200,12 +221,13 @@ class TestListen(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.count = 3
-        cls.users = [UserFactory() for i in range(cls.count)]
+        cls.users = UserFactory.create_batch(cls.count)
         cls.track = TrackFactory()
-        cls.listens = [
-            ListenTrackFactory(user=cls.users[i], track=cls.track)
-            for i in range(cls.count)
-        ]
+        cls.listens = ListenTrackFactory.create_batch(
+            cls.count,
+            user=factory.Iterator(cls.users),
+            track=cls.track
+        )
 
     def test_create_listens(self):
         self.assertEqual(self.count, ListenTrack.objects.count())
@@ -220,4 +242,3 @@ class TestListen(TestCase):
             ListenTrack.objects.filter(user=repeat_user).count(),
             repeat_listens
         )
-
