@@ -1,3 +1,6 @@
+from itertools import chain
+
+from django.db.models import Q
 from rest_framework import exceptions, generics, permissions, viewsets, filters
 
 from apps.music_store.api.serializers import (
@@ -10,6 +13,7 @@ from apps.music_store.api.serializers import (
     PaymentAccountSerializer,
     PaymentMethodSerializer,
 )
+from apps.music_store.api.serializers.search import GlobalSearchSerializer
 from apps.users.models import AppUser
 from ...music_store.models import (
     Album,
@@ -160,3 +164,23 @@ class ListenTrackViewSet(viewsets.mixins.ListModelMixin,
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
     permission_classes = (permissions.IsAuthenticated,)
+
+
+# ##############################################################################
+# SEARCH
+# ##############################################################################
+
+
+class GlobalSearchList(viewsets.mixins.ListModelMixin,
+                       viewsets.GenericViewSet):
+    serializer_class = GlobalSearchSerializer
+    queryset = Track.objects.all()  # Just to avoid error
+
+    def get_queryset(self):
+        query = self.request.query_params.get('query', None)
+        search_filter = Q(author__icontains=query) | Q(title__icontains=query)
+        tracks = Track.objects.filter(search_filter)
+        albums = Album.objects.filter(search_filter)
+        all_results = list(chain(tracks, albums))
+        return all_results
+
