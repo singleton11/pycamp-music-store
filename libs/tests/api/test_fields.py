@@ -1,5 +1,6 @@
 import datetime
 from unittest.mock import patch
+from unittest import skip
 
 from django.test import TestCase
 from django.utils import timezone
@@ -9,6 +10,7 @@ import pytz
 from ...api.serializers.fields import DateTimeFieldWithTZ
 
 
+@skip('No need to test since DRF 3.7.7')
 class DateTimeFieldWithTZTestCase(TestCase):
     """Test case for ``DateTimeFieldWithTZ``"""
 

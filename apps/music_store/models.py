@@ -4,8 +4,19 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
+from django.db import IntegrityError
 
 from ..users.models import AppUser
+
+
+class LikeAlreadyExistsError(IntegrityError):
+    """Error when user try to like track that is already liked."""
+    pass
+
+
+class LikeNotExistsError(IntegrityError):
+    """Error when user try to remove like from track that is not liked."""
+    pass
 
 
 class MusicItem(
@@ -126,6 +137,39 @@ class Track(MusicItem):
 
         """
         return LikeTrack.objects.filter(user=user, track=self).exists()
+
+    def like(self, user):
+        """Create 'Like' for the track by some user.
+
+        Args:
+            user (AppUser): user who likes the track.
+
+        """
+        if self.is_liked(user):
+            raise LikeAlreadyExistsError('Track is already liked!')
+
+        return LikeTrack.objects.create(user=user, track=self)
+
+    def unlike(self, user):
+        """Remove 'Like' from the track by some user.
+
+        Args:
+            user (AppUser): user who removes like from the track.
+
+        """
+        if not self.is_liked(user):
+            raise LikeNotExistsError('Track is not liked!')
+
+        return LikeTrack.objects.filter(user=user, track=self).delete()
+
+    def listen(self, user):
+        """Note about the track was listened by some user
+
+        Args:
+            user (AppUser): user who listened to the track.
+
+        """
+        return ListenTrack.objects.create(user=user, track=self)
 
 
 class BoughtItem(TimeStampedModel):
