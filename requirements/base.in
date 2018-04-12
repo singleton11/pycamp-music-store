@@ -1,4 +1,4 @@
-# *************************************************                                        
+# *************************************************
 # Django packages
 # *************************************************
 django==1.11.8
@@ -40,6 +40,7 @@ djangorestframework-hstore
 drf-nested-routers
 django-taggit-serializer
 django-rest-auth
+coreapi
 
 
 # PDF Support

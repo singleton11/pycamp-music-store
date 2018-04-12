@@ -1,7 +1,10 @@
 from django.conf.urls import include, url
 from rest_framework.routers import DefaultRouter
+from rest_framework.schemas import get_schema_view
 
 from ..api import views
+
+schema_view = get_schema_view(title='Music Store API')
 
 router = DefaultRouter()
 router.register(r'albums', views.AlbumViewSet)
@@ -15,4 +18,5 @@ router.register(r'payment_methods', views.PaymentMethodViewSet)
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^account/$', views.AccountView.as_view()),
+    url(r'^schema/$', schema_view),
 ]
