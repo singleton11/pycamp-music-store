@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from rest_framework import exceptions, generics, permissions, viewsets
 
 from apps.music_store.api.serializers.album_track import (
@@ -25,7 +24,7 @@ from ...music_store.models import (
     LikeTrack,
     ListenTrack,
     Track,
-    PaymentMethod, NotEnoughMoney)
+    PaymentMethod, NotEnoughMoney, PaymentNotFound)
 
 
 class PaymentMethodViewSet(viewsets.ModelViewSet):
@@ -68,11 +67,8 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
 
         try:
             item.buy(user, payment_method)
-        except ValidationError as e:
+        except (PaymentNotFound, NotEnoughMoney)  as e:
             raise exceptions.ValidationError(e.message)
-        except NotEnoughMoney as e:
-            raise exceptions.ValidationError(e.message)
-
 
         serializer.save()
 
