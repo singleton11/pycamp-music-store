@@ -64,7 +64,9 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
         """ Pay for item and save bought item """
         user = self.request.user
         item = serializer.validated_data['item']
-        payment_method = user.default_payment
+        payment_method = serializer.validated_data.get('payment')
+        if payment_method is None:
+            payment_method = user.default_payment
 
         if payment_method is None:
             raise exceptions.ValidationError("Payment method not found")
