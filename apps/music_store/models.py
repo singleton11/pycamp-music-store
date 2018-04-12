@@ -37,21 +37,6 @@ class PaymentMethod(models.Model):
             default_methods = PaymentMethod.objects.filter(is_default=True)
             default_methods.exclude(pk=self.pk).update(is_default=False)
 
-    def pay_item(self, item):
-        """ Method for subtract cost of item from owner balance
-
-        Raises:
-            exceptions.ValidationError: User does not have enough money
-        """
-        if self.owner.balance < item.price:
-            raise ValidationError("Not enough money")
-
-        PaymentTransaction.objects.create(
-            user=self.owner,
-            amount=-item.price,
-            payment_method=self,
-        )
-
 
 class PaymentTransaction(TimeStampedModel):
     """Model for storing operations with user balance """
@@ -131,9 +116,34 @@ class Album(
         """bool: True if no related Tracks"""
         return not self.tracks.exists()
 
-    def buy_album(self, user):
-        """Method to buy music track"""
-        pass
+    def buy(self, user, payment_method=None):
+        """ Method for buy this item
+
+        Raises:
+            exceptions.ValidationError: User does not have enough money
+            exceptions.ValidationError: User don't have payment method
+        """
+
+        if payment_method is None:
+            payment_method = user.default_payment
+
+        if not payment_method:
+            raise ValidationError("Payment method not found")
+
+        if user.balance < self.price:
+            raise ValidationError("Not enough money")
+
+        transaction = PaymentTransaction.objects.create(
+            user=user,
+            amount=-self.price,
+            payment_method=payment_method,
+        )
+
+        BoughtAlbum.objects.create(
+            user=user,
+            item=self,
+            transaction=transaction,
+        )
 
 
 class Track(
@@ -184,6 +194,35 @@ class Track(
         self.free_version = self.full_version[:25]
         super().save(*args, **kwargs)
 
+    def buy(self, user, payment_method=None):
+        """ Method for buy this item
+
+        Raises:
+            exceptions.ValidationError: User does not have enough money
+            exceptions.ValidationError: User don't have payment method
+        """
+
+        if payment_method is None:
+            payment_method = user.default_payment
+
+        if not payment_method:
+            raise ValidationError("Payment method not found")
+
+        if user.balance < self.price:
+            raise ValidationError("Not enough money")
+
+        transaction = PaymentTransaction.objects.create(
+            user=user,
+            amount=-self.price,
+            payment_method=payment_method,
+        )
+
+        BoughtTrack.objects.create(
+            user=user,
+            item=self,
+            transaction=transaction,
+        )
+
 
 class BoughtItem(TimeStampedModel):
     """ An abstract base class model for BoughtTrack and BoughtAlbum
@@ -194,6 +233,10 @@ class BoughtItem(TimeStampedModel):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('user'),
+    )
+    transaction = models.ForeignKey(
+        'PaymentTransaction',
+        verbose_name=_('transaction'),
     )
 
     class Meta:

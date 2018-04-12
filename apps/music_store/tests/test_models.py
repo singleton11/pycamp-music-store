@@ -27,7 +27,7 @@ class TestPaymentAccount(TestCase):
     def test_not_enough_money(self):
         track = TrackFactory(price=200)
         with self.assertRaises(ValidationError):
-            self.account.default_payment.pay_item(track)
+            track.buy(self.account)
         self.assertEqual(self.account.balance, 100)
 
     def test_save_negative_balance(self):
@@ -36,7 +36,7 @@ class TestPaymentAccount(TestCase):
 
     def test_enough_money(self):
         track = TrackFactory(price=10)
-        self.account.default_payment.pay_item(track)
+        track.buy(self.account)
         self.assertEqual(self.account.balance, 90)
 
     def test_select_methods(self):
