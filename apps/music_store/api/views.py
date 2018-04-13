@@ -96,7 +96,7 @@ class ItemViewSet(viewsets.mixins.ListModelMixin,
         url_name='buy',
     )
     def buy_album(self, request, **kwargs):
-        """"""
+        """Method to buy item with using payment `payment_id`"""
         user = request.user
         item = self.get_object()
         payment_id = self.request.query_params.get('payment_id', None)
