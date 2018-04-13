@@ -1,4 +1,4 @@
-from rest_framework import exceptions, generics, permissions, viewsets
+from rest_framework import generics, permissions, viewsets
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -19,8 +19,6 @@ from ...music_store.models import (
     ListenTrack,
     Track,
     PaymentMethod,
-    NotEnoughMoney,
-    PaymentNotFound
 )
 
 
@@ -59,9 +57,9 @@ class AccountView(generics.RetrieveUpdateAPIView):
 # ##############################################################################
 
 
-class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
-                         viewsets.mixins.ListModelMixin,
-                         viewsets.GenericViewSet):
+class BoughtTrackViewSet(  # viewsets.mixins.CreateModelMixin,
+    viewsets.mixins.ListModelMixin,
+    viewsets.GenericViewSet):
     """View to display the list of purchased user tracks and purchase them."""
     serializer_class = BoughtTrackSerializer
     permission_classes = (permissions.IsAuthenticated,)
@@ -71,18 +69,18 @@ class BoughtTrackViewSet(viewsets.mixins.CreateModelMixin,
         user = self.request.user
         return super().get_queryset().filter(user=user)
 
-    def perform_create(self, serializer):
-        """ Pay for item and save bought item """
-        user = self.request.user
-        item = serializer.validated_data.get('item')
-        payment_method = serializer.validated_data.get('payment')
-
-        try:
-            item.buy(user, payment_method)
-        except (PaymentNotFound, NotEnoughMoney)  as e:
-            raise exceptions.ValidationError(e.message)
-
-        serializer.save()
+    # def perform_create(self, serializer):
+    #     """ Pay for item and save bought item """
+    #     user = self.request.user
+    #     item = serializer.validated_data.get('item')
+    #     payment_method = serializer.validated_data.get('payment')
+    #
+    #     try:
+    #         transaction = item.buy(user, payment_method)
+    #     except (PaymentNotFound, NotEnoughMoney, ItemAlreadyBought) as e:
+    #         raise exceptions.ValidationError(e.message)
+    #
+    #     serializer.save(transaction=transaction)
 
 
 # ##############################################################################

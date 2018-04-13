@@ -54,6 +54,7 @@ class PaymentTransactionFactory(factory.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     amount = fuzzy.FuzzyInteger(1, 1000)
+    payment_method = factory.SubFactory(PaymentMethodFactory)
 
     class Meta:
         model = PaymentTransaction
@@ -83,7 +84,8 @@ class UserWithBalanceFactory(UserWithDefaultPaymentMethodFactory):
     transactions = factory.RelatedFactory(
         PaymentTransactionFactory,
         'user',
-        amount=factory.SelfAttribute('user.balance')
+        amount=factory.SelfAttribute('user.balance'),
+        payment_method=factory.SelfAttribute('user.default_payment'),
     )
 
 
