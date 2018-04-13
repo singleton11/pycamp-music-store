@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import IntegrityError, models
 from django.utils.translation import ugettext_lazy as _
 
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
@@ -184,7 +184,7 @@ class BoughtTrack(BoughtItem):
     """
     item = models.ForeignKey(
         'Track',
-        verbose_name=_('track'),
+        verbose_name=_('Track'),
         related_name='purchased',
     )
 
@@ -201,7 +201,7 @@ class BoughtAlbum(BoughtItem):
     """
     item = models.ForeignKey(
         'Album',
-        verbose_name=_('album'),
+        verbose_name=_('Album'),
         related_name='purchased',
     )
 
@@ -224,7 +224,7 @@ class LikeTrack(
     )
     user = models.ForeignKey(
         AppUser,
-        verbose_name=_('User liked'),
+        verbose_name=_('Liked by'),
     )
 
     class Meta:
@@ -250,7 +250,7 @@ class ListenTrack(
     )
     user = models.ForeignKey(
         AppUser,
-        verbose_name=_('User listened'),
+        verbose_name=_('Listened by'),
     )
 
     class Meta:
