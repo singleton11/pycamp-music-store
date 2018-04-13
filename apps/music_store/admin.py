@@ -1,6 +1,7 @@
-from django.contrib import admin
 from django import forms
+from django.contrib import admin
 from django.forms.widgets import Textarea
+from django.utils.translation import ugettext_lazy as _
 
 from apps.music_store.models import (
     Album,
@@ -11,11 +12,7 @@ from apps.music_store.models import (
     Track,
 )
 from apps.users.models import PaymentMethod, PaymentTransaction
-from django.utils.translation import ugettext_lazy as _
-admin.site.register(BoughtAlbum)
-admin.site.register(BoughtTrack)
-admin.site.register(LikeTrack)
-admin.site.register(ListenTrack)
+
 admin.site.register(PaymentMethod)
 admin.site.register(PaymentTransaction)
 
@@ -40,17 +37,17 @@ class TrackAdmin(admin.ModelAdmin):
         'album',
         'price',
     )
-    list_per_page = 20
     list_filter = (
         'author',
         'album',
     )
+    list_per_page = 20
+    ordering = ('title',)
     search_fields = (
         'title',
         'author',
         'album',
     )
-    ordering = ('title',)
     fieldsets = (
         (_('Main info'), {
             'fields': (
@@ -90,12 +87,15 @@ class AlbumAdmin(admin.ModelAdmin):
         'author',
         'price',
     )
+    list_filter = (
+        'author',
+    )
     list_per_page = 20
+    ordering = ('title',)
     search_fields = (
         'title',
         'author',
     )
-    ordering = ('title',)
     fieldsets = (
         (_('Main info'), {
             'fields': (
@@ -106,3 +106,75 @@ class AlbumAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+
+@admin.register(LikeTrack)
+class LikeTrackAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'track',
+        'created',
+    )
+    list_filter = (
+        'created',
+    )
+    search_fields = (
+        'track',
+        'user',
+    )
+    list_per_page = 20
+    ordering = ('created',)
+
+
+@admin.register(ListenTrack)
+class ListenTrackAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'track',
+        'created',
+    )
+    list_filter = (
+        'created',
+    )
+    search_fields = (
+        'track',
+        'user',
+    )
+    list_per_page = 20
+    ordering = ('created',)
+
+
+@admin.register(BoughtAlbum)
+class BoughtAlbumAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'item',
+        'created',
+    )
+    list_filter = (
+        'created',
+    )
+    search_fields = (
+        'item',
+        'user',
+    )
+    list_per_page = 20
+    ordering = ('created',)
+
+
+@admin.register(BoughtTrack)
+class BoughtTrackAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'item',
+        'created',
+    )
+    list_filter = (
+        'created',
+    )
+    search_fields = (
+        'item',
+        'user',
+    )
+    list_per_page = 20
+    ordering = ('created',)
