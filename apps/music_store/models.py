@@ -142,6 +142,15 @@ class Album(MusicItem):
         """bool: True if no related Tracks"""
         return not self.tracks.exists()
 
+    def is_bought(self, user):
+        """Check if the album is bought by the user.
+
+        Args:
+            user (AppUser): probable owner of album.
+
+        """
+        return BoughtAlbum.objects.filter(user=user, item=self).exists()
+
     def buy(self, user, payment_method=None):
         """ Method for buy this item
 
@@ -208,7 +217,7 @@ class Track(MusicItem):
         super().save()
 
     def is_bought(self, user):
-        """Check if the track is bought by some user.
+        """Check if the track is bought by the user.
 
         Args:
             user (AppUser): probable owner of track.
@@ -247,6 +256,44 @@ class Track(MusicItem):
             transaction=transaction,
         )
 
+    def is_liked(self, user):
+        """Check if the track is liked by the user.
+
+        Args:
+            user (AppUser): probable owner of track.
+
+        """
+        return LikeTrack.objects.filter(user=user, track=self).exists()
+
+    def like(self, user):
+        """Create 'Like' for the track by some user.
+
+        Args:
+            user (AppUser): user who likes the track.
+
+        """
+        if not self.is_liked(user):
+            return LikeTrack.objects.create(user=user, track=self)
+
+    def unlike(self, user):
+        """Remove 'Like' from the track by some user.
+
+        Args:
+            user (AppUser): user who removes like from the track.
+
+        """
+        if self.is_liked(user):
+            return LikeTrack.objects.filter(user=user, track=self).delete()
+
+    def listen(self, user):
+        """Note about the track was listened by some user
+
+        Args:
+            user (AppUser): user who listened to the track.
+
+        """
+        return ListenTrack.objects.create(user=user, track=self)
+
 
 class BoughtItem(TimeStampedModel):
     """ An abstract base class model for BoughtTrack and BoughtAlbum.
@@ -279,7 +326,7 @@ class BoughtTrack(BoughtItem):
     """
     item = models.ForeignKey(
         'Track',
-        verbose_name=_('track'),
+        verbose_name=_('Track'),
         related_name='purchased',
     )
 
@@ -296,7 +343,7 @@ class BoughtAlbum(BoughtItem):
     """
     item = models.ForeignKey(
         'Album',
-        verbose_name=_('album'),
+        verbose_name=_('Album'),
         related_name='purchased',
     )
 
@@ -319,13 +366,16 @@ class LikeTrack(
     )
     user = models.ForeignKey(
         AppUser,
-        verbose_name=_('User liked'),
+        verbose_name=_('Liked by'),
     )
 
     class Meta:
         unique_together = (('track', 'user'),)
         verbose_name = _('Like')
         verbose_name_plural = _('Likes')
+
+    def __str__(self):
+        return f'{self.user} liked {self.track}'
 
 
 class ListenTrack(
@@ -342,9 +392,12 @@ class ListenTrack(
     )
     user = models.ForeignKey(
         AppUser,
-        verbose_name=_('User listened'),
+        verbose_name=_('Listened by'),
     )
 
     class Meta:
         verbose_name = _('Listen')
         verbose_name_plural = _('Listens')
+
+    def __str__(self):
+        return f'{self.user} listened {self.track}'
