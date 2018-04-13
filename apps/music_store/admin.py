@@ -18,19 +18,36 @@ admin.site.register(PaymentTransaction)
 
 
 class TrackAdminForm(forms.ModelForm):
+    """Custom form to display Track with small text boxes for 'full_version' and
+    'free_Version' fields.
+
+    """
     class Meta:
         model = Track
         widgets = {
-            'full_version': Textarea(attrs={'rows': 2, 'cols': 79}),
-            'free_version': Textarea(attrs={'rows': 1, 'cols': 79}),
+            'full_version': Textarea(attrs={'rows': 2, 'cols': 50}),
+            'free_version': Textarea(attrs={'rows': 1, 'cols': 50}),
         }
         fields = '__all__'
 
 
+class TrackInline(admin.TabularInline):
+    """Inline Track to display list of tracks inside Album."""
+    model = Track
+    form = TrackAdminForm
+    fk_name = 'album'
+    fields = (
+        'title',
+        'price',
+        'full_version',
+    )
+
+
 @admin.register(Track)
 class TrackAdmin(admin.ModelAdmin):
+    """Custom form for Tracks"""
     form = TrackAdminForm
-
+    # List display
     list_display = (
         'title',
         'author',
@@ -48,6 +65,7 @@ class TrackAdmin(admin.ModelAdmin):
         'author',
         'album',
     )
+    # Single Track display
     fieldsets = (
         (_('Main info'), {
             'fields': (
@@ -66,19 +84,10 @@ class TrackAdmin(admin.ModelAdmin):
     )
 
 
-class TrackInline(admin.TabularInline):
-    model = Track
-    form = TrackAdminForm
-    fk_name = 'album'
-    fields = (
-        'title',
-        'price',
-        'full_version',
-    )
-
-
 @admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
+    """Custom form for Albums"""
+    # List display
     inlines = (
         TrackInline,
     )
@@ -96,6 +105,7 @@ class AlbumAdmin(admin.ModelAdmin):
         'title',
         'author',
     )
+    # Single Track display
     fieldsets = (
         (_('Main info'), {
             'fields': (
@@ -110,6 +120,7 @@ class AlbumAdmin(admin.ModelAdmin):
 
 @admin.register(LikeTrack)
 class LikeTrackAdmin(admin.ModelAdmin):
+    """Custom form for Likes"""
     list_display = (
         'user',
         'track',
@@ -128,6 +139,7 @@ class LikeTrackAdmin(admin.ModelAdmin):
 
 @admin.register(ListenTrack)
 class ListenTrackAdmin(admin.ModelAdmin):
+    """Custom form for Listens"""
     list_display = (
         'user',
         'track',
@@ -146,6 +158,7 @@ class ListenTrackAdmin(admin.ModelAdmin):
 
 @admin.register(BoughtAlbum)
 class BoughtAlbumAdmin(admin.ModelAdmin):
+    """Custom form for Bought albums"""
     list_display = (
         'user',
         'item',
@@ -164,6 +177,7 @@ class BoughtAlbumAdmin(admin.ModelAdmin):
 
 @admin.register(BoughtTrack)
 class BoughtTrackAdmin(admin.ModelAdmin):
+    """Custom form for Bought tracks"""
     list_display = (
         'user',
         'item',
