@@ -1,8 +1,11 @@
 import coreapi
 import coreschema
 from django.db.models import Q
-from rest_framework import exceptions, generics, permissions, viewsets, filters
+from rest_framework import exceptions, generics, permissions, viewsets, \
+    filters, status
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -172,8 +175,7 @@ class ListenTrackViewSet(viewsets.mixins.ListModelMixin,
 # ##############################################################################
 
 
-class GlobalSearchList(viewsets.mixins.ListModelMixin,
-                       viewsets.GenericViewSet):
+class GlobalSearchList(APIView):
     """View for global searching.
 
     Search Tracks and Albums, which contain the value of get-parameter "query"
@@ -184,16 +186,17 @@ class GlobalSearchList(viewsets.mixins.ListModelMixin,
     queryset = Track.objects.all()  # Just to avoid error
     search_param = 'query'
 
-    def get_serializer(self, *args, **kwargs):
-        query = self.request.query_params.get(self.search_param, None)
-        if query is None:
+    def get(self, request):
+        query = request.query_params.get(self.search_param, None)
+        if not query:
             message = f"Query parameter '{self.search_param}' is required"
             raise ValidationError(message)
 
         search_filter = Q(author__icontains=query) | Q(title__icontains=query)
         tracks = Track.objects.filter(search_filter)
         albums = Album.objects.filter(search_filter)
-        return self.serializer_class({'tracks': tracks, 'albums': albums})
+        result = GlobalSearchSerializer({'tracks': tracks, 'albums': albums})
+        return Response(data=result, status=status.HTTP_201_CREATED)
 
     def get_schema_fields(self, view):
         return [
