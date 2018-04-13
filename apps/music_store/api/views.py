@@ -182,8 +182,6 @@ class GlobalSearchList(APIView):
     in the "title" or "author" fields.
 
     """
-    serializer_class = GlobalSearchSerializer
-    queryset = Track.objects.all()  # Just to avoid error
     search_param = 'query'
 
     def get(self, request):
@@ -196,7 +194,7 @@ class GlobalSearchList(APIView):
         tracks = Track.objects.filter(search_filter)
         albums = Album.objects.filter(search_filter)
         result = GlobalSearchSerializer({'tracks': tracks, 'albums': albums})
-        return Response(data=result, status=status.HTTP_201_CREATED)
+        return Response(data=result.data, status=status.HTTP_201_CREATED)
 
     def get_schema_fields(self, view):
         return [
