@@ -9,14 +9,6 @@ from django.db import IntegrityError
 from ..users.models import AppUser
 
 
-class LikeAlreadyExistsError(IntegrityError):
-    """Error when user try to like track that is already liked."""
-
-
-class LikeNotExistsError(IntegrityError):
-    """Error when user try to remove like from track that is not liked."""
-
-
 class MusicItem(
     TitleDescriptionModel,
     TimeStampedModel,
@@ -143,10 +135,8 @@ class Track(MusicItem):
             user (AppUser): user who likes the track.
 
         """
-        if self.is_liked(user):
-            raise LikeAlreadyExistsError('Track is already liked!')
-
-        return LikeTrack.objects.create(user=user, track=self)
+        if not self.is_liked(user):
+            return LikeTrack.objects.create(user=user, track=self)
 
     def unlike(self, user):
         """Remove 'Like' from the track by some user.
@@ -155,10 +145,8 @@ class Track(MusicItem):
             user (AppUser): user who removes like from the track.
 
         """
-        if not self.is_liked(user):
-            raise LikeNotExistsError('Track is not liked!')
-
-        return LikeTrack.objects.filter(user=user, track=self).delete()
+        if self.is_liked(user):
+            return LikeTrack.objects.filter(user=user, track=self).delete()
 
     def listen(self, user):
         """Note about the track was listened by some user

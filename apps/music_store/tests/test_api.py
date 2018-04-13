@@ -11,7 +11,7 @@ from ..factories import (
     LikeTrackFactory,
     TrackFactoryLongFullVersion,
 )
-from ..models import ListenTrack
+from ..models import ListenTrack, LikeTrack
 
 fake = Faker()
 
@@ -159,15 +159,17 @@ class TestAPILikeUnlikeTrack(APITestCase):
         )
         self.assertTrue(self.track_to_like.is_liked(self.user))
 
-    def test_cannot_like_track_second_time(self):
-        LikeTrackFactory(user=self.user, track=self.track_to_like)
+    def test_cannot_like_track_multiple_times(self):
+        likes = 3
         self.client.force_authenticate(user=self.user)
-        response = self.client.post(
-            f'{self.url}{self.track_to_like.id}/like/'
-        )
+        for i in range(likes):
+            self.client.post(
+                f'{self.url}{self.track_to_like.id}/like/'
+            )
         self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK
+            1,
+            LikeTrack.objects.filter(user=self.user,
+                                     track=self.track_to_like).count()
         )
 
     def test_unlike_forbidden_without_auth(self):
@@ -200,7 +202,7 @@ class TestAPILikeUnlikeTrack(APITestCase):
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_204_NO_CONTENT
+            status.HTTP_200_OK
         )
 
 
@@ -247,7 +249,7 @@ class TestAPIListenTrack(APITestCase):
         )
         self.assertTrue(
             response.status_code,
-            status.HTTP_201_CREATED
+            status.HTTP_200_OK
         )
 
     def test_can_listen_track_multiple_times(self):

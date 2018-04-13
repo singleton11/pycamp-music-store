@@ -21,9 +21,6 @@ from ...music_store.models import (
     LikeTrack,
     ListenTrack,
     Track,
-
-    LikeAlreadyExistsError,
-    LikeNotExistsError,
 )
 
 
@@ -129,32 +126,29 @@ class TrackViewSet(viewsets.mixins.ListModelMixin,
         url_path='like',
         url_name='like',
     )
-    def put_like(self, request, **kwargs):
+    def like_unlike(self, request, **kwargs):
+        """Like or Unlike the Track.
+
+        When request method is POST, likes Track if it isn't liked.
+        Otherwise does nothing.
+        When method is DELETE, unlikes Track if it is liked.
+        Otherwise does nothing.
+
+        """
         user = request.user
         track = self.get_object()
 
-        try:
-            if request.method == 'POST':
-                track.like(user=user)
-                return Response(
-                    data={'message': 'You liked track! Great!'},
-                    status=status.HTTP_201_CREATED
-                )
-            if request.method == 'DELETE':
-                track.unlike(user=user)
-                return Response(
-                    data={'message': 'You disliked track! SAD!'},
-                    status=status.HTTP_200_OK
-                )
-        except LikeAlreadyExistsError:
+        if request.method == 'POST':
+            track.like(user=user)
             return Response(
-                data={'message': 'Track is already liked.'},
-                status=status.HTTP_200_OK
+                data={'message': 'You liked track! Great!'},
+                status=status.HTTP_201_CREATED
             )
-        except LikeNotExistsError:
+        if request.method == 'DELETE':
+            track.unlike(user=user)
             return Response(
-                data={'message': 'There was no like here, dude!'},
-                status=status.HTTP_204_NO_CONTENT
+                data={'message': 'You disliked track! SAD!'},
+                status=status.HTTP_200_OK
             )
 
     @detail_route(
@@ -164,15 +158,17 @@ class TrackViewSet(viewsets.mixins.ListModelMixin,
         url_name='listen',
     )
     def listen(self, request, **kwargs):
+        """Create an entry about user listen to the track.
+
+        """
         user = request.user
         track = self.get_object()
 
-        if request.method == 'POST':
-            track.listen(user)
-            return Response(
-                data={'message': 'You liked track! Great!'},
-                status=status.HTTP_201_CREATED
-            )
+        track.listen(user)
+        return Response(
+            data={'message': 'Yeah! Music!'},
+            status=status.HTTP_200_OK
+        )
 
 
 # ##############################################################################

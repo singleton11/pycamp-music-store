@@ -17,8 +17,6 @@ from apps.music_store.models import (
     LikeTrack,
     ListenTrack,
     Track,
-    LikeNotExistsError,
-    LikeAlreadyExistsError,
 )
 from apps.users.factories import (
     PaymentMethodFactory,
@@ -169,19 +167,19 @@ class TestAlbumAndTrack(TestCase):
         self.track.like(user=self.user)
         self.assertTrue(self.track.is_liked(user=self.user))
 
-    def test_like_track_second_time(self):
-        self.track.like(user=self.user)
-        with self.assertRaises(LikeAlreadyExistsError):
+    def test_cannot_like_track_multiple_times(self):
+        likes = 3
+        for i in range(likes):
             self.track.like(user=self.user)
+        self.assertEqual(
+            1,
+            LikeTrack.objects.filter(user=self.user, track=self.track).count()
+        )
 
     def test_unlike_track(self):
         LikeTrackFactory(user=self.user, track=self.track)
         self.track.unlike(user=self.user)
         self.assertFalse(self.track.is_liked(user=self.user))
-
-    def test_unlike_track_that_not_liked(self):
-        with self.assertRaises(LikeNotExistsError):
-            self.track.unlike(user=self.user)
 
     def test_listen_to_track(self):
         self.track.listen(user=self.user)
