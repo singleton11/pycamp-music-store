@@ -187,14 +187,14 @@ class GlobalSearchList(APIView):
     def get(self, request):
         query = request.query_params.get(self.search_param, None)
         if not query:
-            message = f"Query parameter '{self.search_param}' is required"
-            raise ValidationError(message)
+            raise ValidationError(f"Query parameter '{self.search_param}' "
+                                  f"is required.")
 
         search_filter = Q(author__icontains=query) | Q(title__icontains=query)
         tracks = Track.objects.filter(search_filter)
         albums = Album.objects.filter(search_filter)
         result = GlobalSearchSerializer({'tracks': tracks, 'albums': albums})
-        return Response(data=result.data, status=status.HTTP_201_CREATED)
+        return Response(data=result.data, status=status.HTTP_200_OK)
 
     def get_schema_fields(self, view):
         return [
