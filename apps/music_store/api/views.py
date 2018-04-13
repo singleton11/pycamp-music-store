@@ -21,7 +21,10 @@ from ...music_store.models import (
     ListenTrack,
     Track,
     PaymentMethod,
-    PaymentNotFound, NotEnoughMoney, ItemAlreadyBought)
+    PaymentNotFound,
+    NotEnoughMoney,
+    ItemAlreadyBought
+)
 
 
 # ##############################################################################

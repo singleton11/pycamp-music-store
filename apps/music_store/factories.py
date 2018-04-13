@@ -97,13 +97,13 @@ class BoughtTrackFactory(factory.DjangoModelFactory):
         price=fuzzy.FuzzyInteger(1, 10),
     )
     user = factory.SubFactory(
-        UserWithBalanceFactory,
+        UserWithPaymentMethodFactory,
         balance=fuzzy.FuzzyInteger(11, 20)
     )
-    transaction = factory.SubFactory(
-        PaymentTransactionFactory,
-        user=user
-    )
+
+    @factory.lazy_attribute
+    def transaction(self):
+        return PaymentTransactionFactory(user=self.user)
 
     class Meta:
         model = BoughtTrack
@@ -137,13 +137,12 @@ class BoughtAlbumFactory(factory.DjangoModelFactory):
         price=fuzzy.FuzzyInteger(1, 10),
     )
     user = factory.SubFactory(
-        UserWithBalanceFactory,
-        balance=fuzzy.FuzzyInteger(11, 20)
+        UserWithPaymentMethodFactory
     )
-    transaction = factory.SubFactory(
-        PaymentTransactionFactory,
-        user=factory.SelfAttribute('user'),
-    )
+
+    @factory.lazy_attribute
+    def transaction(self):
+        return PaymentTransactionFactory(user=self.user)
 
     class Meta:
         model = BoughtAlbum

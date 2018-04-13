@@ -5,7 +5,7 @@ from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
-from apps.music_store.api.exceptions import PaymentNotFound, NotEnoughMoney, \
+from apps.music_store.exceptions import PaymentNotFound, NotEnoughMoney, \
     ItemAlreadyBought
 from ..users.models import AppUser
 

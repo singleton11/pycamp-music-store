@@ -335,7 +335,7 @@ class TestAPIMusicStoreBoughtTrack(APITestCase):
         response = self._api_buy_track(self.track.pk, self.user)
         balance_after = self.user.balance
 
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(balance_before, balance_after)
 
     def test_track_buy_not_default_method(self):
@@ -420,7 +420,7 @@ class TestAPIMusicStoreBoughtAlbum(APITestCase):
         response = self._api_buy_album(self.album.pk, self.user)
         balance_after = self.user.balance
 
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(balance_before, balance_after)
 
     def _api_buy_album(self, item_id, user=None):
