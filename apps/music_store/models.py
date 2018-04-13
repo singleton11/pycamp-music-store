@@ -233,6 +233,9 @@ class LikeTrack(
         verbose_name = _('Like')
         verbose_name_plural = _('Likes')
 
+    def __str__(self):
+        return f'{self.user} liked {self.track}'
+
 
 class ListenTrack(
     TimeStampedModel,
@@ -254,3 +257,6 @@ class ListenTrack(
     class Meta:
         verbose_name = _('Listen')
         verbose_name_plural = _('Listens')
+
+    def __str__(self):
+        return f'{self.user} listened {self.track}'
