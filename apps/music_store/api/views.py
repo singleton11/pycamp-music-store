@@ -111,15 +111,10 @@ class ItemViewSet(viewsets.mixins.ListModelMixin,
 
         try:
             item.buy(user, payment_method)
-        except (PaymentNotFound, NotEnoughMoney) as e:
+        except (PaymentNotFound, NotEnoughMoney, ItemAlreadyBought) as e:
             return Response(
                 data={'message': e.message},
                 status=status.HTTP_400_BAD_REQUEST
-            )
-        except ItemAlreadyBought as e:
-            return Response(
-                data={'message': e.message},
-                status=status.HTTP_302_FOUND
             )
 
         return Response(status=status.HTTP_200_OK)

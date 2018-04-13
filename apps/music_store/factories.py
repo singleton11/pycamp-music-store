@@ -142,7 +142,7 @@ class BoughtAlbumFactory(factory.DjangoModelFactory):
     )
     transaction = factory.SubFactory(
         PaymentTransactionFactory,
-        user=user,
+        user=factory.SelfAttribute('user'),
     )
 
     class Meta:
