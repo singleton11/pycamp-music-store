@@ -99,7 +99,15 @@ class ItemViewSet(viewsets.mixins.ListModelMixin,
         """"""
         user = request.user
         item = self.get_object()
-        payment_method = None
+        payment_id = self.request.query_params.get('payment_id', None)
+
+        try:
+            payment_method = PaymentMethod.objects.get(
+                owner=user,
+                id=payment_id
+            )
+        except PaymentMethod.DoesNotExist:
+            payment_method = None
 
         try:
             item.buy(user, payment_method)

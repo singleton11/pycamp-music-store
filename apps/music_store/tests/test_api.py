@@ -338,12 +338,21 @@ class TestAPIMusicStoreBoughtTrack(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(balance_before, balance_after)
 
-    def _api_buy_track(self, item_id, user=None):
+    def test_track_buy_not_default_method(self):
+        """ Checking the purchase result code"""
+        method = PaymentMethodFactory(owner=self.user)
+
+        response = self._api_buy_track(self.track.pk, self.user, method.id)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def _api_buy_track(self, item_id, user=None, payment_id=None):
         """ Method for send request to bought Track Api"""
         if user:
             self.client.force_authenticate(user=self.user)
 
         url = api_url(f'tracks/{item_id}/buy/')
+        if payment_id:
+            url = url + "?payment_id=" + str(payment_id)
         return self.client.post(url)
 
     def _api_list_bought_track(self, user=None):
