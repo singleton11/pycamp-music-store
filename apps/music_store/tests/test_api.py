@@ -11,7 +11,7 @@ from ..factories import (
     LikeTrackFactory,
     TrackFactoryLongFullVersion,
 )
-from ..models import ListenTrack, LikeTrack
+from ..models import LikeTrack, ListenTrack
 
 fake = Faker()
 

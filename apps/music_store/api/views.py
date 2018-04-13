@@ -1,19 +1,21 @@
 from django.core.exceptions import ValidationError
-from rest_framework import exceptions, generics, permissions, viewsets, status
+
+from rest_framework import exceptions, generics, permissions, status, viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
-    TrackSerializer,
-    LikeTrackSerializer,
-    ListenTrackSerializer,
     BoughtAlbumSerializer,
     BoughtTrackSerializer,
+    LikeTrackSerializer,
+    ListenTrackSerializer,
     PaymentAccountSerializer,
     PaymentMethodSerializer,
+    TrackSerializer,
 )
 from apps.users.models import AppUser, PaymentMethod
+
 from ...music_store.models import (
     Album,
     BoughtAlbum,
@@ -22,7 +24,6 @@ from ...music_store.models import (
     ListenTrack,
     Track,
 )
-
 
 # ##############################################################################
 # PAYMENT METHODS
