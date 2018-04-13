@@ -1,9 +1,10 @@
 import factory
 from factory import fuzzy
 
-from .models import PaymentTransaction, PaymentMethod
+from apps.music_store.models import BoughtAlbum
 from apps.users.factories import UserFactory
-from .models import Album, BoughtTrack, LikeTrack, ListenTrack, Track
+from .models import Album, Track, BoughtTrack, LikeTrack, ListenTrack
+from .models import PaymentTransaction, PaymentMethod
 
 
 class AlbumFactory(factory.django.DjangoModelFactory):
@@ -28,12 +29,12 @@ class TrackFactory(factory.django.DjangoModelFactory):
 
 
 class TrackFactoryLongFullVersion(TrackFactory):
-    """For tracks with long full_version text """
+    """For tracks with long full_version text"""
     full_version = factory.Faker('sentence', nb_words=30)
 
 
 class PaymentMethodFactory(factory.DjangoModelFactory):
-    """ Factory to create payment method with random title """
+    """Factory to create payment method with random title"""
 
     owner = factory.SubFactory(UserFactory)
     title = factory.Sequence(lambda n: "Method %03d" % n)
@@ -44,12 +45,12 @@ class PaymentMethodFactory(factory.DjangoModelFactory):
 
 
 class PaymentDefaultMethodFactory(PaymentMethodFactory):
-    """ Factory to create default payment method"""
+    """Factory to create default payment method"""
     is_default = True
 
 
 class PaymentTransactionFactory(factory.DjangoModelFactory):
-    """ Factory to create payment transaction for 'user' with 'amount' """
+    """Factory to create payment transaction for 'user' with 'amount'"""
 
     user = factory.SubFactory(UserFactory)
     amount = fuzzy.FuzzyInteger(1, 1000)
@@ -59,7 +60,7 @@ class PaymentTransactionFactory(factory.DjangoModelFactory):
 
 
 class UserWithPaymentMethodFactory(UserFactory):
-    """ Factory to create user with one payment method set by dafault """
+    """Factory to create user with one payment method set by default"""
 
     payment_methods = factory.RelatedFactory(
         PaymentMethodFactory,
@@ -68,7 +69,7 @@ class UserWithPaymentMethodFactory(UserFactory):
 
 
 class UserWithDefaultPaymentMethodFactory(UserFactory):
-    """ Factory to create user with one payment method """
+    """Factory to create user with one payment method"""
 
     payment_methods = factory.RelatedFactory(
         PaymentDefaultMethodFactory,
@@ -78,7 +79,7 @@ class UserWithDefaultPaymentMethodFactory(UserFactory):
 
 
 class UserWithBalanceFactory(UserWithDefaultPaymentMethodFactory):
-    """ Factory to create AppUser with balance. """
+    """Factory to create AppUser with balance."""
     transactions = factory.RelatedFactory(
         PaymentTransactionFactory,
         'user',
@@ -87,7 +88,7 @@ class UserWithBalanceFactory(UserWithDefaultPaymentMethodFactory):
 
 
 class BoughtTrackFactory(factory.DjangoModelFactory):
-    """Factory for generates test Track model with random price and title """
+    """Factory for generates test Track model with random price and title"""
 
     item = factory.SubFactory(
         TrackFactory,
@@ -124,3 +125,19 @@ class ListenTrackFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = ListenTrack
+
+
+class BoughtAlbumFactory(factory.DjangoModelFactory):
+    """Factory for generates test Track model with random price and title"""
+
+    item = factory.SubFactory(
+        AlbumFactory,
+        price=fuzzy.FuzzyInteger(1, 10),
+    )
+    user = factory.SubFactory(
+        UserWithBalanceFactory,
+        balance=fuzzy.FuzzyInteger(11, 20)
+    )
+
+    class Meta:
+        model = BoughtAlbum
