@@ -16,8 +16,8 @@ from apps.music_store.api.serializers import (
     BoughtTrackSerializer,
     PaymentAccountSerializer,
     PaymentMethodSerializer,
+    GlobalSearchSerializer
 )
-from apps.music_store.api.serializers.search import GlobalSearchSerializer
 from apps.users.models import AppUser
 from ...music_store.models import (
     Album,
