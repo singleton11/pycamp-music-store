@@ -19,6 +19,7 @@ fake = Faker()
 
 
 def api_url(relative_url):
+    """Function to get url by relative url"""
     return '/api/v1/music_store/' + relative_url
 
 
