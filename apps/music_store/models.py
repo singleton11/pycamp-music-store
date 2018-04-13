@@ -237,7 +237,7 @@ class LikeTrack(
     )
     user = models.ForeignKey(
         AppUser,
-        verbose_name=_('User liked'),
+        verbose_name=_('Liked by'),
     )
 
     class Meta:
@@ -260,7 +260,7 @@ class ListenTrack(
     )
     user = models.ForeignKey(
         AppUser,
-        verbose_name=_('User listened'),
+        verbose_name=_('Listened by'),
     )
 
     class Meta:
