@@ -1,33 +1,13 @@
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
+from apps.music_store.api.exceptions import PaymentNotFound, NotEnoughMoney, \
+    ItemAlreadyBought
 from ..users.models import AppUser
-
-
-class ItemAlreadyBought(ValidationError):
-    """ Error that raise when user try to buy already bought item"""
-
-    def __init__(self):
-        super().__init__("Already Bought")
-
-
-class NotEnoughMoney(ValidationError):
-    """ Error that raise when user not have enough money"""
-
-    def __init__(self):
-        super().__init__("Not enough money")
-
-
-class PaymentNotFound(ValidationError):
-    """ Error that raise when user not have payment method"""
-
-    def __init__(self):
-        super().__init__("Payment method not found")
 
 
 class PaymentMethod(models.Model):
@@ -100,7 +80,7 @@ class PaymentTransaction(TimeStampedModel):
 
     def save(self, **kwargs):
         if self.amount < 0 and self.user.balance < abs(self.amount):
-            raise ValidationError("Not enough money")
+            raise NotEnoughMoney
 
         super().save(**kwargs)
         self.update_user_balance(self.user)
