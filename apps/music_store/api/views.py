@@ -175,8 +175,30 @@ class GlobalSearchList(viewsets.mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     """View for global searching.
 
-    Displays the found items in the general list with an additional "type"
-    parameter for each item
+    Search Tracks and Albums, which contain the value of get-parameter "query"
+    in the "title" or "author" fields and return the found serialized elements
+    of Track and Album models, with additional field "type", which contain
+    name of model.
+
+    Response format:
+        [
+            {
+                "id": 1,  # id in
+                "title": "Some track title",
+                ...
+                "type": "Track"
+            },
+            ...
+            {
+                "id": 5,
+                "title": "Some album title",
+                ...
+                "type": "Album"
+            },
+            ...
+        ]
+
+    Notice: field "id" not unique! It is an element id in its type base.
 
     """
     serializer_class = GlobalSearchSerializer
