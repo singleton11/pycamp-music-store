@@ -1,25 +1,24 @@
 from operator import methodcaller
 
 from faker import Faker
-
-from apps.users.factories import UserFactory
-
 from rest_framework import status
 from rest_framework.test import (
     APIClient,
     APITestCase,
 )
 
-from apps.music_store.factories import (
-    TrackFactory,
-    BoughtTrackFactory,
-    BoughtAlbumFactory,
+from apps.users.factories import UserFactory
+from ..factories import (
     AlbumFactory,
+    BoughtTrackFactory,
+    LikeTrackFactory,
+    TrackFactoryLongFullVersion,
+    TrackFactory,
+    BoughtAlbumFactory,
     UserWithPaymentMethodFactory,
     PaymentMethodFactory,
     UserWithBalanceFactory,
-    LikeTrackFactory,
-    TrackFactoryLongFullVersion
+    TrackWithoutAlbumFactory
 )
 
 fake = Faker()
@@ -177,13 +176,11 @@ class TestAPITrack(APITestCase):
 class TestAPIAlbum(APITestCase):
     """Tests for Albums API."""
 
-    def setUp(self):
-        self.client = APIClient()
-        self.user = UserFactory()
-        self.user_with_balance = UserWithBalanceFactory()
-
     @classmethod
     def setUpTestData(cls):
+        cls.client = APIClient()
+        cls.user = UserFactory()
+        cls.user_with_balance = UserWithBalanceFactory()
         cls.url = api_url('albums/')
         cls.album = AlbumFactory()
 
@@ -215,7 +212,7 @@ class TestAPILikeTrackListView(APITestCase):
         cls.count = 2
         cls.client = APIClient()
         cls.user = UserFactory()
-        cls.likes = [LikeTrackFactory(user=cls.user) for i in range(cls.count)]
+        cls.likes = LikeTrackFactory.create_batch(cls.count, user=cls.user)
         cls.track_to_like = TrackFactoryLongFullVersion()
 
     def test_watch_likes_forbidden_without_auth(self):
@@ -235,7 +232,7 @@ class TestAPILikeUnlikeTrack(APITestCase):
         cls.count = 2
         cls.client = APIClient()
         cls.user = UserFactory()
-        cls.likes = [LikeTrackFactory(user=cls.user) for i in range(cls.count)]
+        cls.likes = LikeTrackFactory.create_batch(cls.count, user=cls.user)
         cls.track_to_like = TrackFactoryLongFullVersion()
 
     def test_like_forbidden_without_auth(self):
@@ -498,3 +495,109 @@ class TestAPIMusicStoreBoughtAlbum(APITestCase):
 
         url = api_url(f'bought_albums/')
         return self.client.get(url)
+
+
+class TestAPISearch(APITestCase):
+    """Test for API of 'Music Store' app.
+
+    Tests for search tracks and albums
+
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.client = APIClient()
+        cls.track_1 = TrackWithoutAlbumFactory(
+            title="one two",
+            author="three four",
+        )
+        cls.track_2 = TrackWithoutAlbumFactory(
+            title="one",
+            author="five",
+        )
+        cls.track_3 = TrackWithoutAlbumFactory(
+            title="six",
+            author="two",
+        )
+        cls.track_4 = TrackWithoutAlbumFactory(
+            title="unique1",
+            author="unique2",
+        )
+
+        cls.album_1 = AlbumFactory(
+            title="one two",
+            author="three four",
+        )
+        cls.album_2 = AlbumFactory(
+            title="one",
+            author="five",
+        )
+        cls.album_3 = AlbumFactory(
+            title="six",
+            author="two",
+        )
+        cls.album_4 = AlbumFactory(
+            title="unique3",
+            author="unique4",
+        )
+
+        cls.url = '/api/v1/music_store/'
+
+    def test_search_tracks_many_1(self):
+        response = self.client.get(self.url + 'tracks/?search=one')
+        self.assertEqual(len(response.data), 2)
+
+    def test_search_tracks_many_2(self):
+        response = self.client.get(self.url + 'tracks/?search=two')
+        self.assertEqual(len(response.data), 2)
+
+    def test_search_tracks_one_1(self):
+        response = self.client.get(self.url + 'tracks/?search=ix')
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0].get('id'), self.track_3.id)
+
+    def test_search_tracks_one_2(self):
+        response = self.client.get(self.url + 'tracks/?search=ive')
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0].get('id'), self.track_2.id)
+
+    def test_search_albums_many_1(self):
+        response = self.client.get(self.url + 'albums/?search=one')
+        self.assertEqual(len(response.data), 2)
+
+    def test_search_albums_many_2(self):
+        response = self.client.get(self.url + 'albums/?search=two')
+        self.assertEqual(len(response.data), 2)
+
+    def test_search_albums_one_1(self):
+        response = self.client.get(self.url + 'albums/?search=ix')
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0].get('id'), self.album_3.id)
+
+    def test_search_albums_one_2(self):
+        response = self.client.get(self.url + 'albums/?search=ive')
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0].get('id'), self.album_2.id)
+
+    def test_global_search_unique_track(self):
+        response = self.client.get(self.url + 'search/?query=unique1')
+        tracks = response.data['tracks']
+        albums = response.data['albums']
+        self.assertEqual(len(tracks), 1)
+        self.assertEqual(len(albums), 0)
+        self.assertEqual(tracks[0].get('id'), self.track_4.id)
+
+    def test_global_search_unique_album(self):
+        response = self.client.get(self.url + 'search/?query=unique3')
+        tracks = response.data['tracks']
+        albums = response.data['albums']
+        self.assertEqual(len(tracks), 0)
+        self.assertEqual(len(albums), 1)
+        self.assertEqual(albums[0].get('id'), self.album_4.id)
+
+    def test_global_search_many(self):
+        response = self.client.get(self.url + 'search/?query=one')
+        tracks = response.data['tracks']
+        albums = response.data['albums']
+        self.assertEqual(len(tracks), 2)
+        self.assertEqual(len(albums), 2)

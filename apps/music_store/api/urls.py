@@ -17,6 +17,7 @@ router.register(r'payment_methods', views.PaymentMethodViewSet)
 urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^account/$', views.AccountView.as_view()),
+    url(r'^search/$', views.GlobalSearchList.as_view()),
 ]
 
 schema_view = get_schema_view(title='Music Store API', patterns=urlpatterns)

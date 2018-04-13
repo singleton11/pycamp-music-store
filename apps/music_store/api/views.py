@@ -1,6 +1,11 @@
-from rest_framework import generics, permissions, viewsets, status
+import coreapi
+import coreschema
+from django.db.models import Q
+from rest_framework import filters, generics, permissions, viewsets, status
 from rest_framework.decorators import detail_route
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -12,6 +17,7 @@ from apps.music_store.api.serializers import (
     PaymentAccountSerializer,
     PaymentMethodSerializer,
 )
+from apps.music_store.api.serializers.search import GlobalSearchSerializer
 from apps.users.models import AppUser
 from ...music_store.models import (
     Album,
@@ -127,6 +133,9 @@ class AlbumViewSet(ItemViewSet):
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
 
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('title', 'author',)
+
 
 class TrackViewSet(ItemViewSet):
     """Operations on music tracks
@@ -134,6 +143,9 @@ class TrackViewSet(ItemViewSet):
     """
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('title', 'author',)
 
     @detail_route(
         methods=['post', 'delete'],
@@ -214,3 +226,44 @@ class ListenTrackViewSet(viewsets.mixins.ListModelMixin,
     queryset = ListenTrack.objects.all()
     serializer_class = ListenTrackSerializer
     permission_classes = (permissions.IsAuthenticated,)
+
+
+# ##############################################################################
+# SEARCH
+# ##############################################################################
+
+
+class GlobalSearchList(APIView):
+    """View for global searching.
+
+    Search Tracks and Albums, which contain the value of get-parameter "query"
+    in the "title" or "author" fields.
+
+    """
+    search_param = 'query'
+
+    def get(self, request):
+        query = request.query_params.get(self.search_param, None)
+        if not query:
+            raise ValidationError(f"Query parameter '{self.search_param}' "
+                                  f"is required.")
+
+        search_filter = Q(author__icontains=query) | Q(title__icontains=query)
+        tracks = Track.objects.filter(search_filter)
+        albums = Album.objects.filter(search_filter)
+        result = GlobalSearchSerializer({'tracks': tracks, 'albums': albums})
+        return Response(data=result.data, status=status.HTTP_200_OK)
+
+    def get_schema_fields(self, view):
+        return [
+            coreapi.Field(
+                name=self.search_param,
+                required=True,
+                location='query',
+                schema=coreschema.String(
+                    title="The string to search",
+                    description="The string that will be used to "
+                                "search in the fields"
+                )
+            )
+        ]
