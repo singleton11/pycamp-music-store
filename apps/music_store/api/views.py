@@ -1,4 +1,6 @@
-from rest_framework import generics, permissions, viewsets
+from rest_framework import generics, permissions, viewsets, status
+from rest_framework.decorators import detail_route
+from rest_framework.response import Response
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -19,7 +21,7 @@ from ...music_store.models import (
     ListenTrack,
     Track,
     PaymentMethod,
-)
+    PaymentNotFound, NotEnoughMoney, ItemAlreadyBought)
 
 
 # ##############################################################################
@@ -57,10 +59,9 @@ class AccountView(generics.RetrieveUpdateAPIView):
 # ##############################################################################
 
 
-class BoughtTrackViewSet(  # viewsets.mixins.CreateModelMixin,
-    viewsets.mixins.ListModelMixin,
-    viewsets.GenericViewSet):
-    """View to display the list of purchased user tracks and purchase them."""
+class BoughtTrackViewSet(viewsets.mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
+    """View to display the list of purchased user tracks"""
     serializer_class = BoughtTrackSerializer
     permission_classes = (permissions.IsAuthenticated,)
     queryset = BoughtTrack.objects.all()
@@ -69,19 +70,6 @@ class BoughtTrackViewSet(  # viewsets.mixins.CreateModelMixin,
         user = self.request.user
         return super().get_queryset().filter(user=user)
 
-    # def perform_create(self, serializer):
-    #     """ Pay for item and save bought item """
-    #     user = self.request.user
-    #     item = serializer.validated_data.get('item')
-    #     payment_method = serializer.validated_data.get('payment')
-    #
-    #     try:
-    #         transaction = item.buy(user, payment_method)
-    #     except (PaymentNotFound, NotEnoughMoney, ItemAlreadyBought) as e:
-    #         raise exceptions.ValidationError(e.message)
-    #
-    #     serializer.save(transaction=transaction)
-
 
 # ##############################################################################
 # BOUGHT ALBUMS
@@ -89,19 +77,47 @@ class BoughtTrackViewSet(  # viewsets.mixins.CreateModelMixin,
 
 
 class BoughtAlbumViewSet(BoughtTrackViewSet):
-    """View to display the list of purchased user albums and purchase them."""
+    """View to display the list of purchased user albums"""
     serializer_class = BoughtAlbumSerializer
     queryset = BoughtAlbum.objects.all()
 
 
 # ##############################################################################
-# ALBUMS
+# ITEMS
 # ##############################################################################
 
+class ItemViewSet(viewsets.mixins.ListModelMixin,
+                  viewsets.mixins.RetrieveModelMixin,
+                  viewsets.GenericViewSet):
+    @detail_route(
+        methods=['post'],
+        permission_classes=(permissions.IsAuthenticated,),
+        url_path='buy',
+        url_name='buy',
+    )
+    def buy_album(self, request, **kwargs):
+        """"""
+        user = request.user
+        item = self.get_object()
+        payment_method = None
 
-class AlbumViewSet(viewsets.mixins.ListModelMixin,
-                   viewsets.mixins.RetrieveModelMixin,
-                   viewsets.GenericViewSet):
+        try:
+            item.buy(user, payment_method)
+        except (PaymentNotFound, NotEnoughMoney) as e:
+            return Response(
+                data={'message': e.message},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ItemAlreadyBought as e:
+            return Response(
+                data={'message': e.message},
+                status=status.HTTP_302_FOUND
+            )
+
+        return Response(status=status.HTTP_200_OK)
+
+
+class AlbumViewSet(ItemViewSet):
     """Operations on music albums
 
     """
@@ -109,14 +125,7 @@ class AlbumViewSet(viewsets.mixins.ListModelMixin,
     serializer_class = AlbumSerializer
 
 
-# ##############################################################################
-# TRACKS
-# ##############################################################################
-
-
-class TrackViewSet(viewsets.mixins.ListModelMixin,
-                   viewsets.mixins.RetrieveModelMixin,
-                   viewsets.GenericViewSet):
+class TrackViewSet(ItemViewSet):
     """Operations on music tracks
 
     """

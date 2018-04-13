@@ -140,6 +140,10 @@ class BoughtAlbumFactory(factory.DjangoModelFactory):
         UserWithBalanceFactory,
         balance=fuzzy.FuzzyInteger(11, 20)
     )
+    transaction = factory.SubFactory(
+        PaymentTransactionFactory,
+        user=user,
+    )
 
     class Meta:
         model = BoughtAlbum

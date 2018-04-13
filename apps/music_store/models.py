@@ -9,6 +9,27 @@ from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 from ..users.models import AppUser
 
 
+class ItemAlreadyBought(ValidationError):
+    """ Error that raise when user try to buy already bought item"""
+
+    def __init__(self):
+        super().__init__("Already Bought")
+
+
+class NotEnoughMoney(ValidationError):
+    """ Error that raise when user not have enough money"""
+
+    def __init__(self):
+        super().__init__("Not enough money")
+
+
+class PaymentNotFound(ValidationError):
+    """ Error that raise when user not have payment method"""
+
+    def __init__(self):
+        super().__init__("Payment method not found")
+
+
 class PaymentMethod(models.Model):
     """Model to store payment methods."""
     owner = models.ForeignKey(
@@ -34,7 +55,10 @@ class PaymentMethod(models.Model):
 
         # if this method is default, set all other methods not default
         if self.is_default:
-            default_methods = PaymentMethod.objects.filter(is_default=True)
+            default_methods = PaymentMethod.objects.filter(
+                owner=self.owner,
+                is_default=True,
+            )
             default_methods.exclude(pk=self.pk).update(is_default=False)
 
 
@@ -81,19 +105,6 @@ class PaymentTransaction(TimeStampedModel):
         super().save(**kwargs)
         self.update_user_balance(self.user)
 
-
-class NotEnoughMoney(ValidationError):
-    """ Error that raise when user not have enough money"""
-
-    def __init__(self):
-        super().__init__("Not enough money")
-
-
-class PaymentNotFound(ValidationError):
-    """ Error that raise when user not have payment method"""
-
-    def __init__(self):
-        super().__init__("Payment method not found")
 
 class MusicItem(
     TitleDescriptionModel,
@@ -158,27 +169,29 @@ class Album(MusicItem):
             exceptions.ValidationError: User does not have enough money
             exceptions.ValidationError: User don't have payment method
         """
-
         if payment_method is None:
             payment_method = user.default_payment
 
-        if not payment_method:
+        if payment_method is None:
             raise PaymentNotFound
 
         if user.balance < self.price:
             raise NotEnoughMoney
+
+        if BoughtAlbum.objects.filter(user=user, item=self).exists():
+            raise ItemAlreadyBought
 
         transaction = PaymentTransaction.objects.create(
             user=user,
             amount=-self.price,
             payment_method=payment_method,
         )
-
         BoughtAlbum.objects.create(
             user=user,
             item=self,
             transaction=transaction,
         )
+
 
 class Track(MusicItem):
     """Music track with its title, price and album if exists.
@@ -241,12 +254,14 @@ class Track(MusicItem):
         if user.balance < self.price:
             raise NotEnoughMoney
 
+        if BoughtTrack.objects.filter(user=user, item=self).exists():
+            raise ItemAlreadyBought
+
         transaction = PaymentTransaction.objects.create(
             user=user,
             amount=-self.price,
             payment_method=payment_method,
         )
-
         BoughtTrack.objects.create(
             user=user,
             item=self,
