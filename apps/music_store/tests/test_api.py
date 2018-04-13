@@ -360,16 +360,23 @@ class TestAPISearch(APITestCase):
 
     def test_global_search_unique_track(self):
         response = self.client.get(self.url + 'search/?query=unique1')
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0].get('id'), self.track_4.id)
-        self.assertEqual(response.data[0].get('type'), 'Track')
+        tracks = response.data['tracks']
+        albums = response.data['albums']
+        self.assertEqual(len(tracks), 1)
+        self.assertEqual(len(albums), 0)
+        self.assertEqual(tracks[0].get('id'), self.track_4.id)
 
     def test_global_search_unique_album(self):
         response = self.client.get(self.url + 'search/?query=unique3')
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0].get('id'), self.album_4.id)
-        self.assertEqual(response.data[0].get('type'), 'Album')
+        tracks = response.data['tracks']
+        albums = response.data['albums']
+        self.assertEqual(len(tracks), 0)
+        self.assertEqual(len(albums), 1)
+        self.assertEqual(albums[0].get('id'), self.album_4.id)
 
     def test_global_search_many(self):
         response = self.client.get(self.url + 'search/?query=one')
-        self.assertEqual(len(response.data), 4)
+        tracks = response.data['tracks']
+        albums = response.data['albums']
+        self.assertEqual(len(tracks), 2)
+        self.assertEqual(len(albums), 2)

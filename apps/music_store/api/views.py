@@ -1,7 +1,8 @@
-from itertools import chain
-
+import coreapi
+import coreschema
 from django.db.models import Q
 from rest_framework import exceptions, generics, permissions, viewsets, filters
+from rest_framework.exceptions import ValidationError
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -176,37 +177,34 @@ class GlobalSearchList(viewsets.mixins.ListModelMixin,
     """View for global searching.
 
     Search Tracks and Albums, which contain the value of get-parameter "query"
-    in the "title" or "author" fields and return the found serialized elements
-    of Track and Album models, with additional field "type", which contain
-    name of model.
-
-    Response format:
-        [
-            {
-                "id": 1,  # id in
-                "title": "Some track title",
-                ...
-                "type": "Track"
-            },
-            ...
-            {
-                "id": 5,
-                "title": "Some album title",
-                ...
-                "type": "Album"
-            },
-            ...
-        ]
-
-    Notice: field "id" not unique! It is an element id in its type base.
+    in the "title" or "author" fields.
 
     """
     serializer_class = GlobalSearchSerializer
     queryset = Track.objects.all()  # Just to avoid error
+    search_param = 'query'
 
-    def get_queryset(self):
-        query = self.request.query_params.get('query', None)
+    def get_serializer(self, *args, **kwargs):
+        query = self.request.query_params.get(self.search_param, None)
+        if query is None:
+            message = f"Query parameter '{self.search_param}' is required"
+            raise ValidationError(message)
+
         search_filter = Q(author__icontains=query) | Q(title__icontains=query)
         tracks = Track.objects.filter(search_filter)
         albums = Album.objects.filter(search_filter)
-        return list(chain(tracks, albums))
+        return self.serializer_class({'tracks': tracks, 'albums': albums})
+
+    def get_schema_fields(self, view):
+        return [
+            coreapi.Field(
+                name=self.search_param,
+                required=True,
+                location='query',
+                schema=coreschema.String(
+                    title="The string to search",
+                    description="The string that will be used to "
+                                "search in the fields"
+                )
+            )
+        ]
