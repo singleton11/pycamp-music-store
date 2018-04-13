@@ -149,8 +149,7 @@ class Album(MusicItem):
             exceptions.ValidationError: User does not have enough money
             exceptions.ValidationError: User don't have payment method
         """
-        if payment_method is None:
-            payment_method = user.default_payment
+        payment_method = payment_method or user.default_payment
 
         if payment_method is None:
             raise PaymentNotFound

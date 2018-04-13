@@ -98,19 +98,16 @@ class ItemViewSet(viewsets.mixins.ListModelMixin,
         url_path='buy',
         url_name='buy',
     )
-    def buy_album(self, request, **kwargs):
+    def buy_item(self, request, **kwargs):
         """Method to buy item with using payment `payment_id`"""
         user = request.user
         item = self.get_object()
         payment_id = self.request.query_params.get('payment_id', None)
 
-        try:
-            payment_method = PaymentMethod.objects.get(
-                owner=user,
-                id=payment_id
-            )
-        except PaymentMethod.DoesNotExist:
-            payment_method = None
+        payment_method = PaymentMethod.objects.filter(
+            owner=user,
+            id=payment_id
+        ).first()
 
         try:
             item.buy(user, payment_method)
