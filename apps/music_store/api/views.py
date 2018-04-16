@@ -50,7 +50,7 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
 # ##############################################################################
 
 
-class AccountView(generics.RetrieveUpdateAPIView):
+class AccountView(generics.RetrieveAPIView):
     """View for AppUser to work with balance and selected payment methods"""
 
     serializer_class = PaymentAccountSerializer
