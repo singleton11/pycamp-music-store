@@ -21,7 +21,6 @@ class PaymentAccountSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
-    default_method = serializers.SerializerMethodField()
 
     class Meta:
         model = AppUser
@@ -29,14 +28,4 @@ class PaymentAccountSerializer(serializers.ModelSerializer):
             'user',
             'balance',
             'payment_methods',
-            'default_method',
         )
-
-    def validate(self, attrs):
-        # check that the Default method belongs to the methods used
-        default_method = attrs.get('default_method', None)
-        if default_method not in attrs.get('methods_used', []):
-            raise exceptions.ValidationError(
-                "The default method must belong to methods used"
-            )
-        return super().validate(attrs)
