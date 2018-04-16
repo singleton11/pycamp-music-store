@@ -4,11 +4,17 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
+from apps.music_store.admin import (
+    PaymentMethodInline,
+    PaymentTransactionInline,
+)
 from .models import AppUser
 
 
 @admin.register(AppUser)
 class AppUserAdmin(UserAdmin):
+    inlines = (PaymentMethodInline, PaymentTransactionInline)
+
     fieldsets = (
         (None, {
             'fields': (
@@ -53,8 +59,6 @@ class AppUserAdmin(UserAdmin):
         (_('Payment'), {
             'fields': (
                 'balance',
-                'methods_used',
-                'default_method',
             )
         })
     )
@@ -65,12 +69,19 @@ class AppUserAdmin(UserAdmin):
         'notifications',
     )
 
+    def _payment_methods(self, user):
+        return user.payment_methods
+
+    def _default_payment(self, user):
+        return user.default_payment
+
     def _avatar(self, user):
         if user.avatar:
             return format_html(mark_safe(
                 "<img src='{}' >".format(user.avatar.url)))
         else:
             return "None"
+
     _avatar.short_description = "Avatar"
 
     def _location(self, user):
@@ -79,8 +90,10 @@ class AppUserAdmin(UserAdmin):
             lat, lon)
         link = format_html("<a href='{0}'>{1}, {2}</a>", url, lat, lon)
         return link
+
     _location.short_description = 'Coordinates (latitude, longitude)'
 
     def _location_updated(self, user):
         return user.location_updated
+
     _location_updated.short_description = 'Location updated'
