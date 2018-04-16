@@ -100,13 +100,22 @@ class ItemViewSet(viewsets.mixins.ListModelMixin,
         methods=['post'],
         permission_classes=(permissions.IsAuthenticated,),
         url_path='buy',
+        url_name='buy_with_default_payment',
+    )
+    def buy_item_with_default(self, request, **kwargs):
+        """Method to buy item with using default payment method"""
+        return self.buy_item(request, payment_id=None)
+
+    @detail_route(
+        methods=['post'],
+        permission_classes=(permissions.IsAuthenticated,),
+        url_path='buy/(?P<payment_id>[0-9]?)',
         url_name='buy',
     )
-    def buy_item(self, request, **kwargs):
+    def buy_item(self, request, payment_id=None, **kwargs):
         """Method to buy item with using payment `payment_id`"""
         user = request.user
         item = self.get_object()
-        payment_id = self.request.query_params.get('payment_id', None)
 
         payment_method = PaymentMethod.objects.filter(
             owner=user,
