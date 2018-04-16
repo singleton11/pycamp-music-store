@@ -118,3 +118,6 @@ funcy
 
 # ip management
 IPy
+
+# swagger
+django-rest-swagger

@@ -54,6 +54,7 @@ django-picklefield==1.0.0
 django-push-notifications==1.6.0
 django-redis==4.9.0
 django-rest-auth==0.9.3
+django-rest-swagger==2.1.2
 django-storages==1.6.6
 django-taggit-serializer==0.1.5
 django-taggit==0.22.2
@@ -116,6 +117,7 @@ nbformat==4.4.0           # via ipywidgets, nbconvert, notebook
 notebook==5.4.1           # via jupyter, widgetsnbextension
 oauthlib==2.0.7           # via requests-oauthlib
 opbeat==3.6.1
+openapi-codec==1.3.2      # via django-rest-swagger
 packaging==17.1           # via sphinx
 pandocfilters==1.4.2      # via nbconvert
 paramiko==2.4.1           # via fabric3
@@ -165,7 +167,7 @@ send2trash==1.5.0         # via notebook
 sendgrid-django==4.2.0
 sendgrid==3.6.5           # via sendgrid-django
 simplegeneric==0.8.1      # via ipython
-simplejson==3.13.2        # via bravado-core
+simplejson==3.13.2        # via bravado-core, django-rest-swagger
 six==1.11.0               # via bcrypt, bleach, bravado-core, cryptography, django-cacheops, django-coverage-plugin, django-extensions, django-imagekit, django-rest-auth, djangorestframework-gis, fabric3, faker, freezegun, html5lib, livereload, munch, packaging, pip-tools, pockets, prompt-toolkit, pydocstyle, pynacl, python-dateutil, sphinx, sphinxcontrib-napoleon, swagger-spec-validator, traitlets, twilio
 snowballstemmer==1.2.1    # via pydocstyle, sphinx
 sphinx-autobuild==0.7.1

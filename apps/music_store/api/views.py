@@ -1,5 +1,3 @@
-import coreapi
-import coreschema
 from django.db.models import Q
 from rest_framework import filters, generics, permissions, viewsets, status
 from rest_framework.decorators import detail_route
@@ -38,7 +36,7 @@ from ...music_store.models import (
 # ##############################################################################
 
 class PaymentMethodViewSet(viewsets.ModelViewSet):
-    """ View for PaymentMethods """
+    """View for PaymentMethods"""
     serializer_class = PaymentMethodSerializer
     permission_classes = (permissions.IsAuthenticated,)
     queryset = PaymentMethod.objects.all()
@@ -53,7 +51,7 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
 
 
 class AccountView(generics.RetrieveUpdateAPIView):
-    """ View for AppUser to work with balance and selected payment methods """
+    """View for AppUser to work with balance and selected payment methods"""
 
     serializer_class = PaymentAccountSerializer
     permission_classes = (permissions.IsAuthenticated,)
@@ -236,8 +234,8 @@ class ListenTrackViewSet(viewsets.mixins.ListModelMixin,
 class GlobalSearchList(APIView):
     """View for global searching.
 
-    Search Tracks and Albums, which contain the value of get-parameter "query"
-    in the "title" or "author" fields.
+    Search Tracks and Albums, which contain the value of get-parameter `query`
+    in the `title` or `author` fields.
 
     """
     search_param = 'query'
@@ -253,17 +251,3 @@ class GlobalSearchList(APIView):
         albums = Album.objects.filter(search_filter)
         result = GlobalSearchSerializer({'tracks': tracks, 'albums': albums})
         return Response(data=result.data, status=status.HTTP_200_OK)
-
-    def get_schema_fields(self, view):
-        return [
-            coreapi.Field(
-                name=self.search_param,
-                required=True,
-                location='query',
-                schema=coreschema.String(
-                    title="The string to search",
-                    description="The string that will be used to "
-                                "search in the fields"
-                )
-            )
-        ]

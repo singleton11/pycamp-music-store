@@ -2,8 +2,11 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
+from rest_framework_swagger.views import get_swagger_view
 
 from rest_auth.registration.views import RegisterView
+
+schema_view = get_swagger_view(title='Music Store API')
 
 urlpatterns = [
     # ADMIN urls
@@ -17,6 +20,7 @@ urlpatterns = [
 
     url(r'^users/', include('apps.users.urls')),
     url(r'^api/v1/music_store/', include('apps.music_store.api.urls')),
+    url(r'^api/v1/docs/', schema_view),
 ]
 
 # for serving uploaded files on dev environment with django
