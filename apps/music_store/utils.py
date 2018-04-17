@@ -12,7 +12,13 @@ class AlbumUploader:
     author_title_delimiter = ' - '
 
     def _get_audio_data(self, audio_name):
-        """"""
+        """Get author and title values.
+
+        Args:
+            audio_name (str): Album or Track description in following format:
+                'author_name - title' or 'title'
+
+        """
         if audio_name.count(self.author_title_delimiter):
             author, title = audio_name.split(self.author_title_delimiter)
             return author, title
@@ -72,7 +78,7 @@ class AlbumUploader:
             )
 
     def no_nested_folders_in_albums(self, zip_file):
-        """"""
+        """Check if album folders contain nested directories"""
         for info in zip_file.infolist():
             # album directory contains nested directory
             if info.filename.count('/') > 1:
@@ -80,10 +86,29 @@ class AlbumUploader:
         return True
 
     def zip_album_handler(self, zip_file):
-        """"""
+        """Handler to get Albums and Tracks from zip archive.
+
+        zip archive must have following structure:
+
+            track_file_1.ext
+            track_file_2.ext
+            album_folder_1/track_file_1.ext
+            album_folder_1/track_file_2.ext
+            album_folder_2/track_file_1.ext
+
+        Track files in root directory have empty album field.
+        Track files in album_folder have album corresponding to album_folder.
+
+        Files and folders must have following format:
+            'author - title' or 'title'
+
+        Args:
+            zip_file (ZipFile): archive with Tracks and Albums.
+
+        """
         for info in zip_file.infolist():
-            track_data = self._get_data_from_filename(info.filename)
             track_file = zip_file.open(info.filename)
+            track_data = self._get_data_from_filename(info.filename)
             self._add_track(track_file, track_data)
             track_file.close()
 
