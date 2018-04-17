@@ -1,7 +1,6 @@
 import zipfile
 import re
 from .models import Album, Track
-from tempfile import NamedTemporaryFile
 
 
 class NestedDirectoryError(Exception):
@@ -74,21 +73,23 @@ def add_track(track_file):
         author = 'Unknown artist'
 
     # check existence of album
-    if album and not Album.objects.filter(author=author, album=album).exists():
+    if album and not Album.objects.filter(author=author, title=album).exists():
         album = Album.objects.create(author=author, title=album, price=100)
+    else:
+        album = Album.objects.filter(author=author, title=album).first()
 
     # check duplicates of track
     if not Track.objects.filter(author=author, title=track).exists():
-        with open(track_file) as tf:
-            content = tf.readlines()
-            Track.objects.create(
-                author=author,
-                title=track,
-                album=album,
-                full_version=content,
-                free_version='free_version',
-                price=10,
-            )
+        # with open(track_file) as tf:
+        content = track_file.readlines()
+        Track.objects.create(
+            author=author,
+            title=track,
+            album=album,
+            full_version=content,
+            free_version='free_version',
+            price=10,
+        )
 
 
 def handle_uploaded_archive(archive_file):
@@ -98,22 +99,17 @@ def handle_uploaded_archive(archive_file):
     with track files. Directories CAN NOT contain nested directories.
 
     """
-    with NamedTemporaryFile() as tmp_archive:
-        # put archive into temporary file tmp_file
-        for chunk in archive_file.chunks():
-            tmp_archive.write(chunk)
+    if not zipfile.is_zipfile(archive_file):
+        raise TypeError('It is not a ZIP archive!')
 
-        if not zipfile.is_zipfile(tmp_archive):
-            raise TypeError('It is not a ZIP archive!')
+    # process names
+    with zipfile.ZipFile(archive_file) as zf:
+        for info in zf.infolist():
+            track_file = zf.open(info.filename)
 
-        # process names
-        with zipfile.ZipFile(archive_file) as zf:
-            for info in zf.infolist():
-                track_file = tmp_archive.open(info.filename)
-
-                try:
-                    add_track(track_file)
-                except NestedDirectoryError as e:
-                    raise e
-
+            try:
+                add_track(track_file)
+            except NestedDirectoryError as e:
+                raise e
+            finally:
                 track_file.close()
