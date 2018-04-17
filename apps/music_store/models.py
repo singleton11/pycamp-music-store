@@ -86,10 +86,7 @@ class PaymentTransaction(TimeStampedModel):
         self.update_user_balance(self.user)
 
 
-class MusicItem(
-    TitleDescriptionModel,
-    TimeStampedModel,
-):
+class MusicItem(TitleDescriptionModel, TimeStampedModel):
     """Abstract base class for Album and Track.
 
     Attributes:
@@ -117,6 +114,54 @@ class MusicItem(
     def __str__(self):
         return f'{self.author} - {self.title}'
 
+    @property
+    def bought_model(self):
+        """Returns the corresponding model of purchased items"""
+        types = {
+            Album: BoughtAlbum,
+            Track: BoughtTrack,
+        }
+        return types.get(self.__class__)
+
+    def is_bought(self, user):
+        """Check if the track is bought by some user.
+
+        Args:
+            user (AppUser): probable owner of track.
+
+        """
+        return self.bought_model.objects.filter(user=user, item=self).exists()
+
+    def buy(self, user, payment_method=None):
+        """ Method for buy this item
+
+        Raises:
+            exceptions.ValidationError: User does not have enough money
+            exceptions.ValidationError: User don't have payment method
+        """
+
+        payment_method = payment_method or user.default_payment
+
+        if payment_method is None:
+            raise PaymentNotFound
+
+        if user.balance < self.price:
+            raise NotEnoughMoney
+
+        if self.bought_model.objects.filter(user=user, item=self).exists():
+            raise ItemAlreadyBought
+
+        transaction = PaymentTransaction.objects.create(
+            user=user,
+            amount=-self.price,
+            payment_method=payment_method,
+        )
+        self.bought_model.objects.create(
+            user=user,
+            item=self,
+            transaction=transaction,
+        )
+
 
 class Album(MusicItem):
     """Music album with its title, image, price and related tracks.
@@ -128,6 +173,9 @@ class Album(MusicItem):
         is_empty (bool): True if album does not have related tracks.
 
     """
+    bought_users = models.ManyToManyField(settings.AUTH_USER_MODEL,
+                                          through='BoughtAlbum',
+                                          related_name='albums')
     image = models.CharField(
         verbose_name=_('Image'),
         max_length=200
@@ -142,44 +190,6 @@ class Album(MusicItem):
         """bool: True if no related Tracks"""
         return not self.tracks.exists()
 
-    def is_bought(self, user):
-        """Check if the album is bought by the user.
-
-        Args:
-            user (AppUser): probable owner of album.
-
-        """
-        return BoughtAlbum.objects.filter(user=user, item=self).exists()
-
-    def buy(self, user, payment_method=None):
-        """ Method for buy this item
-
-        Raises:
-            exceptions.ValidationError: User does not have enough money
-            exceptions.ValidationError: User don't have payment method
-        """
-        payment_method = payment_method or user.default_payment
-
-        if payment_method is None:
-            raise PaymentNotFound
-
-        if user.balance < self.price:
-            raise NotEnoughMoney
-
-        if BoughtAlbum.objects.filter(user=user, item=self).exists():
-            raise ItemAlreadyBought
-
-        transaction = PaymentTransaction.objects.create(
-            user=user,
-            amount=-self.price,
-            payment_method=payment_method,
-        )
-        BoughtAlbum.objects.create(
-            user=user,
-            item=self,
-            transaction=transaction,
-        )
-
 
 class Track(MusicItem):
     """Music track with its title, price and album if exists.
@@ -191,6 +201,11 @@ class Track(MusicItem):
             Equal to full_version[:25].
 
     """
+    bought_users = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        through='BoughtTrack',
+        related_name='tracks'
+    )
     album = models.ForeignKey(
         'Album',
         verbose_name=_('Album'),
@@ -214,47 +229,7 @@ class Track(MusicItem):
 
         """
         self.free_version = self.full_version[:25]
-        super().save()
-
-    def is_bought(self, user):
-        """Check if the track is bought by the user.
-
-        Args:
-            user (AppUser): probable owner of track.
-
-        """
-        return BoughtTrack.objects.filter(user=user, item=self).exists()
-
-    def buy(self, user, payment_method=None):
-        """ Method for buy this item
-
-        Raises:
-            exceptions.ValidationError: User does not have enough money
-            exceptions.ValidationError: User don't have payment method
-        """
-
-        if payment_method is None:
-            payment_method = user.default_payment
-
-        if not payment_method:
-            raise PaymentNotFound
-
-        if user.balance < self.price:
-            raise NotEnoughMoney
-
-        if BoughtTrack.objects.filter(user=user, item=self).exists():
-            raise ItemAlreadyBought
-
-        transaction = PaymentTransaction.objects.create(
-            user=user,
-            amount=-self.price,
-            payment_method=payment_method,
-        )
-        BoughtTrack.objects.create(
-            user=user,
-            item=self,
-            transaction=transaction,
-        )
+        super().save(*args, **kwargs)
 
     def is_liked(self, user):
         """Check if the track is liked by the user.
@@ -326,7 +301,7 @@ class BoughtTrack(BoughtItem):
     """
     item = models.ForeignKey(
         'Track',
-        verbose_name=_('Track'),
+        verbose_name=_('track'),
         related_name='purchased',
     )
 
@@ -343,7 +318,7 @@ class BoughtAlbum(BoughtItem):
     """
     item = models.ForeignKey(
         'Album',
-        verbose_name=_('Album'),
+        verbose_name=_('album'),
         related_name='purchased',
     )
 
@@ -352,21 +327,19 @@ class BoughtAlbum(BoughtItem):
         verbose_name_plural = _('Bought albums')
 
 
-class LikeTrack(
-    TimeStampedModel,
-):
+class LikeTrack(TimeStampedModel):
     """A 'Like' to music track.
 
     Unique pair of user who likes track and track, that is liked by user.
 
     """
     track = models.ForeignKey(
-        Track,
+        'Track',
         verbose_name=_('Track'),
     )
     user = models.ForeignKey(
-        AppUser,
-        verbose_name=_('Liked by'),
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('User liked'),
     )
 
     class Meta:
@@ -378,20 +351,18 @@ class LikeTrack(
         return f'{self.user} liked {self.track}'
 
 
-class ListenTrack(
-    TimeStampedModel,
-):
+class ListenTrack(TimeStampedModel):
     """A note about each listening of any track by any user.
 
     Each track may be listened multiple times.
 
     """
     track = models.ForeignKey(
-        Track,
+        'Track',
         verbose_name=_('Track'),
     )
     user = models.ForeignKey(
-        AppUser,
+        settings.AUTH_USER_MODEL,
         verbose_name=_('Listened by'),
     )
 
