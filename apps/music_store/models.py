@@ -117,10 +117,11 @@ class MusicItem(TitleDescriptionModel, TimeStampedModel):
     @property
     def bought_model(self):
         """Returns the corresponding model of purchased items"""
-        if self.__class__ == Album:
-            return BoughtAlbum
-        if self.__class__ == Track:
-            return BoughtTrack
+        types = {
+            Album: BoughtAlbum,
+            Track: BoughtTrack,
+        }
+        return types.get(self.__class__)
 
     def is_bought(self, user):
         """Check if the track is bought by some user.
