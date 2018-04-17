@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+
+{# This is template, which add one action `upload file` to action panel
+on list Album objects #}
+
+{% block object-tools-items %}
+  <li>
+    <a href="{% url "admin:album_upload_archive" %}" class="addlink">
+      Upload archive
+    </a>
+  </li>
+  {{ block.super }}
+{% endblock %}

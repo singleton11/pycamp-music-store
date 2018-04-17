@@ -121,14 +121,17 @@ class AlbumAdmin(admin.ModelAdmin):
         }),
     )
 
-    change_list_template = 'music_store/album/change_list.html'
+    change_list_template = 'admin/album/change_list.html'
 
     def get_urls(self):
         """Override method `get_urls()` for add custom urls."""
         urls = super().get_urls()
         my_urls = [
-            url(r'^upload_archive/$',
-                self.admin_site.admin_view(AlbumUploadArchiveView.as_view())),
+            url(
+                r'^upload_archive/$',
+                self.admin_site.admin_view(AlbumUploadArchiveView.as_view()),
+                name='album_upload_archive',
+            ),
         ]
         return my_urls + urls
 
