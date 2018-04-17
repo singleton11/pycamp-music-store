@@ -19,3 +19,5 @@ def handle_uploaded_archive(file):
         """
         for chunk in file.chunks():
             tmp_file.write(chunk)
+
+        # Work with `tmp_file` here
