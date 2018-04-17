@@ -1,9 +1,7 @@
 from django.views.generic import FormView
 
-from apps.music_store.forms import (
-    AlbumUploadArchiveForm,
-    handle_uploaded_archive,
-)
+from apps.music_store.forms import AlbumUploadArchiveForm
+from apps.music_store.utils import handle_uploaded_archive
 
 
 class AlbumUploadArchiveView(FormView):
