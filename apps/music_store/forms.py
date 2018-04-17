@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile
 from django.forms import forms
 
 
-class TrackUploadArchiveForm(forms.Form):
+class AlbumUploadArchiveForm(forms.Form):
     """Form for upload archive"""
     file = forms.FileField()
 

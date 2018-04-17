@@ -12,7 +12,7 @@ from apps.music_store.models import (
     PaymentTransaction,
     PaymentMethod,
 )
-from apps.music_store.views import TrackUploadArchiveView
+from apps.music_store.views import AlbumUploadArchiveView
 
 admin.site.register(PaymentMethod)
 admin.site.register(PaymentTransaction)
@@ -85,17 +85,6 @@ class TrackAdmin(admin.ModelAdmin):
         }),
     )
 
-    change_list_template = 'music_store/track/change_list.html'
-
-    def get_urls(self):
-        from django.conf.urls import url
-        urls = super(TrackAdmin, self).get_urls()
-        my_urls = [
-            url(r'^upload_archive/$',
-                self.admin_site.admin_view(TrackUploadArchiveView.as_view())),
-        ]
-        return my_urls + urls
-
 
 @admin.register(Album)
 class AlbumAdmin(admin.ModelAdmin):
@@ -129,6 +118,17 @@ class AlbumAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+    change_list_template = 'music_store/album/change_list.html'
+
+    def get_urls(self):
+        from django.conf.urls import url
+        urls = super(AlbumAdmin, self).get_urls()
+        my_urls = [
+            url(r'^upload_archive/$',
+                self.admin_site.admin_view(AlbumUploadArchiveView.as_view())),
+        ]
+        return my_urls + urls
 
 
 @admin.register(LikeTrack)
