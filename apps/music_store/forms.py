@@ -21,3 +21,4 @@ def handle_uploaded_archive(file):
             tmp_file.write(chunk)
 
         # Work with `tmp_file` here
+        print(tmp_file)

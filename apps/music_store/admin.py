@@ -1,7 +1,9 @@
 from django import forms
+from django.conf.urls import url
 from django.contrib import admin
 from django.forms.widgets import Textarea
 from django.utils.translation import ugettext_lazy as _
+
 from apps.music_store.models import (
     Album,
     BoughtAlbum,
@@ -122,8 +124,8 @@ class AlbumAdmin(admin.ModelAdmin):
     change_list_template = 'music_store/album/change_list.html'
 
     def get_urls(self):
-        from django.conf.urls import url
-        urls = super(AlbumAdmin, self).get_urls()
+        """Override method `get_urls()` for add custom urls."""
+        urls = super().get_urls()
         my_urls = [
             url(r'^upload_archive/$',
                 self.admin_site.admin_view(AlbumUploadArchiveView.as_view())),

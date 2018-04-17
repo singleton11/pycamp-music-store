@@ -12,17 +12,17 @@ class AlbumUploadArchiveView(FormView):
     template_name = 'music_store/album/upload_archive.html'
     success_url = '/admin/music_store/album/'
 
-    def post(self, request, *args, **kwargs):
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        file = request.FILES.get('file')
-        if form.is_valid():
-            handle_uploaded_archive(file)
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
+    def form_valid(self, form):
+        """Override method to actions with a valid form data.
+
+        Concretely, for send a uploaded archive to file handler.
+        """
+        file = form.files.get('file')
+        handle_uploaded_archive(file)
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
+        """Override method for add `title` in context."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Albums Upload'
         return context
