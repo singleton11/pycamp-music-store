@@ -29,11 +29,7 @@ def get_audio_data(audio_name):
 
 def get_data_from_filename(filename):
     """Get author, album title and track title from filename"""
-    data = {
-        'author': '',
-        'album': '',
-        'track': '',
-    }
+    data = dict()
     # album directory contains nested directory
     if filename.count('/') > 1:
         raise NestedDirectoryError(
@@ -105,6 +101,7 @@ def handle_uploaded_archive(archive_file):
     # process names
     with zipfile.ZipFile(archive_file) as zf:
         for info in zf.infolist():
+
             track_file = zf.open(info.filename)
 
             try:
