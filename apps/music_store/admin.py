@@ -1,9 +1,7 @@
 from django import forms
 from django.contrib import admin
 from django.forms.widgets import Textarea
-from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
-
 from apps.music_store.models import (
     Album,
     BoughtAlbum,
@@ -14,6 +12,7 @@ from apps.music_store.models import (
     PaymentTransaction,
     PaymentMethod,
 )
+from apps.music_store.views import TrackUploadArchiveView
 
 admin.site.register(PaymentMethod)
 admin.site.register(PaymentTransaction)
@@ -24,6 +23,7 @@ class TrackAdminForm(forms.ModelForm):
     'free_Version' fields.
 
     """
+
     class Meta:
         model = Track
         widgets = {
@@ -91,19 +91,10 @@ class TrackAdmin(admin.ModelAdmin):
         from django.conf.urls import url
         urls = super(TrackAdmin, self).get_urls()
         my_urls = [
-            url(r'^upload_archive/$',  self.admin_site.admin_view(self.my_view)),
+            url(r'^upload_archive/$',
+                self.admin_site.admin_view(TrackUploadArchiveView.as_view())),
         ]
         return my_urls + urls
-
-    def my_view(self, request):
-        # ...
-        context = dict(
-           # Include common variables for rendering the admin template.
-           self.admin_site.each_context(request),
-           # Anything else you want in the context...
-           denis="super",
-        )
-        return TemplateResponse(request, "music_store/upload_archive.html", context)
 
 
 @admin.register(Album)
