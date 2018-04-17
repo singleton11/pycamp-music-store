@@ -18,6 +18,26 @@ admin.site.register(PaymentMethod)
 admin.site.register(PaymentTransaction)
 
 
+
+class PaymentTransactionInline(admin.TabularInline):
+    """Inline PaymentMethod to display list of payments."""
+    model = PaymentTransaction
+    fields = (
+        'created',
+        'payment_method',
+        'amount',
+    )
+    readonly_fields = fields
+
+class PaymentMethodInline(admin.TabularInline):
+    """Inline PaymentMethod to display list of payments."""
+    model = PaymentMethod
+    fields = (
+        'title',
+        'is_default',
+    )
+
+
 class TrackAdminForm(forms.ModelForm):
     """Custom form to display Track with small text boxes for 'full_version' and
     'free_Version' fields.
