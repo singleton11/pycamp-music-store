@@ -50,7 +50,7 @@ class AlbumUploader:
 
         """
         track_title = track_data.get('track', 'Unknown Track')
-        album_title = track_data.get('album', None)
+        album_title = track_data.get('album')
         author = track_data.get('author', 'Unknown artist')
 
         # check existence of album

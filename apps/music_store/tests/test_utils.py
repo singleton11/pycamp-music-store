@@ -1,9 +1,9 @@
-from apps.music_store.utils import (
+from ..utils import (
     handle_uploaded_archive,
     NestedDirectoryError,
     AlbumUploader,
 )
-from apps.music_store.models import Track, Album
+from ..models import Track, Album
 from unittest.mock import patch, Mock, mock_open
 from django.test import TestCase
 from faker import Faker
@@ -14,21 +14,17 @@ mock_openfile = mock_open(read_data=fake.sentence(30))
 
 
 def mock_infolist():
-    """Mock of Zipfile.infolist() method.
-
-    """
+    """Mock of Zipfile.infolist() method."""
     files = [
         Mock(filename=fake.file_name()),
-        Mock(filename=f'{fake.word()} - {fake.file_name()}'),
-        Mock(filename=f'{fake.word()}/{fake.file_name()}'),
-        Mock(filename=f'{fake.word()} - {fake.word()}/{fake.file_name()}'),
+        Mock(filename=f'{fake.word()} - {fake.word()}.txt'),
+        Mock(filename=f'{fake.word()}/{fake.word()}.txt'),
+        Mock(filename=f'{fake.word()} - {fake.word()}/{fake.word()}.txt'),
     ]
     return files
 
 
 class TestUploadZIPArchive(TestCase):
-    """"""
-
     @classmethod
     def setUpTestData(cls):
         cls.archive = Mock()
@@ -52,7 +48,7 @@ class TestUploadZIPArchive(TestCase):
             with self.assertRaises(NestedDirectoryError):
                 handle_uploaded_archive(self.archive)
 
-    def test_data_from_filename_filename_with_only_track_title(self):
+    def test_data_from_filename_with_only_track_title(self):
         filename = f'{self.track_title}'
         self.assertEqual(
             self.handler._get_data_from_filename(filename),
@@ -62,7 +58,7 @@ class TestUploadZIPArchive(TestCase):
             }
         )
 
-    def test_data_from_filename_filename_with_author_and_track_title(self):
+    def test_data_from_filename_with_author_and_track_title(self):
         filename = f'{self.author} - {self.track_title}'
         self.assertEqual(
             self.handler._get_data_from_filename(filename),
@@ -72,7 +68,7 @@ class TestUploadZIPArchive(TestCase):
             }
         )
 
-    def test_data_from_filename_filename_with_album_and_track_title(self):
+    def test_data_from_filename_with_album_and_track_title(self):
         filename = f'{self.album_title}/{self.track_title}'
         self.assertEqual(
             self.handler._get_data_from_filename(filename),
@@ -83,7 +79,7 @@ class TestUploadZIPArchive(TestCase):
             }
         )
 
-    def test_data_from_filename_filename_full_info(self):
+    def test_data_from_filename_full_info(self):
         filename = f'{self.author} - {self.album_title}/{self.track_title}'
         self.assertEqual(
             self.handler._get_data_from_filename(filename),
@@ -100,14 +96,5 @@ class TestUploadZIPArchive(TestCase):
 
         self.handler.zip_album_handler(self.archive)
 
-        self.assertEqual(
-            Track.objects.all().count(),
-            4
-        )
-
-        self.assertEqual(
-            Album.objects.all().count(),
-            2
-        )
-
-
+        self.assertEqual(Track.objects.all().count(), 4)
+        self.assertEqual(Album.objects.all().count(), 2)
