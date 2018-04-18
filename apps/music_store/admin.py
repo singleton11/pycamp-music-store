@@ -1,4 +1,5 @@
 from django import forms
+from django.conf.urls import url
 from django.contrib import admin
 from django.forms.widgets import Textarea
 from django.utils.translation import ugettext_lazy as _
@@ -13,6 +14,7 @@ from apps.music_store.models import (
     PaymentTransaction,
     PaymentMethod,
 )
+from apps.music_store.views import AlbumUploadArchiveView
 
 admin.site.register(PaymentMethod)
 admin.site.register(PaymentTransaction)
@@ -43,6 +45,7 @@ class TrackAdminForm(forms.ModelForm):
     'free_Version' fields.
 
     """
+
     class Meta:
         model = Track
         widgets = {
@@ -137,6 +140,20 @@ class AlbumAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+    change_list_template = 'admin/album/change_list.html'
+
+    def get_urls(self):
+        """Override method `get_urls()` for add custom urls."""
+        urls = super().get_urls()
+        my_urls = [
+            url(
+                r'^upload_archive/$',
+                self.admin_site.admin_view(AlbumUploadArchiveView.as_view()),
+                name='album_upload_archive',
+            ),
+        ]
+        return my_urls + urls
 
 
 @admin.register(LikeTrack)
