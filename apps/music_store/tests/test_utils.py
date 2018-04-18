@@ -7,7 +7,6 @@ from apps.music_store.models import Track, Album
 from unittest.mock import patch, Mock, mock_open
 from django.test import TestCase
 from faker import Faker
-from zipfile import ZipFile
 
 
 fake = Faker()
@@ -32,7 +31,7 @@ class TestUploadZIPArchive(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.archive = './apps/music_store/tests/test.zip'
+        cls.archive = Mock()
         cls.handler = AlbumUploader()
         cls.track_title = fake.word()
         cls.album_title = fake.word()
@@ -45,12 +44,13 @@ class TestUploadZIPArchive(TestCase):
         with self.assertRaises(TypeError):
             handle_uploaded_archive(self.archive)
 
-    @patch.object(AlbumUploader, 'no_nested_folders_in_albums', return_value=False)
-    def test_archive_with_nested_directories(self, mock_add_track):
+    @patch('zipfile.is_zipfile', return_value=True)
+    @patch.object(AlbumUploader, 'no_folders_in_albums', return_value=False)
+    def test_archive_with_nested_directories(self, mock_add_track, mock_iszip):
         """Test for nested directories in album folder"""
-
-        with self.assertRaises(NestedDirectoryError):
-            handle_uploaded_archive(self.archive)
+        with patch('zipfile.ZipFile') as mock:
+            with self.assertRaises(NestedDirectoryError):
+                handle_uploaded_archive(self.archive)
 
     def test_data_from_filename_filename_with_only_track_title(self):
         filename = f'{self.track_title}'
@@ -96,9 +96,10 @@ class TestUploadZIPArchive(TestCase):
             }
         )
 
-    @patch.object(ZipFile, 'infolist()', mock_infolist)
-    @patch('builtins.open', mock_openfile)
     def test_zip_album_handler(self):
+        self.archive.infolist = mock_infolist
+        self.archive.open = mock_openfile
+
         self.handler.zip_album_handler(self.archive)
 
         self.assertEqual(

@@ -57,8 +57,8 @@ class AlbumUploader:
         if not author:
             author = 'Unknown artist'
         # check existence of album
-        if album_title and not Album.objects.filter(author=author,
-                                                    title=album_title).exists():
+        if album_title and not Album.objects.filter(title=album_title,
+                                                    author=author,).exists():
             album = Album.objects.create(author=author,
                                          title=album_title,
                                          price=randrange(100, 200))
@@ -77,7 +77,7 @@ class AlbumUploader:
                 price=randrange(5, 10),
             )
 
-    def no_nested_folders_in_albums(self, zip_file):
+    def no_folders_in_albums(self, zip_file):
         """Check if album folders contain nested directories"""
         for info in zip_file.infolist():
             # album directory contains nested directory
@@ -127,6 +127,6 @@ def handle_uploaded_archive(archive_file):
 
     # process names
     with zipfile.ZipFile(archive_file) as zf:
-        if not album_uploader.no_nested_folders_in_albums(zf):
+        if not album_uploader.no_folders_in_albums(zf):
             raise NestedDirectoryError(f'{zf.name} contains nested directory!')
         album_uploader.zip_album_handler(zf)
