@@ -20,7 +20,6 @@ admin.site.register(PaymentMethod)
 admin.site.register(PaymentTransaction)
 
 
-
 class PaymentTransactionInline(admin.TabularInline):
     """Inline PaymentMethod to display list of payments."""
     model = PaymentTransaction
@@ -30,6 +29,7 @@ class PaymentTransactionInline(admin.TabularInline):
         'amount',
     )
     readonly_fields = fields
+
 
 class PaymentMethodInline(admin.TabularInline):
     """Inline PaymentMethod to display list of payments."""
