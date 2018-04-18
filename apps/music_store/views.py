@@ -1,7 +1,10 @@
 from django.views.generic import FormView
 
 from apps.music_store.forms import AlbumUploadArchiveForm
-from apps.music_store.utils import handle_uploaded_archive
+
+from django.core.files.storage import default_storage
+from .tasks import get_albums_from_zip
+import random
 
 
 class AlbumUploadArchiveView(FormView):
@@ -16,7 +19,11 @@ class AlbumUploadArchiveView(FormView):
         Concretely, for send a uploaded archive to file handler.
         """
         file = form.files.get('file')
-        handle_uploaded_archive(file)
+        filepath = default_storage.save(
+            name=f'{random.randint(100, 1000)}_{random.randint(100, 1000)}.zip',
+            content=file
+        )
+        get_albums_from_zip(filepath)
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
