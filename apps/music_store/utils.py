@@ -26,23 +26,22 @@ class AlbumUploader:
 
     def _get_data_from_filename(self, filename):
         """Get author, album title and track title from filename"""
-        data = dict()
         # track file in album directory
         if filename.count('/') == 1:
             album, track = filename.split('/')
             album_author, album_title = self._get_audio_data(album)
             track_author, track_title = self._get_audio_data(track)
-
-            data['author'] = album_author
-            data['album'] = album_title
-            data['track'] = track_title
+            return {
+                'author': album_author,
+                'album': album_title,
+                'track': track_title,
+            }
         # track without album
-        else:
-            data['album'] = None
-            track_author, track_title = self._get_audio_data(filename)
-            data['author'] = track_author
-            data['track'] = track_title
-        return data
+        track_author, track_title = self._get_audio_data(filename)
+        return {
+            'author': track_author,
+            'track': track_title,
+        }
 
     def _add_track(self, track_file, track_data):
         """Create Track from file if it does not exist.
@@ -50,12 +49,10 @@ class AlbumUploader:
         If album does not exist, create it. Otherwise update existing album.
 
         """
-        track_title = track_data['track']
-        album_title = track_data['album']
-        author = track_data['author']
+        track_title = track_data.get('track', 'Unknown Track')
+        album_title = track_data.get('album', None)
+        author = track_data.get('author', 'Unknown artist')
 
-        if not author:
-            author = 'Unknown artist'
         # check existence of album
         if album_title and not Album.objects.filter(title=album_title,
                                                     author=author,).exists():

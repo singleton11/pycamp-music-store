@@ -58,7 +58,6 @@ class TestUploadZIPArchive(TestCase):
             self.handler._get_data_from_filename(filename),
             {
                 'author': None,
-                'album': None,
                 'track': self.track_title
             }
         )
@@ -69,7 +68,6 @@ class TestUploadZIPArchive(TestCase):
             self.handler._get_data_from_filename(filename),
             {
                 'author': self.author,
-                'album': None,
                 'track': self.track_title
             }
         )
