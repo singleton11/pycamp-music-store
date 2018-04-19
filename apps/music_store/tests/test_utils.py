@@ -41,7 +41,7 @@ class TestUploadZIPArchive(TestCase):
             handle_uploaded_archive(self.archive)
 
     @patch('zipfile.is_zipfile', return_value=True)
-    @patch.object(AlbumUploader, 'no_folders_in_albums', return_value=False)
+    @patch.object(AlbumUploader, 'is_no_folders_in_albums', return_value=False)
     def test_archive_with_nested_directories(self, mock_add_track, mock_iszip):
         """Test for nested directories in album folder"""
         with patch('zipfile.ZipFile') as mock:
@@ -52,42 +52,28 @@ class TestUploadZIPArchive(TestCase):
         filename = f'{self.track_title}'
         self.assertEqual(
             self.handler._get_data_from_filename(filename),
-            {
-                'author': None,
-                'track': self.track_title
-            }
+            ('Unknown artist', None, self.track_title,)
         )
 
     def test_data_from_filename_with_author_and_track_title(self):
         filename = f'{self.author} - {self.track_title}'
         self.assertEqual(
             self.handler._get_data_from_filename(filename),
-            {
-                'author': self.author,
-                'track': self.track_title
-            }
+            (self.author, None, self.track_title,)
         )
 
     def test_data_from_filename_with_album_and_track_title(self):
         filename = f'{self.album_title}/{self.track_title}'
         self.assertEqual(
             self.handler._get_data_from_filename(filename),
-            {
-                'author': None,
-                'album': self.album_title,
-                'track': self.track_title
-            }
+            ('Unknown artist', self.album_title, self.track_title,)
         )
 
     def test_data_from_filename_full_info(self):
         filename = f'{self.author} - {self.album_title}/{self.track_title}'
         self.assertEqual(
             self.handler._get_data_from_filename(filename),
-            {
-                'author': self.author,
-                'album': self.album_title,
-                'track': self.track_title
-            }
+            (self.author, self.album_title, self.track_title,)
         )
 
     def test_zip_album_handler(self):

@@ -96,14 +96,14 @@ class MusicItem(TitleDescriptionModel, TimeStampedModel):
 
     """
     author = models.CharField(
-        verbose_name=_('Author'),
+        verbose_name=_('author'),
         blank=True,
         null=True,
         max_length=200,
     )
 
     price = models.BigIntegerField(
-        verbose_name=_('Price'),
+        verbose_name=_('price'),
         validators=[MinValueValidator(0)]
     )
 
@@ -208,21 +208,22 @@ class Track(MusicItem):
     )
     album = models.ForeignKey(
         'Album',
-        verbose_name=_('Album'),
+        verbose_name=_('album'),
         blank=True,
         null=True,
         related_name='tracks'
     )
     full_version = models.TextField(
-        verbose_name=_('Full version'),
+        verbose_name=_('full version'),
     )
     free_version = models.TextField(
-        verbose_name=_('Free version'),
+        verbose_name=_('free version'),
+        default='free version'
     )
 
     class Meta(MusicItem.Meta):
-        verbose_name = _('Audio Track')
-        verbose_name_plural = _('Audio Tracks')
+        verbose_name = _('Track')
+        verbose_name_plural = _('Tracks')
 
     def save(self, *args, **kwargs):
         """Saves reduced data to free_version field.
@@ -334,12 +335,12 @@ class LikeTrack(TimeStampedModel):
 
     """
     track = models.ForeignKey(
-        'Track',
-        verbose_name=_('Track'),
+        Track,
+        verbose_name=_('track'),
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name=_('User liked'),
+        verbose_name=_('liked by'),
     )
 
     class Meta:
@@ -358,8 +359,8 @@ class ListenTrack(TimeStampedModel):
 
     """
     track = models.ForeignKey(
-        'Track',
-        verbose_name=_('Track'),
+        Track,
+        verbose_name=_('track'),
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
