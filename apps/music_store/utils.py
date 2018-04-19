@@ -8,73 +8,18 @@ class NestedDirectoryError(Exception):
 
 
 class AlbumUploader:
-    """"""
+    """Class for uploading albums and tracks.
+
+    Provide handlers to get albums and tracks from uploaded files,
+    get album and track titles and author from file names
+    and put them into database.
+
+    """
     author_title_delimiter = ' - '
+    album_price = randrange(100, 200)
+    track_price = randrange(5, 10)
 
-    def _get_audio_data(self, audio_name):
-        """Get author and title values.
-
-        Args:
-            audio_name (str): Album or Track description in following format:
-                'author_name - title' or 'title'
-
-        """
-        if audio_name.count(self.author_title_delimiter):
-            author, title = audio_name.split(self.author_title_delimiter)
-            return author, title
-        return None, audio_name
-
-    def _get_data_from_filename(self, filename):
-        """Get author, album title and track title from filename"""
-        # track file in album directory
-        if filename.count('/') == 1:
-            album, track = filename.split('/')
-            album_author, album_title = self._get_audio_data(album)
-            track_author, track_title = self._get_audio_data(track)
-            return {
-                'author': album_author,
-                'album': album_title,
-                'track': track_title,
-            }
-        # track without album
-        track_author, track_title = self._get_audio_data(filename)
-        return {
-            'author': track_author,
-            'track': track_title,
-        }
-
-    def _add_track(self, track_file, track_data):
-        """Create Track from file if it does not exist.
-
-        If album does not exist, create it. Otherwise update existing album.
-
-        """
-        track_title = track_data.get('track', 'Unknown Track')
-        album_title = track_data.get('album')
-        author = track_data.get('author', 'Unknown artist')
-
-        # check existence of album
-        if album_title and not Album.objects.filter(title=album_title,
-                                                    author=author,).exists():
-            album = Album.objects.create(author=author,
-                                         title=album_title,
-                                         price=randrange(100, 200))
-        else:
-            album = Album.objects.filter(author=author,
-                                         title=album_title).first()
-        # check duplicates of track
-        if not Track.objects.filter(author=author, title=track_title).exists():
-            content = track_file.readlines()
-            Track.objects.create(
-                author=author,
-                title=track_title,
-                album=album,
-                full_version=content,
-                free_version='',
-                price=randrange(5, 10),
-            )
-
-    def no_folders_in_albums(self, zip_file):
+    def is_no_folders_in_albums(self, zip_file):
         """Check if album folders contain nested directories"""
         for info in zip_file.infolist():
             # album directory contains nested directory
@@ -109,6 +54,73 @@ class AlbumUploader:
             self._add_track(track_file, track_data)
             track_file.close()
 
+    def _add_track(self, track_file, track_data):
+        """Create Track from file if it does not exist.
+
+        If album does not exist, create it. Otherwise update existing album.
+
+        """
+        track_title = track_data.get('track', 'Unknown Track')
+        album_title = track_data.get('album')
+        author = track_data.get('author', 'Unknown artist')
+
+        # check existence of album
+        album = None
+        if album_title:
+            album, _ = Album.objects.get_or_create(
+                author=author,
+                title=album_title,
+                price=self.album_price,
+                defaults={'title': album_title, 'author': author}
+            )
+
+        # check duplicates of track
+        if not Track.objects.filter(author=author, title=track_title).exists():
+            content = track_file.readlines()
+            Track.objects.create(
+                author=author,
+                title=track_title,
+                album=album,
+                full_version=content,
+                price=self.track_price,
+            )
+
+    def _get_data_from_filename(self, filename):
+        """Get author, album title and track title from filename"""
+        # track file in album directory
+        if filename.count('/') == 1:
+            album, track = filename.split('/')
+            album_author, album_title = self._get_audio_data(album)
+            track_author, track_title = self._get_audio_data(track)
+            return {
+                'author': album_author,
+                'album': album_title,
+                'track': track_title,
+            }
+        # track without album
+        track_author, track_title = self._get_audio_data(filename)
+        return {
+            'author': track_author,
+            'track': track_title,
+        }
+
+    def _get_audio_data(self, audio_name):
+        """Get author and title values.
+
+        Args:
+            audio_name (str): Album or Track description in following format:
+                'author_name - title' or 'title'
+
+        Returns:
+            (tuple): author(str) and title(str) if audio_name contain both
+                or None and title(str) if audio_name contain only title
+
+        """
+        if audio_name.count(self.author_title_delimiter):
+            author, title = audio_name.split(self.author_title_delimiter)
+            return author, title
+        return None, audio_name
+
 
 def handle_uploaded_archive(archive_file):
     """Handler of zip archive with albums and tracks.
@@ -124,6 +136,6 @@ def handle_uploaded_archive(archive_file):
 
     # process names
     with zipfile.ZipFile(archive_file) as zf:
-        if not album_uploader.no_folders_in_albums(zf):
+        if not album_uploader.is_no_folders_in_albums(zf):
             raise NestedDirectoryError(f'{zf.name} contains nested directory!')
         album_uploader.zip_album_handler(zf)

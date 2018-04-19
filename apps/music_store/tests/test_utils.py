@@ -41,7 +41,7 @@ class TestUploadZIPArchive(TestCase):
             handle_uploaded_archive(self.archive)
 
     @patch('zipfile.is_zipfile', return_value=True)
-    @patch.object(AlbumUploader, 'no_folders_in_albums', return_value=False)
+    @patch.object(AlbumUploader, 'is_no_folders_in_albums', return_value=False)
     def test_archive_with_nested_directories(self, mock_add_track, mock_iszip):
         """Test for nested directories in album folder"""
         with patch('zipfile.ZipFile') as mock:

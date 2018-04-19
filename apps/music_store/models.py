@@ -99,14 +99,14 @@ class MusicItem(
 
     """
     author = models.CharField(
-        verbose_name=_('Author'),
+        verbose_name=_('author'),
         blank=True,
         null=True,
         max_length=200,
     )
 
     price = models.BigIntegerField(
-        verbose_name=_('Price'),
+        verbose_name=_('price'),
         validators=[MinValueValidator(0)]
     )
 
@@ -129,13 +129,13 @@ class Album(MusicItem):
 
     """
     image = models.CharField(
-        verbose_name=_('Image'),
+        verbose_name=_('image'),
         max_length=200
     )
 
     class Meta(MusicItem.Meta):
-        verbose_name = _('Music Album')
-        verbose_name_plural = _('Music Albums')
+        verbose_name = _('Album')
+        verbose_name_plural = _('Albums')
 
     @property
     def is_empty(self):
@@ -193,21 +193,22 @@ class Track(MusicItem):
     """
     album = models.ForeignKey(
         'Album',
-        verbose_name=_('Album'),
+        verbose_name=_('album'),
         blank=True,
         null=True,
         related_name='tracks'
     )
     full_version = models.TextField(
-        verbose_name=_('Full version'),
+        verbose_name=_('full version'),
     )
     free_version = models.TextField(
-        verbose_name=_('Free version'),
+        verbose_name=_('free version'),
+        default='free version'
     )
 
     class Meta(MusicItem.Meta):
-        verbose_name = _('Audio Track')
-        verbose_name_plural = _('Audio Tracks')
+        verbose_name = _('Track')
+        verbose_name_plural = _('Tracks')
 
     def save(self, *args, **kwargs):
         """Saves reduced data to free_version field.
@@ -326,7 +327,7 @@ class BoughtTrack(BoughtItem):
     """
     item = models.ForeignKey(
         'Track',
-        verbose_name=_('Track'),
+        verbose_name=_('track'),
         related_name='purchased',
     )
 
@@ -343,7 +344,7 @@ class BoughtAlbum(BoughtItem):
     """
     item = models.ForeignKey(
         'Album',
-        verbose_name=_('Album'),
+        verbose_name=_('album'),
         related_name='purchased',
     )
 
@@ -362,11 +363,11 @@ class LikeTrack(
     """
     track = models.ForeignKey(
         Track,
-        verbose_name=_('Track'),
+        verbose_name=_('track'),
     )
     user = models.ForeignKey(
         AppUser,
-        verbose_name=_('Liked by'),
+        verbose_name=_('liked by'),
     )
 
     class Meta:
@@ -388,11 +389,11 @@ class ListenTrack(
     """
     track = models.ForeignKey(
         Track,
-        verbose_name=_('Track'),
+        verbose_name=_('track'),
     )
     user = models.ForeignKey(
         AppUser,
-        verbose_name=_('Listened by'),
+        verbose_name=_('listened by'),
     )
 
     class Meta:
