@@ -1,6 +1,6 @@
 import zipfile
-from random import randrange
 from .models import Album, Track
+from collections import namedtuple
 
 
 class NestedDirectoryError(Exception):
@@ -16,8 +16,6 @@ class AlbumUploader:
 
     """
     author_title_delimiter = ' - '
-    album_price = randrange(100, 200)
-    track_price = randrange(5, 10)
 
     def is_no_folders_in_albums(self, zip_file):
         """Check if album folders contain nested directories"""
@@ -60,49 +58,42 @@ class AlbumUploader:
         If album does not exist, create it. Otherwise update existing album.
 
         """
-        track_title = track_data.get('track', 'Unknown Track')
-        album_title = track_data.get('album')
-        author = track_data.get('author', 'Unknown artist')
-
         # check existence of album
         album = None
-        if album_title:
+        if track_data.album:
             album, _ = Album.objects.get_or_create(
-                author=author,
-                title=album_title,
-                price=self.album_price,
-                defaults={'title': album_title, 'author': author}
+                author=track_data.author,
+                title=track_data.album,
+                defaults={
+                    'title': track_data.album,
+                    'author': track_data.author
+                }
             )
 
         # check duplicates of track
-        if not Track.objects.filter(author=author, title=track_title).exists():
+        if not Track.objects.filter(author=track_data.author,
+                                    title=track_data.track).exists():
             content = track_file.readlines()
             Track.objects.create(
-                author=author,
-                title=track_title,
+                author=track_data.author,
+                title=track_data.track,
                 album=album,
                 full_version=content,
-                price=self.track_price,
             )
 
     def _get_data_from_filename(self, filename):
         """Get author, album title and track title from filename"""
+        track_data = namedtuple('TrackData', ['author', 'album', 'track'])
+
         # track file in album directory
         if filename.count('/') == 1:
             album, track = filename.split('/')
             album_author, album_title = self._get_audio_data(album)
-            track_author, track_title = self._get_audio_data(track)
-            return {
-                'author': album_author,
-                'album': album_title,
-                'track': track_title,
-            }
+            _, track_title = self._get_audio_data(track)
+            return track_data(album_author, album_title, track_title)
         # track without album
         track_author, track_title = self._get_audio_data(filename)
-        return {
-            'author': track_author,
-            'track': track_title,
-        }
+        return track_data(track_author, None, track_title)
 
     def _get_audio_data(self, audio_name):
         """Get author and title values.
@@ -119,7 +110,7 @@ class AlbumUploader:
         if audio_name.count(self.author_title_delimiter):
             author, title = audio_name.split(self.author_title_delimiter)
             return author, title
-        return None, audio_name
+        return 'Unknown artist', audio_name
 
 
 def handle_uploaded_archive(archive_file):
