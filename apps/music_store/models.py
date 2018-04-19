@@ -104,7 +104,9 @@ class MusicItem(TitleDescriptionModel, TimeStampedModel):
 
     price = models.BigIntegerField(
         verbose_name=_('price'),
-        validators=[MinValueValidator(0)]
+        validators=[MinValueValidator(0)],
+        blank=True,
+        null=True,
     )
 
     class Meta:
