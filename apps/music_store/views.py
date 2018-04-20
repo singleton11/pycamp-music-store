@@ -23,7 +23,7 @@ class AlbumUploadArchiveView(FormView):
             name=f'{random.randint(100, 999)}_{random.randint(100, 999)}.zip',
             content=file
         )
-        get_albums_from_zip(filepath)
+        get_albums_from_zip.delay(filepath)
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
