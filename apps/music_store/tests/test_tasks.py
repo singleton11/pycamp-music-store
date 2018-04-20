@@ -24,29 +24,26 @@ def mock_infolist():
     return files
 
 
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 class TestGetAlbumsFromZipTask(TestCase):
     """Tests for celery task gets albums and tracks from zip file"""
     @classmethod
     def setUpTestData(cls):
         cls.file = default_storage.save('testfile', ContentFile('new content'))
-        # cls.settings(cls, CELERY_TASK_ALWAYS_EAGER=True)
         cls.archive = Mock()
         cls.handler = AlbumUploader()
 
-    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_upload_not_zip_file(self):
         result = get_albums_from_zip.delay(self.archive)
         self.assertTrue(result.failed())
 
     @patch.object(AlbumUploader, 'is_no_folders_in_albums', return_value=False)
-    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     def test_upload_incorrect_zip_file(self, mock_nested_folders):
         result = get_albums_from_zip.delay(self.archive)
         self.assertTrue(result.failed())
 
     @patch('zipfile.is_zipfile', return_value=True)
-    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
-    def test_upload_incorrect_zip_file(self, mock_iszip):
+    def test_upload_correct_zip_file(self, mock_iszip):
 
         with patch('zipfile.ZipFile') as mock:
 
