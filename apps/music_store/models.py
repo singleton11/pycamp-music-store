@@ -7,7 +7,6 @@ from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
 from apps.music_store.exceptions import PaymentNotFound, NotEnoughMoney, \
     ItemAlreadyBought
-from ..users.models import AppUser
 
 
 class PaymentMethod(models.Model):

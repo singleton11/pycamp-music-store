@@ -20,7 +20,7 @@ class AlbumUploadArchiveView(FormView):
         """
         file = form.files.get('file')
         filepath = default_storage.save(
-            name=f'{random.randint(100, 1000)}_{random.randint(100, 1000)}.zip',
+            name=f'{random.randint(100, 999)}_{random.randint(100, 999)}.zip',
             content=file
         )
         get_albums_from_zip(filepath)
