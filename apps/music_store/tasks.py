@@ -14,7 +14,7 @@ def get_albums_from_zip(zip_filename):
         zip_filename (str): filename of uploaded zip_file.
 
     """
-    time_to_sleep = randint(5,15)
+    time_to_sleep = randint(5, 15)
     time.sleep(time_to_sleep)
     zip_file = default_storage.open(zip_filename)
     handle_uploaded_archive(zip_file)

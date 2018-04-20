@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.core.files.storage import default_storage
 from django.http import HttpResponseNotFound
 from django.shortcuts import redirect
+from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from apps.music_store.forms import AlbumUploadArchiveForm
