@@ -1,10 +1,12 @@
-from django.views.generic import FormView
-
-from apps.music_store.forms import AlbumUploadArchiveForm
+import uuid
 
 from django.core.files.storage import default_storage
+from django.http import HttpResponseNotFound
+from django.shortcuts import redirect
+from django.views.generic import FormView, TemplateView
+
+from apps.music_store.forms import AlbumUploadArchiveForm
 from .tasks import get_albums_from_zip
-import uuid
 from config.celery import app
 
 
@@ -24,15 +26,37 @@ class AlbumUploadArchiveView(FormView):
             name=str(uuid.uuid4()),
             content=file
         )
-        get_albums_from_zip.delay(filepath)
 
-        inspector = app.control.inspect()
-        print(inspector.active())
+        # save task_id in session
+        task_id = get_albums_from_zip.delay(filepath).task_id
+        task_key = task_id.split("-")[0]
+        self.request.session[task_key] = task_id
 
-        return super().form_valid(form)
+        return redirect(
+            'admin:album_upload_status',
+            task_key=task_key
+        )
 
     def get_context_data(self, **kwargs):
         """Override method for add `title` in context."""
         context = super().get_context_data(**kwargs)
         context['title'] = 'Albums Upload'
+        return context
+
+
+class AlbumUploadStatusView(TemplateView):
+    template_name = 'music_store/album/upload_archive_status.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        task_key = self.kwargs['task_key']
+        task_id = self.request.session.get(task_key)
+
+        if task_id == None:
+            raise HttpResponseNotFound
+
+        context['task_id'] = task_id
+        context['task_status'] = app.AsyncResult(task_id).state
+        context['task_result'] = app.AsyncResult(task_id).result
         return context
