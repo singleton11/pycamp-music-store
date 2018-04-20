@@ -1,13 +1,15 @@
-from ..utils import (
-    handle_uploaded_archive,
-    NestedDirectoryError,
-    AlbumUploader,
-)
-from ..models import Track, Album
-from unittest.mock import patch, Mock, mock_open
+from unittest.mock import Mock, mock_open, patch
+
 from django.test import TestCase
+
 from faker import Faker
 
+from ..models import Album, Track
+from ..utils import (
+    AlbumUploader,
+    NestedDirectoryError,
+    handle_uploaded_archive,
+)
 
 fake = Faker()
 mock_openfile = mock_open(read_data=fake.sentence(30))

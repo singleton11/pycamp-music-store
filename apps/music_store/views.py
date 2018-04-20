@@ -1,17 +1,14 @@
-from django.views import View
-from django.http import HttpResponse
+import uuid
 
 from django.core.files.storage import default_storage
-from django.http import HttpResponseNotFound
+from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import redirect
 from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from apps.music_store.forms import AlbumUploadArchiveForm
 from .tasks import get_albums_from_zip
-import uuid
-import json
-from config.celery import app
+from .utils import get_celery_task_status_info
 
 
 class AlbumUploadArchiveView(FormView):
@@ -51,19 +48,12 @@ class AlbumUploadArchiveView(FormView):
 class TaskStatusView(View):
     """View for tracking status of uploading tasks."""
 
-    def get(self, request, task_id, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         """"""
-        task_id = kwargs.get('task_key')
-        task_status = app.AsyncResult(task_id).state
-        task_result = app.AsyncResult(task_id).result
+        task_key = kwargs.get('task_key')
+        task_data = get_celery_task_status_info(self.request, task_key)
 
-        task_data = {
-            'task_id': task_id,
-            'task_status': task_status,
-            'task_result': task_result
-        }
-
-        return HttpResponse(json.dumps(task_data), mimetype='application/json')
+        return JsonResponse(task_data)
 
 
 class AlbumUploadStatusView(TemplateView):
@@ -71,14 +61,10 @@ class AlbumUploadStatusView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        task_key = self.kwargs['task_key']
+        task_key = self.kwargs.get('task_key')
         task_id = self.request.session.get(task_key)
-
-        if task_id == None:
+        if not task_id:
             raise HttpResponseNotFound
 
-        context['task_id'] = task_id
-        context['task_status'] = app.AsyncResult(task_id).state
-        context['task_result'] = app.AsyncResult(task_id).result
+        context.update(get_celery_task_status_info(self.request, task_key))
         return context

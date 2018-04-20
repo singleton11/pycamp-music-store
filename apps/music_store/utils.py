@@ -1,7 +1,7 @@
 import zipfile
-from collections import namedtuple
-
 from .models import Album, Track
+from collections import namedtuple
+from config.celery import app
 
 
 class NestedDirectoryError(Exception):
@@ -138,6 +138,18 @@ def handle_uploaded_archive(archive_file):
     # process names
     with zipfile.ZipFile(archive_file) as zf:
         if not album_uploader.is_no_folders_in_albums(zf):
-            raise NestedDirectoryError(f'{zf.filename} contains nested directory!')
+            raise NestedDirectoryError(f'{zf.filename} has a nested folder!')
         return album_uploader.zip_album_handler(zf)
     return 0, 0
+
+
+def get_celery_task_status_info(request, task_key):
+    """Return celery task status information as a dict"""
+    task_id = request.session.get(task_key)
+    result = app.AsyncResult(task_id)
+
+    return {
+        'task_id': task_id,
+        'task_status': result.state,
+        'task_result': result.result,
+    }

@@ -17,6 +17,7 @@ from apps.music_store.models import (
 from apps.music_store.views import (
     AlbumUploadArchiveView,
     AlbumUploadStatusView,
+    TaskStatusView
 )
 
 admin.site.register(PaymentMethod)
@@ -162,8 +163,8 @@ class AlbumAdmin(admin.ModelAdmin):
             ),
             url(
                 r'^upload_archive/get_status/(?P<task_key>[0-9a-z]*)$',
-                self.admin_site.admin_view(AlbumUploadStatusView.as_view()),
-                name='album_upload_status',
+                self.admin_site.admin_view(TaskStatusView.as_view()),
+                name='album_upload',
             ),
         ]
         return my_urls + urls
