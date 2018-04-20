@@ -4,7 +4,8 @@ from apps.music_store.forms import AlbumUploadArchiveForm
 
 from django.core.files.storage import default_storage
 from .tasks import get_albums_from_zip
-import random
+import uuid
+from config.celery import app
 
 
 class AlbumUploadArchiveView(FormView):
@@ -20,10 +21,14 @@ class AlbumUploadArchiveView(FormView):
         """
         file = form.files.get('file')
         filepath = default_storage.save(
-            name=f'{random.randint(100, 1000)}_{random.randint(100, 1000)}.zip',
+            name=str(uuid.uuid4()),
             content=file
         )
-        get_albums_from_zip(filepath)
+        get_albums_from_zip.delay(filepath)
+
+        inspector = app.control.inspect()
+        print(inspector.active())
+
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
