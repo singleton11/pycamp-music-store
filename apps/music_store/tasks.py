@@ -12,5 +12,5 @@ def get_albums_from_zip(zip_filename):
 
     """
     zip_file = default_storage.open(zip_filename)
-    handle_uploaded_archive(zip_file)
-    return f'{zip_filename} processed'
+    albums_count, tracks_count = handle_uploaded_archive(zip_file)
+    return f'{albums_count} albums and {tracks_count} have been added.'
