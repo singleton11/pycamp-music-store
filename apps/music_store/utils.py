@@ -1,6 +1,7 @@
 import zipfile
-from .models import Album, Track
 from collections import namedtuple
+
+from .models import Album, Track
 
 
 class NestedDirectoryError(Exception):
@@ -17,11 +18,15 @@ class AlbumUploader:
     """
     author_title_delimiter = ' - '
 
+    def __init__(self):
+        self.added_albums_count = 0
+        self.added_tracks_count = 0
+
     def is_no_folders_in_albums(self, zip_file):
         """Check if album folders contain nested directories"""
         for info in zip_file.infolist():
             # album directory contains nested directory
-            if info.filename.count('/') > 1:
+            if not info.is_dir() and info.filename.count('/') > 1:
                 return False
         return True
 
@@ -52,6 +57,8 @@ class AlbumUploader:
             self._add_track(track_file, track_data)
             track_file.close()
 
+        return self.added_albums_count, self.added_tracks_count
+
     def _add_track(self, track_file, track_data):
         """Create Track from file if it does not exist.
 
@@ -61,7 +68,7 @@ class AlbumUploader:
         # check existence of album
         album = None
         if track_data.album:
-            album, _ = Album.objects.get_or_create(
+            album, created = Album.objects.get_or_create(
                 author=track_data.author,
                 title=track_data.album,
                 defaults={
@@ -69,17 +76,20 @@ class AlbumUploader:
                     'author': track_data.author
                 }
             )
+            if created:
+                self.added_albums_count += 1
 
         # check duplicates of track
         if not Track.objects.filter(author=track_data.author,
                                     title=track_data.track).exists():
-            content = track_file.readlines()
+            content = track_file.read()
             Track.objects.create(
                 author=track_data.author,
                 title=track_data.track,
                 album=album,
                 full_version=content,
             )
+            self.added_tracks_count += 1
 
     def _get_data_from_filename(self, filename):
         """Get author, album title and track title from filename"""
@@ -128,5 +138,6 @@ def handle_uploaded_archive(archive_file):
     # process names
     with zipfile.ZipFile(archive_file) as zf:
         if not album_uploader.is_no_folders_in_albums(zf):
-            raise NestedDirectoryError(f'{zf.name} contains nested directory!')
-        album_uploader.zip_album_handler(zf)
+            raise NestedDirectoryError(f'{zf.filename} contains nested directory!')
+        return album_uploader.zip_album_handler(zf)
+    return 0, 0

@@ -15,9 +15,9 @@ def get_albums_from_zip(zip_filename):
 
     """
     time_to_sleep = randint(5, 15)
+
     time.sleep(time_to_sleep)
     zip_file = default_storage.open(zip_filename)
-    handle_uploaded_archive(zip_file)
+    albums_count, tracks_count = handle_uploaded_archive(zip_file)
     time.sleep(time_to_sleep)
-
-    return f'{zip_filename} processed'
+    return f'{albums_count} albums and {tracks_count} have been added.'
