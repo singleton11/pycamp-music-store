@@ -14,7 +14,10 @@ from apps.music_store.models import (
     PaymentTransaction,
     PaymentMethod,
 )
-from apps.music_store.views import AlbumUploadArchiveView
+from apps.music_store.views import (
+    AlbumUploadArchiveView,
+    AlbumUploadStatusView,
+)
 
 admin.site.register(PaymentMethod)
 admin.site.register(PaymentTransaction)
@@ -151,6 +154,16 @@ class AlbumAdmin(admin.ModelAdmin):
                 r'^upload_archive/$',
                 self.admin_site.admin_view(AlbumUploadArchiveView.as_view()),
                 name='album_upload_archive',
+            ),
+            url(
+                r'^upload_archive/(?P<task_key>[0-9a-z]*)$',
+                self.admin_site.admin_view(AlbumUploadStatusView.as_view()),
+                name='album_upload_status',
+            ),
+            url(
+                r'^upload_archive/get_status/(?P<task_key>[0-9a-z]*)$',
+                self.admin_site.admin_view(AlbumUploadStatusView.as_view()),
+                name='album_upload_status',
             ),
         ]
         return my_urls + urls

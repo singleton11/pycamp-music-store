@@ -1,0 +1,20 @@
+{% extends "admin/base_site.html" %}
+
+{% comment %}
+  This is template of admin page for view uploading album status.
+{% endcomment %}
+
+{% block content %}
+  <label>Task ID:</label> {{ task_id }}<br>
+  <label>Task Status:</label> {{ task_status }}<br>
+  {% if task_result %}
+    <label>Task Result:</label> {{ task_result }}<br>
+  {% endif %}
+{% endblock %}
+
+
+{% block footer %}
+  {{ footer.super }}
+  <script>
+  </script>
+{% endblock %}
