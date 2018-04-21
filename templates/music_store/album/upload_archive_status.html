@@ -7,16 +7,17 @@
 {% endcomment %}
 
 {% block content %}
-  <label>Task ID:</label>
-  <span id="task_id">{{ task.id }}</span><br>
+  <div id="app">
+    <label>Task ID:</label>
+    <span v>[[ task_id ]]</span><br>
 
-  <label>Task Status:</label>
-  <span id="task_status">{{ task.status }}</span><br>
+    <label>Task Status:</label>
+    <span>[[ task_status ]]</span><br>
 
-  <div id="task_result_container"
-       style="{% if not task.result %}display: none{% endif %}">
-    <label>Task Result:</label>
-    <span id="task_result">{{ task.result }}</span><br>
+    <div v-show="task_result">
+      <label>Task Result:</label>
+      <span>[[ task_result ]]</span><br>
+    </div>
   </div>
 
 {% endblock %}
@@ -24,29 +25,41 @@
 
 {% block footer %}
   {{ footer.super }}
-
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script
-    src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+
   <script>
-    let update_url =
-      "{% url "admin:album_upload_get_status" task_key=task.key %}";
-
-    let interval = setInterval(() => {
-        $.ajax({
-          url: update_url
-        }).done(function (data) {
-          $("#task_status").html(data.status);
-          if (data.result) {
-            $("#task_result").html(data.result);
-            $("#task_result_container").show();
-
-            clearInterval(interval);
-            alert("Done: " + data.status);
-          }
-        });
+    let vm = new Vue({
+      el: '#app',
+      delimiters: ['[[', ']]'],
+      data: {
+        update_url: '{% url "admin:album_upload_get_status" task_key=task.key %}',
+        task_id: '{{ task.id }}',
+        task_status: '{{ task.status }}',
+        task_result: '{{ task_result }}',
       },
-      2 * 1000
-    );
+      methods: {
+        update_info: function () {
+          let q = this
+          axios.get(this.update_url)
+            .then(function (response) {
+              data = response.data
+              q.task_status = data.status
+              q.task_result = data.result
+
+              if (q.task_result)
+                alert(q.task_result)
+              else
+                setTimeout(q.update_info, 2000)
+            });
+          return true
+        }
+      },
+      created : function(){
+        this.update_info()
+      },
+    });
 
   </script>
 {% endblock %}
