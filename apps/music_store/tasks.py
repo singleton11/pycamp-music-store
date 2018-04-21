@@ -18,6 +18,11 @@ def get_albums_from_zip(zip_filename):
 
     time.sleep(time_to_sleep)
     zip_file = default_storage.open(zip_filename)
-    albums_count, tracks_count = handle_uploaded_archive(zip_file)
+    try:
+        albums_count, tracks_count = handle_uploaded_archive(zip_file)
+    except Exception as e:
+        # return error message for avoid break the request
+        return str(e)
+
     time.sleep(time_to_sleep)
     return f'{albums_count} albums and {tracks_count} have been added.'

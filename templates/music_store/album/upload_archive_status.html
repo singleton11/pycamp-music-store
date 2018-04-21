@@ -1,20 +1,52 @@
 {% extends "admin/base_site.html" %}
 
 {% comment %}
-  This is template of admin page for view uploading album status.
+  Template for displaying the status of uploading the archive to the server.
+  Dynamically requests information and informs the user of the completion
+  of tasks.
 {% endcomment %}
 
 {% block content %}
-  <label>Task ID:</label> {{ task_id }}<br>
-  <label>Task Status:</label> {{ task_status }}<br>
-  {% if task_result %}
-    <label>Task Result:</label> {{ task_result }}<br>
-  {% endif %}
+  <label>Task ID:</label>
+  <span id="task_id">{{ task.id }}</span><br>
+
+  <label>Task Status:</label>
+  <span id="task_status">{{ task.status }}</span><br>
+
+  <div id="task_result_container"
+       style="{% if not task.result %}display: none{% endif %}">
+    <label>Task Result:</label>
+    <span id="task_result">{{ task.result }}</span><br>
+  </div>
+
 {% endblock %}
 
 
 {% block footer %}
   {{ footer.super }}
+
+  <script
+    src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
   <script>
+    let update_url =
+      "{% url "admin:album_upload_get_status" task_key=task.key %}";
+
+    let interval = setInterval(() => {
+        $.ajax({
+          url: update_url
+        }).done(function (data) {
+          $("#task_status").html(data.status);
+          if (data.result) {
+            $("#task_result").html(data.result);
+            $("#task_result_container").show();
+
+            clearInterval(interval);
+            alert("Done: " + data.status);
+          }
+        });
+      },
+      2 * 1000
+    );
+
   </script>
 {% endblock %}

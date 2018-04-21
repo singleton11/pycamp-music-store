@@ -15,7 +15,6 @@ class AlbumUploadArchiveView(FormView):
     """View for uploading archive with albums, which consist from tracks."""
     form_class = AlbumUploadArchiveForm
     template_name = 'music_store/album/upload_archive.html'
-    success_url = '/admin/music_store/album/'
 
     def form_valid(self, form):
         """Override method to actions with a valid form data.
@@ -62,9 +61,11 @@ class AlbumUploadStatusView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         task_key = self.kwargs.get('task_key')
-        task_id = self.request.session.get(task_key)
-        if not task_id:
+        task_data = get_celery_task_status_info(self.request, task_key)
+
+        if not task_data['id']:
             raise HttpResponseNotFound
 
-        context.update(get_celery_task_status_info(self.request, task_key))
+        context['task'] = task_data
+
         return context

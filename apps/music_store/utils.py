@@ -1,7 +1,8 @@
 import zipfile
-from .models import Album, Track
 from collections import namedtuple
+
 from config.celery import app
+from .models import Album, Track
 
 
 class NestedDirectoryError(Exception):
@@ -146,10 +147,17 @@ def handle_uploaded_archive(archive_file):
 def get_celery_task_status_info(request, task_key):
     """Return celery task status information as a dict"""
     task_id = request.session.get(task_key)
-    result = app.AsyncResult(task_id)
+    task_data = app.AsyncResult(task_id)
 
-    return {
-        'task_id': task_id,
-        'task_status': result.state,
-        'task_result': result.result,
+    task_dict = {
+        'key': task_key,
+        'id': task_data.task_id,
+        'status': task_data.state,
+        'result': task_data.result,
     }
+
+    # if task returned exception, result = error_message
+    if isinstance(task_dict['result'], Exception):
+        task_dict['result'] = str(task_dict['result'])
+
+    return task_dict
