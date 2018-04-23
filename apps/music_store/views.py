@@ -7,7 +7,7 @@ from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from apps.music_store.forms import AlbumUploadArchiveForm
-from .tasks import get_albums_from_zip, get_tracks_from_zip
+from .tasks import get_tracks_from_zip
 from .utils import get_celery_task_status_info
 
 
