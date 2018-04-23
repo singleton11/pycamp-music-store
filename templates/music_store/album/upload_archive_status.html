@@ -8,16 +8,9 @@
 
 {% block content %}
   <div id="app">
-    <label>Task ID:</label>
-    <span v>[[ task_id ]]</span><br>
-
-    <label>Task Status:</label>
-    <span>[[ task_status ]]</span><br>
-
-    <div v-show="task_result">
-      <label>Task Result:</label>
-      <span>[[ task_result ]]</span><br>
-    </div>
+    <label-node title="Task ID" v-bind:value="data.id"></label-node>
+    <label-node title="Task Status" v-bind:value="data.status"></label-node>
+    <label-node title="Task Result" v-bind:value="data.result"></label-node>
   </div>
 
 {% endblock %}
@@ -30,26 +23,36 @@
     src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
 
   <script>
-    let vm = new Vue({
+    Vue.component('label-node', {
+      delimiters: ['[[', ']]'],
+      props: ['title', 'value'],
+      template: '<tbody v-show=\'value\'>' +
+      '<label>[[title]]:</label>' +
+      '<span>[[value]]</span>' +
+      '</tbody>',
+    });
+
+
+    new Vue({
       el: '#app',
       delimiters: ['[[', ']]'],
       data: {
         update_url: '{% url "admin:album_upload_get_status" task_key=task.key %}',
-        task_id: '{{ task.id }}',
-        task_status: '{{ task.status }}',
-        task_result: '{{ task_result }}',
+        data: {
+          id: '{{ task.id }}',
+          status: '{{ task.status }}',
+          result: '',
+        },
       },
       methods: {
         update_info: function () {
-          let q = this
+          let q = this;
           axios.get(this.update_url)
             .then(function (response) {
-              data = response.data
-              q.task_status = data.status
-              q.task_result = data.result
-
-              if (q.task_result)
-                alert(q.task_result)
+              q.data = response.data;
+              console.log(q.data.task_id);
+              if (q.data.result)
+                alert(q.data.result);
               else
                 setTimeout(q.update_info, 2000)
             });
