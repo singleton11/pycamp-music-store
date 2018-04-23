@@ -9,7 +9,7 @@ class NestedDirectoryError(Exception):
     """When album directory contains nested directory."""
 
 
-class AlbumUploader:
+class AlbumUnpacker:
     """Class for uploading albums and tracks.
 
     Provide handlers to get albums and tracks from uploaded files,
@@ -55,10 +55,25 @@ class AlbumUploader:
         for info in zip_file.infolist():
             track_file = zip_file.open(info.filename)
             track_data = self._get_data_from_filename(info.filename)
-            self._add_track(track_file, track_data)
+            if track_data.track:
+                self._add_track(track_file, track_data)
             track_file.close()
 
         return self.added_albums_count, self.added_tracks_count
+
+    def is_valid_uploaded_music_archive(self, archive_file):
+        """Check if ZIP archive contain only single files of tracks and album
+        directories with track files and no nested directories.
+
+        """
+        if not zipfile.is_zipfile(archive_file):
+            return False
+
+        # process names
+        with zipfile.ZipFile(archive_file) as zf:
+            if not self.is_no_folders_in_albums(zf):
+                return False
+            return True
 
     def _add_track(self, track_file, track_data):
         """Create Track from file if it does not exist.
@@ -104,6 +119,7 @@ class AlbumUploader:
             return track_data(album_author, album_title, track_title)
         # track without album
         track_author, track_title = self._get_audio_data(filename)
+
         return track_data(track_author, None, track_title)
 
     def _get_audio_data(self, audio_name):
@@ -134,7 +150,7 @@ def handle_uploaded_archive(archive_file):
     if not zipfile.is_zipfile(archive_file):
         raise TypeError('It is not a ZIP archive!')
 
-    album_uploader = AlbumUploader()
+    album_uploader = AlbumUnpacker()
 
     # process names
     with zipfile.ZipFile(archive_file) as zf:
@@ -161,3 +177,5 @@ def get_celery_task_status_info(request, task_key):
         task_dict['result'] = str(task_dict['result'])
 
     return task_dict
+
+

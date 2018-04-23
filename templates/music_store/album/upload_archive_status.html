@@ -35,8 +35,13 @@
         $.ajax({
           url: update_url
         }).done(function (data) {
-          $("#task_status").html(data.status);
-          if (data.result) {
+          if (data.status == 'UNPACKING') {
+            $("#task_status").html(data.status)
+            $("#task_result").html(data.result);
+            $("#task_result_container").show();
+          }
+
+          else if (data.result) {
             $("#task_result").html(data.result);
             $("#task_result_container").show();
 
