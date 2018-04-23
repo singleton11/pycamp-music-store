@@ -29,14 +29,15 @@
     src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
   <script>
     let update_url =
-      "{% url "admin:album_upload_get_status" task_key=task.key %}";
+      "{% url "admin:album_upload_get_status" task_id=task.id %}";
 
     let interval = setInterval(() => {
         $.ajax({
           url: update_url
         }).done(function (data) {
+          $("#task_status").html(data.status);
+
           if (data.status == 'UNPACKING') {
-            $("#task_status").html(data.status)
             $("#task_result").html(data.result);
             $("#task_result_container").show();
           }

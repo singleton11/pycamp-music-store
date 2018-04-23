@@ -160,13 +160,11 @@ def handle_uploaded_archive(archive_file):
     return 0, 0
 
 
-def get_celery_task_status_info(request, task_key):
+def get_celery_task_status_info(task_id):
     """Return celery task status information as a dict"""
-    task_id = request.session.get(task_key)
     task_data = app.AsyncResult(task_id)
 
     task_dict = {
-        'key': task_key,
         'id': task_data.task_id,
         'status': task_data.state,
         'result': task_data.result,
