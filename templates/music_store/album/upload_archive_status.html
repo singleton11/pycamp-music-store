@@ -26,10 +26,10 @@
     Vue.component('label-node', {
       delimiters: ['[[', ']]'],
       props: ['title', 'value'],
-      template: '<tbody v-show=\'value\'>' +
+      template: '<div v-show=\'value\'>' +
       '<label>[[title]]:</label>' +
       '<span>[[value]]</span>' +
-      '</tbody>',
+      '</div>',
     });
 
 
