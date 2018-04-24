@@ -24,7 +24,7 @@ def get_tracks_from_zip(zip_filename):
             unpacker = AlbumUnpacker(zip_file)
         except Exception as e:
             # return error message if problems with zip_archive
-            return str(e)
+            raise e
 
         for track_filename in unpacker.track_list:
             current_task.update_state(
