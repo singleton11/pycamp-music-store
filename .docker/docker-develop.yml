@@ -1,0 +1,25 @@
+version: '2'
+services:
+    pycamp-music-store-backend:
+        image: docker.saritasa.com/pycamp-music-store:develop
+        hostname: pycamp-music-store-backend
+        container_name: pycamp-music-store-backend
+        expose:
+        - "80"
+        environment:
+        - DJANGO_SETTINGS_MODULE=config.settings.development
+        - APP_ENV=development
+        - NEW_RELIC_ENVIRONMENT=develop
+        extra_hosts:
+        - "mysql:172.31.39.163"
+        - "redis:172.31.254.223"
+        - "postgres:172.31.254.223"
+        - "rabbitmq:172.31.254.223"
+        labels:
+            io.rancher.container.network: 'true'
+            io.rancher.container.pull_image: always
+            SERVICE_TAGS: traefik.frontend.rule=Host:pycamp-music-store-dev.saritasa-hosting.com,traefik.tags=app,traefik.backend.loadbalancer=drr
+            SERVICE_NAME: pycamp-music-store
+        stdin_open: true
+        tty: true
+        restart: always
