@@ -17,6 +17,7 @@ class AlbumSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Track.objects.all()
     )
+    is_bought = serializers.SerializerMethodField()
 
     class Meta:
         model = Album
@@ -27,13 +28,23 @@ class AlbumSerializer(serializers.ModelSerializer):
             'image',
             'price',
             'tracks',
+            'is_bought',
         )
+
+    def get_is_bought(self, obj):
+        request = self.context.get('request', None)
+        if request is None:
+            return obj.free_version
+
+        user = request.user
+        return obj.is_bought(user)
 
 
 class TrackSerializer(serializers.ModelSerializer):
     """Serializer for Music Tracks"""
 
     content = serializers.SerializerMethodField()
+    is_bought = serializers.SerializerMethodField()
 
     class Meta:
         model = Track
@@ -44,7 +55,16 @@ class TrackSerializer(serializers.ModelSerializer):
             'album',
             'price',
             'content',
+            'is_bought',
         )
+
+    def get_is_bought(self, obj):
+        request = self.context.get('request', None)
+        if request is None:
+            return obj.free_version
+
+        user = request.user
+        return obj.is_bought(user)
 
     def get_content(self, obj):
         """Get free or full version of track.

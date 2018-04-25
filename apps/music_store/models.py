@@ -271,6 +271,19 @@ class Track(MusicItem):
         """
         return ListenTrack.objects.create(user=user, track=self)
 
+    def is_bought(self, user):
+        """Note about the track was listened by some user
+
+        Args:
+            user (AppUser): user
+
+        """
+
+        if super().is_bought(user):
+            return True
+
+        return self.album and self.album.is_bought(user)
+
 
 class BoughtItem(TimeStampedModel):
     """ An abstract base class model for BoughtTrack and BoughtAlbum.
