@@ -13,7 +13,7 @@ services:
         extra_hosts:
         - "mysql:172.31.39.163"
         - "redis:172.31.254.223"
-        - "postgres:172.31.254.223"
+        - "postgres:172.31.254.5"
         - "rabbitmq:172.31.254.223"
         labels:
             io.rancher.container.network: 'true'
