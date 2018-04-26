@@ -137,7 +137,7 @@ class AlbumViewSet(ItemViewSet):
     """Operations on music albums
 
     """
-    queryset = Album.objects.all()
+    queryset = Album.objects.filter(price__gt=0).all()
     serializer_class = AlbumSerializer
 
     filter_backends = (filters.SearchFilter,)
@@ -148,7 +148,7 @@ class TrackViewSet(ItemViewSet):
     """Operations on music tracks
 
     """
-    queryset = Track.objects.all()
+    queryset = Track.objects.filter(price__gt=0).all()
     serializer_class = TrackSerializer
 
     filter_backends = (filters.SearchFilter,)
