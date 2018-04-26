@@ -27,8 +27,8 @@
       delimiters: ['[[', ']]'],
       props: ['title', 'value'],
       template: '<div v-show=\'value\'>' +
-      '<label>[[title]]:</label>' +
-      '<span>[[value]]</span>' +
+      '<label> [[title]]:</label>' +
+      '<span> [[value]]</span>' +
       '</div>',
     });
 
@@ -37,7 +37,7 @@
       el: '#app',
       delimiters: ['[[', ']]'],
       data: {
-        update_url: '{% url "admin:album_upload_get_status" task_key=task.key %}',
+        update_url: '{% url "admin:album_upload_get_status" task_id=task.id %}',
         data: {
           id: '{{ task.id }}',
           status: '{{ task.status }}',
@@ -51,7 +51,7 @@
             .then(function (response) {
               q.data = response.data;
               console.log(q.data.task_id);
-              if (q.data.result)
+              if (q.data.status !== "UNPACKING" && q.data.status !== "PENDING")
                 alert(q.data.result);
               else
                 setTimeout(q.update_info, 2000)

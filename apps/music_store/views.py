@@ -7,7 +7,7 @@ from django.views import View
 from django.views.generic import FormView, TemplateView
 
 from apps.music_store.forms import AlbumUploadArchiveForm
-from .tasks import get_albums_from_zip
+from .tasks import get_tracks_from_zip
 from .utils import get_celery_task_status_info
 
 
@@ -28,13 +28,11 @@ class AlbumUploadArchiveView(FormView):
         )
 
         # save task_id in session
-        task_id = get_albums_from_zip.delay(filepath).task_id
-        task_key = task_id.split("-")[0]
-        self.request.session[task_key] = task_id
+        id = get_tracks_from_zip.delay(filepath).task_id
 
         return redirect(
             'admin:album_upload_status',
-            task_key=task_key
+            task_id=id
         )
 
     def get_context_data(self, **kwargs):
@@ -49,8 +47,8 @@ class TaskStatusView(View):
 
     def get(self, request, *args, **kwargs):
         """"""
-        task_key = kwargs.get('task_key')
-        task_data = get_celery_task_status_info(self.request, task_key)
+        task_id = self.kwargs.get('task_id')
+        task_data = get_celery_task_status_info(task_id)
 
         return JsonResponse(task_data)
 
@@ -60,8 +58,8 @@ class AlbumUploadStatusView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        task_key = self.kwargs.get('task_key')
-        task_data = get_celery_task_status_info(self.request, task_key)
+        task_id = kwargs.get('task_id')
+        task_data = get_celery_task_status_info(task_id)
 
         if not task_data['id']:
             raise HttpResponseNotFound

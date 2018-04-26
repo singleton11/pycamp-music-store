@@ -157,12 +157,12 @@ class AlbumAdmin(admin.ModelAdmin):
                 name='album_upload_archive',
             ),
             url(
-                r'^upload_archive/(?P<task_key>\w*)$',
+                r'^upload_archive/(?P<task_id>[\w,-]*)$',
                 self.admin_site.admin_view(AlbumUploadStatusView.as_view()),
                 name='album_upload_status',
             ),
             url(
-                r'^upload_archive/(?P<task_key>\w*)/get_status$',
+                r'^upload_archive/(?P<task_id>[\w,-]*)/get_status$',
                 self.admin_site.admin_view(TaskStatusView.as_view()),
                 name='album_upload_get_status',
             ),

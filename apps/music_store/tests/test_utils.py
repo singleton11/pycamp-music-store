@@ -1,88 +1,102 @@
-from unittest.mock import Mock, mock_open, patch
+import zipfile
+from unittest.mock import Mock, mock_open
 
 from django.test import TestCase
 
 from faker import Faker
 
 from ..models import Album, Track
-from ..utils import (
-    AlbumUploader,
-    NestedDirectoryError,
-    handle_uploaded_archive,
-)
-
-fake = Faker()
-mock_openfile = mock_open(read_data=fake.sentence(30))
+from ..utils import AlbumUnpacker, NestedDirectoryError
 
 
-def mock_infolist():
+def mock_infolist(obj):
     """Mock of Zipfile.infolist() method."""
-    files = [
-        Mock(filename=fake.file_name()),
-        Mock(filename=f'{fake.word()} - {fake.word()}.txt'),
-        Mock(filename=f'{fake.word()}/{fake.word()}.txt'),
-        Mock(filename=f'{fake.word()} - {fake.word()}/{fake.word()}.txt'),
+    fake = Faker()
+    return [
+        fake.file_name(),
+        f'{fake.word()} - {fake.word()}.txt',
+        f'{fake.word()}/{fake.word()}.txt',
+        f'{fake.word()} - {fake.word()}/{fake.word()}.txt',
     ]
-    return files
+
+
+def mock_unpacker(is_zip=True, is_no_folders=True):
+    """Mock AlbumUnpacker methods and attributes for tests.
+
+    Args:
+        is_zip (bool): to mock behaviour if zip archive given or not
+        is_no_folders (bool): to mock behaviour if zip archive contain nested
+            folders in album folders or not
+
+    """
+    zipfile.ZipFile = Mock()
+    AlbumUnpacker._is_zip_archive = Mock(return_value=is_zip)
+    AlbumUnpacker._get_track_list = mock_infolist
+    AlbumUnpacker._is_no_folders_in_albums = Mock(return_value=is_no_folders)
 
 
 class TestUploadZIPArchive(TestCase):
     @classmethod
     def setUpTestData(cls):
+        cls.fake = Faker()
+        cls.track_title = cls.fake.word()
+        cls.album_title = cls.fake.word()
+        cls.author = cls.fake.word()
+
+        # mock AlbumUnpacker
+        mock_unpacker()
         cls.archive = Mock()
-        cls.handler = AlbumUploader()
-        cls.track_title = fake.word()
-        cls.album_title = fake.word()
-        cls.author = fake.word()
+        cls.unpacker = AlbumUnpacker(cls.archive)
+        cls.unpacker.zip_file.open = mock_open(
+            read_data=cls.fake.sentence(30)
+        )
 
-    @patch('zipfile.is_zipfile', return_value=False)
-    def test_not_a_zip_file(self, mock_iszip):
+    def test_unpack_not_a_zip_file(self):
         """Test for opening not a zip file"""
-
+        mock_unpacker(is_zip=False)
         with self.assertRaises(TypeError):
-            handle_uploaded_archive(self.archive)
+            AlbumUnpacker(self.archive)
 
-    @patch('zipfile.is_zipfile', return_value=True)
-    @patch.object(AlbumUploader, 'is_no_folders_in_albums', return_value=False)
-    def test_archive_with_nested_directories(self, mock_add_track, mock_iszip):
+    def test_unpack_archive_with_nested_directories(self):
         """Test for nested directories in album folder"""
-        with patch('zipfile.ZipFile') as mock:
-            with self.assertRaises(NestedDirectoryError):
-                handle_uploaded_archive(self.archive)
+        mock_unpacker(is_no_folders=False)
 
+        with self.assertRaises(NestedDirectoryError):
+            AlbumUnpacker(self.archive)
+
+    # tests for getting correct data from filenames in archive
     def test_data_from_filename_with_only_track_title(self):
         filename = f'{self.track_title}'
         self.assertEqual(
-            self.handler._get_data_from_filename(filename),
+            self.unpacker._get_track_info(filename),
             ('Unknown artist', None, self.track_title,)
         )
 
     def test_data_from_filename_with_author_and_track_title(self):
         filename = f'{self.author} - {self.track_title}'
         self.assertEqual(
-            self.handler._get_data_from_filename(filename),
+            self.unpacker._get_track_info(filename),
             (self.author, None, self.track_title,)
         )
 
     def test_data_from_filename_with_album_and_track_title(self):
         filename = f'{self.album_title}/{self.track_title}'
         self.assertEqual(
-            self.handler._get_data_from_filename(filename),
+            self.unpacker._get_track_info(filename),
             ('Unknown artist', self.album_title, self.track_title,)
         )
 
     def test_data_from_filename_full_info(self):
         filename = f'{self.author} - {self.album_title}/{self.track_title}'
         self.assertEqual(
-            self.handler._get_data_from_filename(filename),
+            self.unpacker._get_track_info(filename),
             (self.author, self.album_title, self.track_title,)
         )
 
-    def test_zip_album_handler(self):
-        self.archive.infolist = mock_infolist
-        self.archive.open = mock_openfile
-
-        self.handler.zip_album_handler(self.archive)
+    def test_unpack_track_handler(self):
+        """Test unpacking tracks from zip archive"""
+        for track_filename in self.unpacker.track_list:
+            self.unpacker.track_handler(track_filename)
 
         self.assertEqual(Track.objects.all().count(), 4)
         self.assertEqual(Album.objects.all().count(), 2)
