@@ -2,6 +2,7 @@ import zipfile
 from collections import namedtuple
 
 from config.celery import app
+
 from .models import Album, Track
 
 
@@ -22,7 +23,7 @@ class AlbumUnpacker:
     def __init__(self, archive):
         """
         Args:
-            zip_file (ZipFile): ZIP archive file with albums and tracks.
+            archive (ZipFile): ZIP archive file with albums and tracks.
         """
         if not self._is_zip_archive(archive):
             raise TypeError(
@@ -183,26 +184,6 @@ class AlbumUnpacker:
                 full_version=content,
             )
             self.added_tracks_count += 1
-
-
-def handle_uploaded_archive(archive_file):
-    """Handler of zip archive with albums and tracks.
-
-    ZIP archive can contain only single files of tracks and album directories
-    with track files. Directories CAN NOT contain nested directories.
-
-    """
-    if not zipfile.is_zipfile(archive_file):
-        raise TypeError('It is not a ZIP archive!')
-
-    album_uploader = AlbumUnpacker(archive_file)
-
-    # process names
-    with zipfile.ZipFile(archive_file) as zf:
-        if not album_uploader._is_no_folders_in_albums():
-            raise NestedDirectoryError(f'{zf.filename} has a nested folder!')
-        return album_uploader.zip_album_handler()
-    return 0, 0
 
 
 def get_celery_task_status_info(task_id):

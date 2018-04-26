@@ -1,15 +1,12 @@
-from unittest.mock import Mock, mock_open
 import zipfile
+from unittest.mock import Mock, mock_open
 
 from django.test import TestCase
 
 from faker import Faker
 
 from ..models import Album, Track
-from ..utils import (
-    AlbumUnpacker,
-    NestedDirectoryError,
-)
+from ..utils import AlbumUnpacker, NestedDirectoryError
 
 
 def mock_infolist(obj):

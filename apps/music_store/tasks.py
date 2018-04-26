@@ -1,9 +1,11 @@
-from random import randint
 import time
+from random import randint
 
-from celery import shared_task, current_task
-from .utils import AlbumUnpacker
 from django.core.files.storage import default_storage
+
+from celery import current_task, shared_task
+
+from .utils import AlbumUnpacker
 
 
 @shared_task
