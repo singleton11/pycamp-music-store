@@ -191,6 +191,10 @@ class Album(MusicItem):
         """bool: True if no related Tracks"""
         return not self.tracks.exists()
 
+    def get_track_list(self):
+        """"""
+        return Track.objects.filter(album=self)
+
 
 class Track(MusicItem):
     """Music track with its title, price and album if exists.
