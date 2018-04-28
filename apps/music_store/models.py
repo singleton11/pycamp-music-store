@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils import timezone
+from django.db.models.query import QuerySet
 from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
@@ -9,7 +11,73 @@ from apps.music_store.exceptions import PaymentNotFound, NotEnoughMoney, \
     ItemAlreadyBought
 
 
-class PaymentMethod(models.Model):
+class SoftDeletionManager(models.Manager):
+    """Manager for models with support of soft deletion. """
+    def __init__(self, *args, **kwargs):
+        """Add alive_only option to make available only objects
+        that were not soft deleted.
+
+        """
+        self.alive_only = kwargs.pop('alive_only', True)
+        super().__init__(*args, **kwargs)
+
+    def get_queryset(self):
+        """Get queryset of objects due to alive_only option"""
+        if self.alive_only:
+            return SoftDeletionQuerySet(self.model).filter(deleted_at=None)
+        return SoftDeletionQuerySet(self.model)
+
+    def hard_delete(self):
+        """Complete deletion of objects."""
+        return self.get_queryset().hard_delete()
+
+
+class SoftDeletionModel(models.Model):
+    """Abstract model for soft deletion from DB.
+
+    Instead of deletion mark an instance with date and time of deletion.
+    Marked objects are still available.
+
+    """
+    deleted_at = models.DateTimeField(blank=True, null=True)
+
+    objects = SoftDeletionManager()
+    # return
+    all_objects = SoftDeletionManager(alive_only=False)
+
+    class Meta:
+        abstract = True
+
+    def delete(self, *args, **kwargs):
+        """Soft deletion. Mark object with deleted_at date and time"""
+        self.deleted_at = timezone.now()
+        self.save()
+
+    def hard_delete(self):
+        """Complete deletion of object."""
+        super(SoftDeletionModel, self).delete()
+
+
+class SoftDeletionQuerySet(QuerySet):
+    """Queryset for models with support of soft deletion. """
+    def delete(self):
+        """Soft deletion. Mark objects with deleted_at date and time"""
+        return super().update(deleted_at=timezone.now())
+
+    def hard_delete(self):
+        """Complete deletion of objects."""
+        return super().delete()
+
+    def alive(self):
+        """Provide queryset of active (not soft deleted) objects"""
+        return self.filter(deleted_at=None)
+
+    def dead(self):
+        """Provide queryset of soft deleted objects"""
+        return self.exclude(deleted_at=None)
+
+
+class PaymentMethod(models.Model, SoftDeletionModel):
     """Model to store payment methods."""
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
