@@ -63,7 +63,8 @@ class TestAPIMusicStorePaymentMethods(APITestCase):
         }
         response = self._api_payment_method(data, user)
         self.assertTrue(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, data)
+        self.assertEqual(response.data['title'], data['title'])
+        self.assertEqual(response.data['is_default'], data['is_default'])
 
     def test_payment_methods_patch_edit(self):
         """ Edit a part of payment method with patch request """
@@ -83,7 +84,8 @@ class TestAPIMusicStorePaymentMethods(APITestCase):
         self.client.force_authenticate(user=payment_method.owner)
         url = api_url(f'payment_methods/{payment_method.pk}/')
         response = self.client.put(url, data)
-        self.assertEqual(response.data, data)
+        self.assertEqual(response.data['is_default'], data['is_default'])
+        self.assertEqual(response.data['title'], data['title'])
 
     def test_payment_methods_delete(self):
         """ Delete payment method """
