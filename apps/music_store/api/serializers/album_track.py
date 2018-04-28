@@ -35,8 +35,11 @@ class AlbumSerializer(serializers.ModelSerializer):
         request = self.context.get('request', None)
         if request is None:
             return obj.free_version
-
         user = request.user
+
+        if not user.is_authenticated:
+            return False
+
         return obj.is_bought(user)
 
 
@@ -62,8 +65,11 @@ class TrackSerializer(serializers.ModelSerializer):
         request = self.context.get('request', None)
         if request is None:
             return obj.free_version
-
         user = request.user
+
+        if not user.is_authenticated:
+            return False
+
         return obj.is_bought(user)
 
     def get_content(self, obj):
