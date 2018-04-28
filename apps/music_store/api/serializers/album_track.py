@@ -33,10 +33,10 @@ class AlbumSerializer(serializers.ModelSerializer):
 
     def get_is_bought(self, obj):
         request = self.context.get('request', None)
-        if request is None:
-            return obj.free_version
-        user = request.user
+        if not request:
+            return False
 
+        user = request.user
         if not user.is_authenticated:
             return False
 
@@ -63,10 +63,10 @@ class TrackSerializer(serializers.ModelSerializer):
 
     def get_is_bought(self, obj):
         request = self.context.get('request', None)
-        if request is None:
-            return obj.free_version
-        user = request.user
+        if not request:
+            return False
 
+        user = request.user
         if not user.is_authenticated:
             return False
 
@@ -83,7 +83,7 @@ class TrackSerializer(serializers.ModelSerializer):
 
         """
         request = self.context.get('request', None)
-        if request is None:
+        if not request:
             return obj.free_version
 
         user = request.user
