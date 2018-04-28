@@ -39,7 +39,7 @@ class SoftDeletionModel(models.Model):
     Marked objects are still available.
 
     """
-    deleted_at = models.DateTimeField(blank=True, null=True)
+    deleted_at = models.DateTimeField(blank=True, null=True, default=None)
 
     objects = SoftDeletionManager()
     # return
@@ -55,7 +55,7 @@ class SoftDeletionModel(models.Model):
 
     def hard_delete(self):
         """Complete deletion of object."""
-        super(SoftDeletionModel, self).delete()
+        super().delete()
 
 
 class SoftDeletionQuerySet(QuerySet):
@@ -77,7 +77,7 @@ class SoftDeletionQuerySet(QuerySet):
         return self.exclude(deleted_at=None)
 
 
-class PaymentMethod(models.Model, SoftDeletionModel):
+class PaymentMethod(SoftDeletionModel, models.Model):
     """Model to store payment methods."""
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,

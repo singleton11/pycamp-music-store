@@ -18,7 +18,8 @@ from apps.music_store.factories import (
     UserWithDefaultPaymentMethodFactory,
     UserWithPaymentMethodFactory
 )
-from apps.music_store.models import Album, LikeTrack, ListenTrack, Track
+
+from apps.music_store.models import Album, LikeTrack, ListenTrack, Track, PaymentMethod, PaymentTransaction
 from apps.users.factories import UserFactory
 
 
@@ -66,6 +67,67 @@ class TestPaymentAccount(TestCase):
         self.assertEqual(
             account.payment_methods.filter(is_default=True).count(),
             1,
+        )
+
+    def test_soft_delete_payment_method(self):
+        """Test soft deletion."""
+        account = UserWithBalanceFactory(balance=100)
+        method = PaymentDefaultMethodFactory(owner=account)
+
+        tracks = TrackFactory.create_batch(3, price=10)
+        for track in tracks:
+            track.buy(account)
+
+        transactions_done = PaymentTransaction.objects.filter(user=account)
+        method = account.payment_methods.get(is_default=True)
+        method.delete()
+
+        # check method is deleted
+        self.assertFalse(
+            account.payment_methods.filter(is_default=True).exists()
+        )
+        # transactions still exist
+        self.assertEqual(
+            transactions_done.count(),
+            PaymentTransaction.objects.filter(user=account).count()
+        )
+        # method is not in objects
+        self.assertFalse(PaymentMethod.objects.filter(id=method.id).exists())
+        # method is in all_objects
+        self.assertTrue(
+            PaymentMethod.all_objects.filter(id=method.id).exists()
+        )
+        deleted_method = PaymentMethod.all_objects.filter(id=method.id).first()
+        # check deleted_ad
+        self.assertTrue(deleted_method.deleted_at is not None)
+
+    def test_hard_delete_payment_method(self):
+        """Test hard deletion."""
+        account = UserWithBalanceFactory(balance=100)
+        method = PaymentDefaultMethodFactory(owner=account)
+
+        tracks = TrackFactory.create_batch(3, price=10)
+        for track in tracks:
+            track.buy(account)
+
+        transactions = PaymentTransaction.objects.get_queryset()
+        method = account.payment_methods.get(is_default=True)
+        method.hard_delete()
+
+        # check method is deleted
+        self.assertFalse(
+            account.payment_methods.filter(is_default=True).exists()
+        )
+        # transactions of buy tracks are deleted
+        self.assertNotEqual(
+            transactions,
+            PaymentTransaction.objects.get_queryset()
+        )
+        # method is not in objects
+        self.assertFalse(PaymentMethod.objects.filter(id=method.id).exists())
+        # method is not in all_objects
+        self.assertFalse(
+            PaymentMethod.all_objects.filter(id=method.id).exists()
         )
 
 
