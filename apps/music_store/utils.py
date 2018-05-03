@@ -38,10 +38,20 @@ class AlbumUnpacker:
     get album and track titles and author from file names
     and put them into database.
 
+    Files in zip archive must be stored like:
+
+        track_file_1.ext
+        track_file_2.ext
+        album_folder_1/track_file_1.ext
+        album_folder_1/track_file_2.ext
+        album_folder_2/track_file_1.ext
+
+    Empty folders ignored.
+
     """
     author_title_delimiter = ' - '
     default_author = 'Unknown artist'
-
+    # check required structure
     nested_check = partial(check_zip_level_of_nesting_files, level=1)
 
     def __init__(self, archive):
@@ -53,12 +63,15 @@ class AlbumUnpacker:
             raise TypeError(
                 f'{archive} is not a ZIP archive!'
             )
+
         self.zip_file = zipfile.ZipFile(archive)
+
         if not self.nested_check(self.zip_file):
             raise NestedFolderError(
                 f'{self.zip_file.filename} has folders with files '
                 f'in album folders'
             )
+
         self.track_list = self._get_track_list()
         self.added_albums_count = 0
         self.added_tracks_count = 0
@@ -88,14 +101,6 @@ class AlbumUnpacker:
 
     def zip_album_handler(self):
         """Handler to get Albums and Tracks from zip archive.
-
-        zip archive must have following structure:
-
-            track_file_1.ext
-            track_file_2.ext
-            album_folder_1/track_file_1.ext
-            album_folder_1/track_file_2.ext
-            album_folder_2/track_file_1.ext
 
         Track files in root directory have empty album field.
         Track files in album_folder have album corresponding to album_folder.
@@ -143,8 +148,6 @@ class AlbumUnpacker:
             filename (str): filename of track in zip archive.
 
         """
-
-
         # track file in album directory
         if filename.count('/') == 1:
             album, track = filename.split('/')
