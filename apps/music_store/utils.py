@@ -2,11 +2,12 @@ import zipfile
 from collections import namedtuple
 
 from config.celery import app
+from functools import partial
 
 from .models import Album, Track
 
 
-class NestedDirectoryError(Exception):
+class NestedFolderError(Exception):
     """When album directory contains nested directory."""
 
 
@@ -26,9 +27,6 @@ def check_zip_level_of_nesting_files(zip_file, level=1):
             level = 2 means zip may contain folder/folder/file.ext, etc.
 
     """
-    if level < 0:
-        raise ValueError(f'level = {level}. Must be equal or greater than 0')
-
     return all((info.is_dir() or info.filename.count('/') <= level)
                for info in zip_file.infolist())
 
@@ -43,7 +41,8 @@ class AlbumUnpacker:
     """
     author_title_delimiter = ' - '
     default_author = 'Unknown artist'
-    nested_level = 1
+
+    nested_check = partial(check_zip_level_of_nesting_files, level=1)
 
     def __init__(self, archive):
         """
@@ -52,12 +51,13 @@ class AlbumUnpacker:
         """
         if not zipfile.is_zipfile(archive):
             raise TypeError(
-                f'It is not a ZIP archive!'
+                f'{archive} is not a ZIP archive!'
             )
         self.zip_file = zipfile.ZipFile(archive)
-        if not check_zip_level_of_nesting_files(self.zip_file, self.nested_level):
-            raise NestedDirectoryError(
-                f'{self.zip_file.filename} has a nested folder!'
+        if not self.nested_check(self.zip_file):
+            raise NestedFolderError(
+                f'{self.zip_file.filename} has folders with files '
+                f'in album folders'
             )
         self.track_list = self._get_track_list()
         self.added_albums_count = 0

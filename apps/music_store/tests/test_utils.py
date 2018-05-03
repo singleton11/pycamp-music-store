@@ -6,7 +6,7 @@ from django.test import TestCase
 from faker import Faker
 
 from ..models import Album, Track
-from ..utils import AlbumUnpacker, NestedDirectoryError
+from ..utils import AlbumUnpacker, NestedFolderError
 
 
 def mock_infolist(obj):
@@ -31,8 +31,9 @@ def mock_unpacker(is_zip=True, is_no_folders=True):
     """
     zipfile.ZipFile = Mock()
     zipfile.is_zipfile = Mock(return_value=is_zip)
+    zipfile.ZipFile.infolist = mock_infolist
+    AlbumUnpacker.nested_check = Mock(return_value=is_no_folders)
     AlbumUnpacker._get_track_list = mock_infolist
-    AlbumUnpacker._is_no_folders_in_albums = Mock(return_value=is_no_folders)
 
 
 class TestUploadZIPArchive(TestCase):
@@ -61,7 +62,7 @@ class TestUploadZIPArchive(TestCase):
         """Test for nested directories in album folder"""
         mock_unpacker(is_no_folders=False)
 
-        with self.assertRaises(NestedDirectoryError):
+        with self.assertRaises(NestedFolderError):
             AlbumUnpacker(self.archive)
 
     # tests for getting correct data from filenames in archive

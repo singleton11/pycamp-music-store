@@ -41,5 +41,4 @@ class TestGetAlbumsFromZipTask(TestCase):
         default_storage.open = mock_open(read_data=fake.sentence(30))
 
         result = get_tracks_from_zip.delay(archive)
-        print(result.result)
         self.assertTrue(result.successful())
