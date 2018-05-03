@@ -4,6 +4,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -140,7 +141,8 @@ class AlbumViewSet(ItemViewSet):
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
 
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    filter_fields = ('title', 'author', 'price')
     search_fields = ('title', 'author',)
 
 
@@ -151,7 +153,8 @@ class TrackViewSet(ItemViewSet):
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
 
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    filter_fields = ('title', 'author', 'album', 'price')
     search_fields = ('title', 'author',)
 
     @detail_route(

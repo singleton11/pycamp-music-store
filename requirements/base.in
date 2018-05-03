@@ -41,6 +41,7 @@ drf-nested-routers
 django-taggit-serializer
 django-rest-auth
 coreapi
+django-filters
 
 
 # PDF Support
