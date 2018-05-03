@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.music_store.models import Album, Track
+from apps.music_store.models import Album, Track, LikeTrack
 
 __all__ = (
     'AlbumSerializer',
@@ -49,6 +49,9 @@ class TrackSerializer(serializers.ModelSerializer):
     content = serializers.SerializerMethodField()
     is_bought = serializers.SerializerMethodField()
 
+    is_liked = serializers.SerializerMethodField()
+    number_of_likes = serializers.SerializerMethodField()
+
     class Meta:
         model = Track
         fields = (
@@ -59,6 +62,8 @@ class TrackSerializer(serializers.ModelSerializer):
             'price',
             'content',
             'is_bought',
+            'is_liked',
+            'number_of_likes',
         )
 
     def get_is_bought(self, obj):
@@ -90,3 +95,23 @@ class TrackSerializer(serializers.ModelSerializer):
         if user.is_authenticated and obj.is_bought(user):
             return obj.full_version
         return obj.free_version
+
+    def get_is_liked(self, obj):
+        """Check if track is liked by authorized user"""
+        request = self.context.get('request', None)
+        if not request:
+            return False
+
+        user = request.user
+        if not user.is_authenticated:
+            return False
+
+        return obj.is_liked(user)
+
+    def get_number_of_likes(self, obj):
+        """Get total number of 'likes' on the track"""
+        request = self.context.get('request', None)
+        if not request:
+            return 0
+
+        return LikeTrack.objects.filter(track=obj).count()
