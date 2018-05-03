@@ -14,6 +14,7 @@ from apps.music_store.api.serializers import (
     BoughtTrackSerializer,
     PaymentAccountSerializer,
     PaymentMethodSerializer,
+    PaymentTransactionSerializer,
     GlobalSearchSerializer
 )
 from apps.users.models import AppUser
@@ -25,6 +26,7 @@ from ...music_store.models import (
     ListenTrack,
     Track,
     PaymentMethod,
+    PaymentTransaction,
     PaymentNotFound,
     NotEnoughMoney,
     ItemAlreadyBought
@@ -32,7 +34,7 @@ from ...music_store.models import (
 
 
 # ##############################################################################
-# PAYMENT METHODS
+# PAYMENTS
 # ##############################################################################
 
 class PaymentMethodViewSet(viewsets.ModelViewSet):
@@ -43,6 +45,16 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return super().get_queryset().filter(owner=self.request.user)
+
+
+class PaymentTransactionViewSet(viewsets.ModelViewSet):
+    """View for PaymentTransactions"""
+    serializer_class = PaymentTransactionSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = PaymentTransaction.objects.all()
+
+    def get_queryset(self):
+        return super().get_queryset().filter(user=self.request.user)
 
 
 # ##############################################################################

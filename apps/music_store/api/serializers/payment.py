@@ -46,11 +46,13 @@ class PaymentTransactionSerializer(serializers.ModelSerializer):
     )
     amount = serializers.ReadOnlyField()
     payment_method = serializers.ReadOnlyField()
+    created = serializers.ReadOnlyField()
 
     class Meta:
         model = PaymentTransaction
         fields = (
             'user',
             'amount',
-            'payment_method'
+            'payment_method',
+            'created',
         )
