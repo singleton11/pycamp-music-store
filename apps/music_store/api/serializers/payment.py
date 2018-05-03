@@ -1,9 +1,13 @@
 from rest_framework import serializers
 
-from apps.music_store.models import PaymentMethod
+from apps.music_store.models import PaymentMethod, PaymentTransaction
 from apps.users.models import AppUser
 
-__all__ = ('PaymentMethodSerializer', 'PaymentAccountSerializer',)
+__all__ = (
+    'PaymentMethodSerializer',
+    'PaymentAccountSerializer',
+    'PaymentTransactionSerializer'
+)
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):
@@ -34,3 +38,19 @@ class PaymentAccountSerializer(serializers.ModelSerializer):
 
     def get_default_payment(self, obj):
         return obj.default_payment.pk
+
+
+class PaymentTransactionSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+    amount = serializers.ReadOnlyField()
+    payment_method = serializers.ReadOnlyField()
+
+    class Meta:
+        model = PaymentTransaction
+        fields = (
+            'user',
+            'amount',
+            'payment_method'
+        )
