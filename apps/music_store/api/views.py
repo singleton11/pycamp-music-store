@@ -153,9 +153,8 @@ class AlbumViewSet(ItemViewSet):
         """Display track list of current album."""
         album = self.get_object()
         tracks = album.get_track_list()
-        seralizer = TrackSerializer(tracks, many=True)
-
-        return Response(data=seralizer.data, status=status.HTTP_200_OK)
+        serializer = TrackSerializer(tracks, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 class TrackViewSet(ItemViewSet):

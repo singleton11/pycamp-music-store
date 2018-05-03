@@ -192,8 +192,8 @@ class Album(MusicItem):
         return not self.tracks.exists()
 
     def get_track_list(self):
-        """"""
-        return Track.objects.filter(album=self)
+        """Get list of tracks of the album"""
+        return self.tracks.all()
 
 
 class Track(MusicItem):
