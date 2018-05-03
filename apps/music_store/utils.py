@@ -14,6 +14,25 @@ class NestedDirectoryError(Exception):
 TrackData = namedtuple('TrackData', ['author', 'album', 'track'])
 
 
+def check_zip_level_of_nesting_files(zip_file, level=1):
+    """Check zip archive to nested files on level less or equal to given value.
+    Skip empty folders of any nested level
+
+    Args:
+        zip_file (ZipFile): zip archive to check
+        level (int): level of nesting.
+            level = 0 means zip contain only files without folders
+            level = 1 means zip may contain folder/file.ext
+            level = 2 means zip may contain folder/folder/file.ext, etc.
+
+    """
+    if level < 0:
+        raise ValueError(f'level = {level}. Must be equal or greater than 0')
+
+    return all((info.is_dir() or info.filename.count('/') <= level)
+               for info in zip_file.infolist())
+
+
 class AlbumUnpacker:
     """Class for uploading albums and tracks.
 
@@ -24,6 +43,7 @@ class AlbumUnpacker:
     """
     author_title_delimiter = ' - '
     default_author = 'Unknown artist'
+    nested_level = 1
 
     def __init__(self, archive):
         """
@@ -35,7 +55,7 @@ class AlbumUnpacker:
                 f'It is not a ZIP archive!'
             )
         self.zip_file = zipfile.ZipFile(archive)
-        if not self._is_no_folders_in_albums():
+        if not check_zip_level_of_nesting_files(self.zip_file, self.nested_level):
             raise NestedDirectoryError(
                 f'{self.zip_file.filename} has a nested folder!'
             )
@@ -92,14 +112,6 @@ class AlbumUnpacker:
             track_file.close()
 
         return self.added_albums_count, self.added_tracks_count
-
-    def _is_no_folders_in_albums(self):
-        """Check if album folders contain nested directories"""
-        for info in self.zip_file.infolist():
-            # album directory contains nested directory
-            if not info.is_dir() and info.filename.count('/') > 1:
-                return False
-        return True
 
     def _get_track_list(self):
         """Get list of tracks from zip file. Exclude empty folders."""
