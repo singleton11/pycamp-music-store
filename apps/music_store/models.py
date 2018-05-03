@@ -235,6 +235,9 @@ class Track(MusicItem):
 
         """
         self.free_version = self.full_version[:25]
+        # Get author's name from related album if its not defined
+        if not self.author and self.album:
+            self.author = self.album.author
         super().save(*args, **kwargs)
 
     def is_liked(self, user):
