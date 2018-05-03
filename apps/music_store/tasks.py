@@ -17,25 +17,25 @@ def get_tracks_from_zip(zip_filename):
         zip_filename (str): filename of uploaded zip_file.
 
     """
+    # delay to simulate unpacking takes a long time
     time_to_sleep = randint(3, 6)
 
-    time.sleep(time_to_sleep)
     with default_storage.open(zip_filename) as zip_file:
 
-        try:
-            unpacker = AlbumUnpacker(zip_file)
-        except Exception as e:
-            # return error message if problems with zip_archive
-            raise e
+        unpacker = AlbumUnpacker(zip_file)
 
         for track_filename in unpacker.track_list:
             current_task.update_state(
                 state='UNPACKING',
                 meta=f'{track_filename} is unpacking...'
             )
-            unpacker.track_handler(track_filename)
 
+            # simulate unpacking takes a long time
             time.sleep(time_to_sleep)
 
-        return f'{unpacker.added_albums_count} albums added. ' \
-               f'{unpacker.added_tracks_count} tracks added'
+            unpacker.track_handler(track_filename)
+
+        return (
+            f'{unpacker.added_albums_count} albums added. '
+            f'{unpacker.added_tracks_count} tracks added'
+        )

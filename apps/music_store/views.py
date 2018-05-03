@@ -46,7 +46,7 @@ class TaskStatusView(View):
     """View for tracking status of uploading tasks."""
 
     def get(self, request, *args, **kwargs):
-        """"""
+        """Get data about the celery task in JSON."""
         task_id = self.kwargs.get('task_id')
         task_data = get_celery_task_status_info(task_id)
 
