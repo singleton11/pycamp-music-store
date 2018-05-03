@@ -20,6 +20,7 @@ from ..factories import (
     UserWithBalanceFactory,
     TrackWithoutAlbumFactory
 )
+from ..models import Track
 from apps.music_store.api.serializers import TrackSerializer
 
 fake = Faker()
@@ -173,6 +174,17 @@ class TestAPITrack(APITestCase):
             self.track.full_version
         )
 
+    def test_get_tracks_of_album(self):
+        """Test filtering tracks with album they relate to"""
+        self.client.force_authenticate(user=self.user)
+        album = AlbumFactory()
+        tracks = TrackFactory.create_batch(3, album=album)
+        TrackFactory.create_batch(2)
+
+        response = self.client.get(f'{self.url}?album={album.id}')
+
+        self.assertEqual(len(tracks), len(response.data))
+
 
 class TestAPIAlbum(APITestCase):
     """Tests for Albums API."""
@@ -203,15 +215,6 @@ class TestAPIAlbum(APITestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f'{self.url}{self.album.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_get_track_list_with_auth(self):
-        self.client.force_authenticate(user=self.user)
-        response = self.client.get(f'{self.url}{self.album.id}/track_list/')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response.data,
-            TrackSerializer(self.tracks, many=True).data
-        )
 
 
 class TestAPILikeTrackListView(APITestCase):

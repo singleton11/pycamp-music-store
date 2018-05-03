@@ -31,6 +31,7 @@ INSTALLED_APPS = (
     'rest_auth.registration',
     'push_notifications',
     'django_celery_beat',
+    'django_filters',
 )
 
 LOCAL_APPS = (

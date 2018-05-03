@@ -4,6 +4,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -140,21 +141,9 @@ class AlbumViewSet(ItemViewSet):
     queryset = Album.objects.all()
     serializer_class = AlbumSerializer
 
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    filter_fields = ('title', 'author', 'price')
     search_fields = ('title', 'author',)
-
-    @detail_route(
-        methods=['get'],
-        permission_classes=[permissions.IsAuthenticated],
-        url_path='track_list',
-        url_name='track_list',
-    )
-    def track_list_of_album(self, request, **kwargs):
-        """Display track list of current album."""
-        album = self.get_object()
-        tracks = album.get_track_list()
-        serializer = TrackSerializer(tracks, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 class TrackViewSet(ItemViewSet):
@@ -164,7 +153,8 @@ class TrackViewSet(ItemViewSet):
     queryset = Track.objects.all()
     serializer_class = TrackSerializer
 
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    filter_fields = ('title', 'author', 'album', 'price')
     search_fields = ('title', 'author',)
 
     @detail_route(
