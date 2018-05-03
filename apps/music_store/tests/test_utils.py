@@ -30,7 +30,7 @@ def mock_unpacker(is_zip=True, is_no_folders=True):
 
     """
     zipfile.ZipFile = Mock()
-    AlbumUnpacker._is_zip_archive = Mock(return_value=is_zip)
+    zipfile.is_zipfile = Mock(return_value=is_zip)
     AlbumUnpacker._get_track_list = mock_infolist
     AlbumUnpacker._is_no_folders_in_albums = Mock(return_value=is_no_folders)
 

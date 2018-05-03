@@ -8,6 +8,9 @@ from celery import current_task, shared_task
 from .utils import AlbumUnpacker
 
 
+UNPACKING_STATE = 'UNPACKING'
+
+
 @shared_task
 def get_tracks_from_zip(zip_filename):
     """Get albums and tracks from ZIP file.
@@ -26,7 +29,7 @@ def get_tracks_from_zip(zip_filename):
 
         for track_filename in unpacker.track_list:
             current_task.update_state(
-                state='UNPACKING',
+                state=UNPACKING_STATE,
                 meta=f'{track_filename} is unpacking...'
             )
 
