@@ -11,7 +11,29 @@ from apps.music_store.exceptions import PaymentNotFound, NotEnoughMoney, \
     ItemAlreadyBought
 
 
-class SoftDeletionManager(models.Manager):
+class SoftDeletionQuerySet(QuerySet):
+    """Queryset for models with support of soft deletion. """
+    def delete(self):
+        """Soft deletion. Mark objects with deleted_at date and time"""
+        return super().update(deleted_at=timezone.now())
+
+    def hard_delete(self):
+        """Complete deletion of objects."""
+        return super().delete()
+
+    def alive(self):
+        """Provide queryset of active (not soft deleted) objects"""
+        return self.filter(deleted_at=None)
+
+    def dead(self):
+        """Provide queryset of soft deleted objects"""
+        return self.exclude(deleted_at=None)
+
+
+class SoftDeletionManager(
+    models.Manager.from_queryset(SoftDeletionQuerySet),
+    models.Manager
+):
     """Manager for models with support of soft deletion. """
     def __init__(self, *args, **kwargs):
         """Add alive_only option to make available only objects
@@ -56,25 +78,6 @@ class SoftDeletionModel(models.Model):
     def hard_delete(self):
         """Complete deletion of object."""
         super().delete()
-
-
-class SoftDeletionQuerySet(QuerySet):
-    """Queryset for models with support of soft deletion. """
-    def delete(self):
-        """Soft deletion. Mark objects with deleted_at date and time"""
-        return super().update(deleted_at=timezone.now())
-
-    def hard_delete(self):
-        """Complete deletion of objects."""
-        return super().delete()
-
-    def alive(self):
-        """Provide queryset of active (not soft deleted) objects"""
-        return self.filter(deleted_at=None)
-
-    def dead(self):
-        """Provide queryset of soft deleted objects"""
-        return self.exclude(deleted_at=None)
 
 
 class PaymentMethod(SoftDeletionModel, models.Model):
