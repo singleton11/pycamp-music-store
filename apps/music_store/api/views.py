@@ -4,6 +4,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 
 from apps.music_store.api.serializers import (
     AlbumSerializer,
@@ -33,6 +34,13 @@ from ...music_store.models import (
 )
 
 
+class PaymentTransactionPagination(PageNumberPagination):
+    """Pagination for payment transactions"""
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
 # ##############################################################################
 # PAYMENTS
 # ##############################################################################
@@ -47,11 +55,13 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
         return super().get_queryset().filter(owner=self.request.user)
 
 
-class PaymentTransactionViewSet(viewsets.ModelViewSet):
+class PaymentTransactionViewSet(viewsets.mixins.ListModelMixin,
+                                viewsets.GenericViewSet):
     """View for PaymentTransactions"""
     serializer_class = PaymentTransactionSerializer
     permission_classes = (permissions.IsAuthenticated,)
     queryset = PaymentTransaction.objects.all()
+    pagination_class = PaymentTransactionPagination
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -109,6 +119,7 @@ class BoughtAlbumViewSet(BoughtTrackViewSet):
 class ItemViewSet(viewsets.mixins.ListModelMixin,
                   viewsets.mixins.RetrieveModelMixin,
                   viewsets.GenericViewSet):
+
     @detail_route(
         methods=['post'],
         permission_classes=(permissions.IsAuthenticated,),
@@ -144,6 +155,10 @@ class ItemViewSet(viewsets.mixins.ListModelMixin,
             )
 
         return Response(status=status.HTTP_200_OK)
+
+    def get_queryset(self):
+        """Prevent display Albums and Tracks with null price"""
+        return super().get_queryset().filter(price__isnull=False)
 
 
 class AlbumViewSet(ItemViewSet):
