@@ -50,7 +50,7 @@ class TaskStatusView(View):
         task_id = self.kwargs.get('task_id')
         task_data = get_celery_task_status_info(task_id)
 
-        return JsonResponse(task_data)
+        return JsonResponse(task_data._asdict())
 
 
 class AlbumUploadStatusView(TemplateView):
@@ -61,9 +61,10 @@ class AlbumUploadStatusView(TemplateView):
         task_id = kwargs.get('task_id')
         task_data = get_celery_task_status_info(task_id)
 
-        if not task_data['id']:
+        if not task_data.id:
             raise HttpResponseNotFound
 
         context['task'] = task_data
+        print(context['task'])
 
         return context

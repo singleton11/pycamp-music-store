@@ -8,6 +8,7 @@ from celery import current_task, shared_task
 from .utils import AlbumUnpacker
 
 
+# External state for celery task of getting tracks from zip archive
 UNPACKING_STATE = 'UNPACKING'
 
 

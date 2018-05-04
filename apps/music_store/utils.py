@@ -13,6 +13,8 @@ class NestedFolderError(Exception):
 
 # Data of track file extracted from its filename
 TrackData = namedtuple('TrackData', ['author', 'album', 'track'])
+# Data about celery task for further display task status and result
+TaskInfo = namedtuple('TaskInfo', ['id', 'status', 'result'])
 
 
 def check_zip_level_of_nesting_files(zip_file, level=1):
@@ -196,14 +198,10 @@ def get_celery_task_status_info(task_id):
     """Return celery task status information as a dict"""
     task_data = app.AsyncResult(task_id)
 
-    task_dict = {
-        'id': task_data.task_id,
-        'status': task_data.state,
-        'result': task_data.result,
-    }
+    task_info = TaskInfo(task_data.task_id, task_data.state, task_data.result)
 
     # if task returned exception, result = error_message
-    if isinstance(task_dict['result'], Exception):
-        task_dict['result'] = str(task_dict['result'])
+    if isinstance(task_info.result, Exception):
+        task_info.result = str(task_info.result)
 
-    return task_dict
+    return task_info
