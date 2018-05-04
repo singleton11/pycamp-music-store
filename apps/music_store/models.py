@@ -24,8 +24,8 @@ class SoftDeletionManager(models.Manager):
     def get_queryset(self):
         """Get queryset of objects due to alive_only option"""
         if self.alive_only:
-            return SoftDeletionQuerySet(self.model).filter(deleted_at=None)
-        return SoftDeletionQuerySet(self.model)
+            return super().get_queryset().filter(deleted_at__isnull=True)
+        return super().get_queryset()
 
     def hard_delete(self):
         """Complete deletion of objects."""
@@ -39,7 +39,7 @@ class SoftDeletionModel(models.Model):
     Marked objects are still available.
 
     """
-    deleted_at = models.DateTimeField(blank=True, null=True, default=None)
+    deleted_at = models.DateTimeField(blank=True, null=True)
 
     objects = SoftDeletionManager()
     # return
@@ -51,7 +51,7 @@ class SoftDeletionModel(models.Model):
     def delete(self, *args, **kwargs):
         """Soft deletion. Mark object with deleted_at date and time"""
         self.deleted_at = timezone.now()
-        self.save()
+        self.save(update_fields=['deleted_at'])
 
     def hard_delete(self):
         """Complete deletion of object."""
