@@ -187,7 +187,7 @@ class TestAPITrack(APITestCase):
         LikeTrackFactory.create_batch(num_of_likes, track=self.track)
         response = self.client.get(f'{self.url}{self.track.id}/')
 
-        self.assertEqual(response.data['number_of_likes'], num_of_likes)
+        self.assertEqual(response.data['count_likes'], num_of_likes)
 
 
 class TestAPIAlbum(APITestCase):

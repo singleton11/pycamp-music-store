@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.music_store.models import Album, Track, LikeTrack
+from apps.music_store.models import Album, Track
 
 __all__ = (
     'AlbumSerializer',
@@ -8,7 +8,23 @@ __all__ = (
 )
 
 
-class AlbumSerializer(serializers.ModelSerializer):
+class IsBoughtMixin(serializers.BaseSerializer):
+    """Mixin for check is_bought status of Album or Track"""
+
+    def get_is_bought(self, obj):
+        request = self.context.get('request', None)
+        if not request:
+            return False
+
+        user = request.user
+        # always display as not bought for anonymous users
+        if not user.is_authenticated:
+            return False
+
+        return obj.is_bought(user)
+
+
+class AlbumSerializer(IsBoughtMixin, serializers.ModelSerializer):
     """Serializer for Music Albums
 
     """
@@ -31,26 +47,15 @@ class AlbumSerializer(serializers.ModelSerializer):
             'is_bought',
         )
 
-    def get_is_bought(self, obj):
-        request = self.context.get('request', None)
-        if not request:
-            return False
 
-        user = request.user
-        if not user.is_authenticated:
-            return False
-
-        return obj.is_bought(user)
-
-
-class TrackSerializer(serializers.ModelSerializer):
+class TrackSerializer(IsBoughtMixin, serializers.ModelSerializer):
     """Serializer for Music Tracks"""
 
     content = serializers.SerializerMethodField()
-    is_bought = serializers.SerializerMethodField()
-
     is_liked = serializers.SerializerMethodField()
     count_likes = serializers.SerializerMethodField()
+
+    is_bought = serializers.SerializerMethodField()
 
     class Meta:
         model = Track
@@ -65,17 +70,6 @@ class TrackSerializer(serializers.ModelSerializer):
             'is_liked',
             'count_likes',
         )
-
-    def get_is_bought(self, obj):
-        request = self.context.get('request', None)
-        if not request:
-            return False
-
-        user = request.user
-        if not user.is_authenticated:
-            return False
-
-        return obj.is_bought(user)
 
     def get_content(self, obj):
         """Get free or full version of track.

@@ -138,7 +138,7 @@ class AlbumViewSet(ItemViewSet):
 
     """
     # albums without price or with price < 0 are not displayed
-    queryset = Album.objects.filter(price__ge=0)
+    queryset = Album.objects.filter(price__gte=0)
     serializer_class = AlbumSerializer
 
     filter_backends = (filters.SearchFilter,)
@@ -150,7 +150,7 @@ class TrackViewSet(ItemViewSet):
 
     """
     # tracks without price or with price < 0 are not displayed
-    queryset = Track.objects.filter(price__ge=0)
+    queryset = Track.objects.filter(price__gte=0)
     serializer_class = TrackSerializer
 
     filter_backends = (filters.SearchFilter,)
