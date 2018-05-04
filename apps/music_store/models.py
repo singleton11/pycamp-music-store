@@ -351,10 +351,12 @@ class LikeTrack(TimeStampedModel):
     track = models.ForeignKey(
         Track,
         verbose_name=_('track'),
+        related_name='likes',
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('liked by'),
+        related_name='likes',
     )
 
     class Meta:

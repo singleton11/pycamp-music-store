@@ -50,7 +50,7 @@ class TrackSerializer(serializers.ModelSerializer):
     is_bought = serializers.SerializerMethodField()
 
     is_liked = serializers.SerializerMethodField()
-    number_of_likes = serializers.SerializerMethodField()
+    count_likes = serializers.SerializerMethodField()
 
     class Meta:
         model = Track
@@ -63,7 +63,7 @@ class TrackSerializer(serializers.ModelSerializer):
             'content',
             'is_bought',
             'is_liked',
-            'number_of_likes',
+            'count_likes',
         )
 
     def get_is_bought(self, obj):
@@ -108,10 +108,10 @@ class TrackSerializer(serializers.ModelSerializer):
 
         return obj.is_liked(user)
 
-    def get_number_of_likes(self, obj):
+    def get_count_likes(self, obj):
         """Get total number of 'likes' on the track"""
         request = self.context.get('request', None)
         if not request:
             return 0
 
-        return LikeTrack.objects.filter(track=obj).count()
+        return obj.likes.count()
