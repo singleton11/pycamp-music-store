@@ -1,7 +1,15 @@
 from rest_framework import serializers
 
-from apps.music_store.models import PaymentMethod, PaymentTransaction, BoughtTrack, BoughtAlbum
-from apps.music_store.api.serializers import BoughtTrackSerializer, BoughtAlbumSerializer
+from apps.music_store.models import (
+    PaymentMethod,
+    PaymentTransaction,
+    BoughtTrack,
+    BoughtAlbum,
+)
+from apps.music_store.api.serializers import (
+    BoughtTrackSerializer,
+    BoughtAlbumSerializer,
+)
 from apps.users.models import AppUser
 
 __all__ = (
