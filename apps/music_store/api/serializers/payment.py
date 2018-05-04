@@ -45,8 +45,10 @@ class PaymentTransactionSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault()
     )
     amount = serializers.ReadOnlyField()
-    payment_method = serializers.ReadOnlyField()
-    created = serializers.ReadOnlyField()
+    payment_method = PaymentMethodSerializer()
+    created = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S'
+    )
 
     class Meta:
         model = PaymentTransaction

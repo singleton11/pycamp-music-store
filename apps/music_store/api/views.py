@@ -54,7 +54,8 @@ class PaymentTransactionViewSet(viewsets.ModelViewSet):
     queryset = PaymentTransaction.objects.all()
 
     def get_queryset(self):
-        return super().get_queryset().filter(user=self.request.user)
+        queryset = super().get_queryset()
+        return queryset.filter(user=self.request.user).order_by('-created')
 
 
 # ##############################################################################
