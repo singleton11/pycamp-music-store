@@ -30,10 +30,7 @@ class SoftDeletionQuerySet(QuerySet):
         return self.exclude(deleted_at=None)
 
 
-class SoftDeletionManager(
-    models.Manager.from_queryset(SoftDeletionQuerySet),
-    models.Manager
-):
+class SoftDeletionManager(models.Manager.from_queryset(SoftDeletionQuerySet)):
     """Manager for models with support of soft deletion. """
     def __init__(self, *args, **kwargs):
         """Add alive_only option to make available only objects
@@ -45,9 +42,8 @@ class SoftDeletionManager(
 
     def get_queryset(self):
         """Get queryset of objects due to alive_only option"""
-        if self.alive_only:
-            return super().get_queryset().filter(deleted_at__isnull=True)
-        return super().get_queryset()
+        qs = super().get_queryset()
+        return qs.alive() if self.alive_only else qs
 
     def hard_delete(self):
         """Complete deletion of objects."""

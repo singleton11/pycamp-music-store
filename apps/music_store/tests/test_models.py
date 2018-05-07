@@ -135,22 +135,13 @@ class TestPaymentAccount(TestCase):
         methods_to_del = PaymentMethod.objects.all().delete()
 
         # check methods are not available in objects
-        self.assertEqual(
-            PaymentMethod.objects.count(),
-            0
-        )
+        self.assertEqual(PaymentMethod.objects.count(), 0)
 
         # check methods are available in all_objects
-        self.assertEqual(
-            PaymentMethod.all_objects.count(),
-            number_of_methods
-        )
+        self.assertEqual(PaymentMethod.all_objects.count(), number_of_methods)
 
         # check method alive
-        self.assertEqual(
-            PaymentMethod.all_objects.alive().count(),
-            0
-        )
+        self.assertEqual(PaymentMethod.all_objects.alive().count(), 0)
         # check method dead
         self.assertEqual(
             PaymentMethod.all_objects.dead().count(),
@@ -161,27 +152,15 @@ class TestPaymentAccount(TestCase):
         methods_to_del = PaymentMethod.objects.all().hard_delete()
 
         # check methods are not available in objects
-        self.assertEqual(
-            PaymentMethod.objects.count(),
-            0
-        )
+        self.assertEqual(PaymentMethod.objects.count(), 0)
 
         # check methods are available in all_objects
-        self.assertEqual(
-            PaymentMethod.all_objects.count(),
-            0
-        )
+        self.assertEqual(PaymentMethod.all_objects.count(), 0)
 
         # check method alive
-        self.assertEqual(
-            PaymentMethod.all_objects.alive().count(),
-            0
-        )
+        self.assertEqual(PaymentMethod.all_objects.alive().count(), 0)
         # check method dead
-        self.assertEqual(
-            PaymentMethod.all_objects.dead().count(),
-            0
-        )
+        self.assertEqual(PaymentMethod.all_objects.dead().count(), 0)
 
 
 class TestBought(TestCase):
