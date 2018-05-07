@@ -26,16 +26,12 @@ class PaymentAccountSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault(),
     )
-    default_payment = serializers.SerializerMethodField()
+    email = serializers.EmailField()
 
     class Meta:
         model = AppUser
         fields = (
             'user',
+            'email',
             'balance',
-            'payment_methods',
-            'default_payment',
         )
-
-    def get_default_payment(self, obj):
-        return obj.default_payment.pk
