@@ -123,13 +123,7 @@ class TestAPIPaymentTransactions(APITestCase):
 
     def test_transaction_for_track(self):
         self.client.force_authenticate(user=self.user)
-        self.track.buy(user=self.user)
-
-        response = self.client.get(self.url)
-
-        # get transaction
-        transaction = response.data['results'][0]
-        print(transaction)
+        transaction = self._make_transaction(self.track)
 
         # check type of purchased item
         self.assertEqual(transaction['purchase_type'], 'Track')
@@ -140,12 +134,7 @@ class TestAPIPaymentTransactions(APITestCase):
 
     def test_transaction_for_album(self):
         self.client.force_authenticate(user=self.user)
-        self.album.buy(user=self.user)
-
-        response = self.client.get(self.url)
-
-        # get transaction
-        transaction = response.data['results'][0]
+        transaction = self._make_transaction(self.album)
 
         # check type of purchased item
         self.assertEqual(transaction['purchase_type'], 'Music Album')
@@ -153,6 +142,17 @@ class TestAPIPaymentTransactions(APITestCase):
         self.assertEqual(transaction['purchase_info'], str(self.album))
         # check id of purchased item
         self.assertEqual(transaction['purchase_id'], self.album.id)
+
+    def _make_transaction(self, item):
+        """Buy album or track with its .buy method and get info about its
+        transaction.
+
+        """
+        item.buy(user=self.user)
+        response = self.client.get(self.url)
+        # get transaction
+        transaction = response.data['results'][0]
+        return transaction
 
 
 class TestAPITrack(APITestCase):

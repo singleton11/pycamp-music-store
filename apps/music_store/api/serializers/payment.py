@@ -80,4 +80,3 @@ class PaymentTransactionSerializer(serializers.ModelSerializer):
     def get_purchase_id(self, obj):
         """Provide id of purchased good"""
         return obj.object_id
-
