@@ -1,0 +1,68 @@
+{% extends "admin/base_site.html" %}
+
+{% comment %}
+  Template for displaying the status of uploading the archive to the server.
+  Dynamically requests information and informs the user of the completion
+  of tasks.
+{% endcomment %}
+
+{% block content %}
+  <div id="app">
+    <label-node title="Task ID" v-bind:value="data.id"></label-node>
+    <label-node title="Task Status" v-bind:value="data.status"></label-node>
+    <label-node title="Task Result" v-bind:value="data.result"></label-node>
+  </div>
+
+{% endblock %}
+
+
+{% block footer %}
+  {{ footer.super }}
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+
+  <script>
+    Vue.component('label-node', {
+      delimiters: ['[[', ']]'],
+      props: ['title', 'value'],
+      template: '<div v-show=\'value\'>' +
+      '<label> [[title]]:</label>' +
+      '<span> [[value]]</span>' +
+      '</div>',
+    });
+
+
+    new Vue({
+      el: '#app',
+      delimiters: ['[[', ']]'],
+      data: {
+        update_url: '{% url "admin:album_upload_get_status" task_id=task.id %}',
+        data: {
+          id: '{{ task.id }}',
+          status: '{{ task.status }}',
+          result: '',
+        },
+      },
+      methods: {
+        update_info: function () {
+          let q = this;
+          axios.get(this.update_url)
+            .then(function (response) {
+              q.data = response.data;
+              console.log(q.data.task_id);
+              if (q.data.status !== "UNPACKING" && q.data.status !== "PENDING")
+                alert(q.data.result);
+              else
+                setTimeout(q.update_info, 2000)
+            });
+          return true
+        }
+      },
+      created : function(){
+        this.update_info()
+      },
+    });
+
+  </script>
+{% endblock %}
