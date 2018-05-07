@@ -130,6 +130,59 @@ class TestPaymentAccount(TestCase):
             PaymentMethod.all_objects.filter(id=method.id).exists()
         )
 
+    def test_soft_delete_queryset_payment_method(self):
+        number_of_methods = PaymentMethod.objects.count()
+        methods_to_del = PaymentMethod.objects.all().delete()
+
+        # check methods are not available in objects
+        self.assertEqual(
+            PaymentMethod.objects.count(),
+            0
+        )
+
+        # check methods are available in all_objects
+        self.assertEqual(
+            PaymentMethod.all_objects.count(),
+            number_of_methods
+        )
+
+        # check method alive
+        self.assertEqual(
+            PaymentMethod.all_objects.alive().count(),
+            0
+        )
+        # check method dead
+        self.assertEqual(
+            PaymentMethod.all_objects.dead().count(),
+            number_of_methods
+        )
+
+    def test_hard_delete_queryset_payment_method(self):
+        methods_to_del = PaymentMethod.objects.all().hard_delete()
+
+        # check methods are not available in objects
+        self.assertEqual(
+            PaymentMethod.objects.count(),
+            0
+        )
+
+        # check methods are available in all_objects
+        self.assertEqual(
+            PaymentMethod.all_objects.count(),
+            0
+        )
+
+        # check method alive
+        self.assertEqual(
+            PaymentMethod.all_objects.alive().count(),
+            0
+        )
+        # check method dead
+        self.assertEqual(
+            PaymentMethod.all_objects.dead().count(),
+            0
+        )
+
 
 class TestBought(TestCase):
     """Test for buy tracks and albums and his methods
