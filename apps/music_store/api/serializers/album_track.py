@@ -8,7 +8,23 @@ __all__ = (
 )
 
 
-class AlbumSerializer(serializers.ModelSerializer):
+class IsBoughtMixin(serializers.BaseSerializer):
+    """Mixin for check is_bought status of Album or Track"""
+
+    def get_is_bought(self, obj):
+        request = self.context.get('request', None)
+        if not request:
+            return False
+
+        user = request.user
+        # always display as not bought for anonymous users
+        if not user.is_authenticated:
+            return False
+
+        return obj.is_bought(user)
+
+
+class AlbumSerializer(IsBoughtMixin, serializers.ModelSerializer):
     """Serializer for Music Albums
 
     """
@@ -17,6 +33,7 @@ class AlbumSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Track.objects.all()
     )
+    is_bought = serializers.SerializerMethodField()
 
     class Meta:
         model = Album
@@ -27,13 +44,18 @@ class AlbumSerializer(serializers.ModelSerializer):
             'image',
             'price',
             'tracks',
+            'is_bought',
         )
 
 
-class TrackSerializer(serializers.ModelSerializer):
+class TrackSerializer(IsBoughtMixin, serializers.ModelSerializer):
     """Serializer for Music Tracks"""
 
     content = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+    count_likes = serializers.SerializerMethodField()
+
+    is_bought = serializers.SerializerMethodField()
 
     class Meta:
         model = Track
@@ -44,6 +66,9 @@ class TrackSerializer(serializers.ModelSerializer):
             'album',
             'price',
             'content',
+            'is_bought',
+            'is_liked',
+            'count_likes',
         )
 
     def get_content(self, obj):
@@ -57,10 +82,30 @@ class TrackSerializer(serializers.ModelSerializer):
 
         """
         request = self.context.get('request', None)
-        if request is None:
+        if not request:
             return obj.free_version
 
         user = request.user
         if user.is_authenticated and obj.is_bought(user):
             return obj.full_version
         return obj.free_version
+
+    def get_is_liked(self, obj):
+        """Check if track is liked by authorized user"""
+        request = self.context.get('request', None)
+        if not request:
+            return False
+
+        user = request.user
+        if not user.is_authenticated:
+            return False
+
+        return obj.is_liked(user)
+
+    def get_count_likes(self, obj):
+        """Get total number of 'likes' on the track"""
+        request = self.context.get('request', None)
+        if not request:
+            return 0
+
+        return obj.likes.count()

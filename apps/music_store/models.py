@@ -274,6 +274,19 @@ class Track(MusicItem):
         """
         return ListenTrack.objects.create(user=user, track=self)
 
+    def is_bought(self, user):
+        """Note about the track was listened by some user
+
+        Args:
+            user (AppUser): user
+
+        """
+
+        if super().is_bought(user):
+            return True
+
+        return self.album and self.album.is_bought(user)
+
 
 class BoughtItem(TimeStampedModel):
     """ An abstract base class model for BoughtTrack and BoughtAlbum.
@@ -341,10 +354,12 @@ class LikeTrack(TimeStampedModel):
     track = models.ForeignKey(
         Track,
         verbose_name=_('track'),
+        related_name='likes',
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('liked by'),
+        related_name='likes',
     )
 
     class Meta:

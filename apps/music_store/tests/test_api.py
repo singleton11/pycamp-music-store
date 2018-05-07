@@ -65,7 +65,8 @@ class TestAPIMusicStorePaymentMethods(APITestCase):
         }
         response = self._api_payment_method(data, user)
         self.assertTrue(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, data)
+        self.assertEqual(response.data['title'], data['title'])
+        self.assertEqual(response.data['is_default'], data['is_default'])
 
     def test_payment_methods_patch_edit(self):
         """ Edit a part of payment method with patch request """
@@ -85,7 +86,8 @@ class TestAPIMusicStorePaymentMethods(APITestCase):
         self.client.force_authenticate(user=payment_method.owner)
         url = api_url(f'payment_methods/{payment_method.pk}/')
         response = self.client.put(url, data)
-        self.assertEqual(response.data, data)
+        self.assertEqual(response.data['is_default'], data['is_default'])
+        self.assertEqual(response.data['title'], data['title'])
 
     def test_payment_methods_delete(self):
         """ Delete payment method """
@@ -143,36 +145,51 @@ class TestAPITrack(APITestCase):
         response = self.client.get(f'{self.url}{self.track.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_content_of_track_no_login(self):
+    def test_content_of_track_not_authorized(self):
         """If not logged in, content is free version"""
         response = self.client.get(f'{self.url}{self.track.id}/')
         content = response.data['content']
-        self.assertEqual(
-            content,
-            self.track.free_version
-        )
+        self.assertEqual(content, self.track.free_version)
 
-    def test_content_of_track_login_not_bought(self):
+    def test_content_of_track_authorized_not_bought(self):
         """If logged in and track not bought, content is free version"""
         self.client.force_authenticate(user=self.user)
         response = self.client.get(f'{self.url}{self.track.id}/')
         content = response.data['content']
-        self.assertEqual(
-            content,
-            self.track.free_version
-        )
+        self.assertEqual(content, self.track.free_version)
 
-    def test_content_of_track_login_bought(self):
+    def test_content_of_track_authorized_bought(self):
         """If logged in and track bought, content is full version"""
         self.client.force_authenticate(user=self.user)
         BoughtTrackFactory(user=self.user, item=self.track)
 
         response = self.client.get(f'{self.url}{self.track.id}/')
         content = response.data['content']
-        self.assertEqual(
-            content,
-            self.track.full_version
-        )
+        self.assertEqual(content, self.track.full_version)
+
+    def test_track_is_liked_authorized(self):
+        """Authorized user see if track is liked"""
+        self.client.force_authenticate(user=self.user)
+        LikeTrackFactory(user=self.user, track=self.track)
+        response = self.client.get(f'{self.url}{self.track.id}/')
+
+        is_liked = response.data['is_liked']
+        self.assertTrue(is_liked)
+
+    def test_track_is_liked_not_authorized(self):
+        """Unauthorized user always see track is not liked"""
+        LikeTrackFactory(user=self.user, track=self.track)
+        response = self.client.get(f'{self.url}{self.track.id}/')
+
+        is_liked = response.data['is_liked']
+        self.assertFalse(is_liked)
+
+    def test_track_number_of_likes(self):
+        num_of_likes = 3
+        LikeTrackFactory.create_batch(num_of_likes, track=self.track)
+        response = self.client.get(f'{self.url}{self.track.id}/')
+
+        self.assertEqual(response.data['count_likes'], num_of_likes)
 
     def test_get_tracks_of_album(self):
         """Test filtering tracks with album they relate to"""
