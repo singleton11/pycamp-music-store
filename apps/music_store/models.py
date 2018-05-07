@@ -7,6 +7,8 @@ from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
 from apps.music_store.exceptions import PaymentNotFound, NotEnoughMoney, \
     ItemAlreadyBought
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 
 class PaymentMethod(models.Model):
@@ -57,6 +59,11 @@ class PaymentTransaction(TimeStampedModel):
         verbose_name=_('payment method'),
         related_name='transactions',
     )
+
+    # contenttypes implementation for storing bought item
+    content_type = models.ForeignKey(ContentType, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     class Meta:
         verbose_name = _('Payment transaction')
@@ -156,6 +163,7 @@ class MusicItem(TitleDescriptionModel, TimeStampedModel):
             user=user,
             amount=-self.price,
             payment_method=payment_method,
+            content_object=self,
         )
         self.bought_model.objects.create(
             user=user,

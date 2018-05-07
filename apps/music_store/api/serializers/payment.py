@@ -3,12 +3,6 @@ from rest_framework import serializers
 from apps.music_store.models import (
     PaymentMethod,
     PaymentTransaction,
-    BoughtTrack,
-    BoughtAlbum,
-)
-from apps.music_store.api.serializers import (
-    BoughtTrackSerializer,
-    BoughtAlbumSerializer,
 )
 from apps.users.models import AppUser
 
@@ -58,8 +52,10 @@ class PaymentTransactionSerializer(serializers.ModelSerializer):
     created = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S'
     )
-    purchased_track = serializers.SerializerMethodField()
-    purchased_album = serializers.SerializerMethodField()
+
+    purchase_type = serializers.SerializerMethodField()
+    purchase_info = serializers.SerializerMethodField()
+    purchase_id = serializers.SerializerMethodField()
 
     class Meta:
         model = PaymentTransaction
@@ -68,30 +64,20 @@ class PaymentTransactionSerializer(serializers.ModelSerializer):
             'amount',
             'payment_method',
             'created',
-            'purchased_track',
-            'purchased_album',
+            'purchase_type',
+            'purchase_info',
+            'purchase_id',
         )
 
-    def get_purchased_track(self, obj):
-        request = self.context.get('request', None)
-        if request is None:
-            return None
+    def get_purchase_type(self, obj):
+        """Provide type of purchased good"""
+        return str(obj.content_type)
 
-        user = request.user
+    def get_purchase_info(self, obj):
+        """Provide main info of purchased good"""
+        return str(obj.content_object)
 
-        track = BoughtTrack.objects.filter(transaction=obj, user=user)
-        if track.exists():
-            return BoughtTrackSerializer(track.get()).data
-        return None
+    def get_purchase_id(self, obj):
+        """Provide id of purchased good"""
+        return obj.object_id
 
-    def get_purchased_album(self, obj):
-        request = self.context.get('request', None)
-        if request is None:
-            return None
-
-        user = request.user
-
-        album = BoughtAlbum.objects.filter(transaction=obj, user=user)
-        if album.exists():
-            return BoughtAlbumSerializer(album.get()).data
-        return None
