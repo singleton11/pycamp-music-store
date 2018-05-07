@@ -85,7 +85,7 @@ class AccountView(generics.RetrieveAPIView):
 
 
 # ##############################################################################
-# BOUGHT TRACKS
+# BOUGHT ITEMS
 # ##############################################################################
 
 
@@ -99,11 +99,6 @@ class BoughtTrackViewSet(viewsets.mixins.ListModelMixin,
     def get_queryset(self):
         user = self.request.user
         return super().get_queryset().filter(user=user)
-
-
-# ##############################################################################
-# BOUGHT ALBUMS
-# ##############################################################################
 
 
 class BoughtAlbumViewSet(BoughtTrackViewSet):

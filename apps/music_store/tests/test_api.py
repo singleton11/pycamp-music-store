@@ -112,6 +112,49 @@ class TestAPIMusicStorePaymentMethods(APITestCase):
         return caller(self.client)
 
 
+class TestAPIPaymentTransactions(APITestCase):
+    """Tests for API of list of transactions"""
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserWithBalanceFactory(balance=100)
+        cls.album = AlbumFactory(price=10)
+        cls.track = TrackFactory(price=10)
+        cls.url = api_url('transactions/')
+
+    def test_transaction_for_track(self):
+        self.client.force_authenticate(user=self.user)
+        self.track.buy(user=self.user)
+
+        response = self.client.get(self.url)
+
+        # get transaction
+        transaction = response.data['results'][0]
+        print(transaction)
+
+        # check type of purchased item
+        self.assertEqual(transaction['purchase_type'], 'Track')
+        # check string repr of purchased item
+        self.assertEqual(transaction['purchase_info'], str(self.track))
+        # check id of purchased item
+        self.assertEqual(transaction['purchase_id'], self.track.id)
+
+    def test_transaction_for_album(self):
+        self.client.force_authenticate(user=self.user)
+        self.album.buy(user=self.user)
+
+        response = self.client.get(self.url)
+
+        # get transaction
+        transaction = response.data['results'][0]
+
+        # check type of purchased item
+        self.assertEqual(transaction['purchase_type'], 'Music Album')
+        # check string repr of purchased item
+        self.assertEqual(transaction['purchase_info'], str(self.album))
+        # check id of purchased item
+        self.assertEqual(transaction['purchase_id'], self.album.id)
+
+
 class TestAPITrack(APITestCase):
     """Tests for Tracks API."""
 
