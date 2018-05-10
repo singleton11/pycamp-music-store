@@ -63,7 +63,8 @@ class TestAPIMusicStorePaymentMethods(APITestCase):
         }
         response = self._api_payment_method(data, user)
         self.assertTrue(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, data)
+        self.assertEqual(response.data['title'], data['title'])
+        self.assertEqual(response.data['is_default'], data['is_default'])
 
     def test_payment_methods_patch_edit(self):
         """ Edit a part of payment method with patch request """
@@ -78,7 +79,7 @@ class TestAPIMusicStorePaymentMethods(APITestCase):
     def test_payment_methods_put_edit(self):
         """ Edit a part of payment method with put request """
         payment_method = PaymentMethodFactory()
-        data = {'is_default': True, 'title': 'test'}
+        data = {'id': payment_method.id, 'is_default': True, 'title': 'test'}
 
         self.client.force_authenticate(user=payment_method.owner)
         url = api_url(f'payment_methods/{payment_method.pk}/')
@@ -137,7 +138,7 @@ class TestAPIPaymentTransactions(APITestCase):
         transaction = self._make_transaction(self.album)
 
         # check type of purchased item
-        self.assertEqual(transaction['purchase_type'], 'Music Album')
+        self.assertEqual(transaction['purchase_type'], 'Album')
         # check string repr of purchased item
         self.assertEqual(transaction['purchase_info'], str(self.album))
         # check id of purchased item

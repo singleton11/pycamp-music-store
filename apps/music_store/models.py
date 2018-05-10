@@ -191,8 +191,8 @@ class Album(MusicItem):
     )
 
     class Meta(MusicItem.Meta):
-        verbose_name = _('Music Album')
-        verbose_name_plural = _('Music Albums')
+        verbose_name = _('Album')
+        verbose_name_plural = _('Albums')
 
     @property
     def is_empty(self):

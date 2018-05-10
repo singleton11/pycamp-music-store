@@ -20,7 +20,7 @@ class PaymentMethodSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PaymentMethod
-        fields = ('owner', 'title', 'is_default')
+        fields = ('id', 'owner', 'title', 'is_default')
 
 
 class PaymentAccountSerializer(serializers.ModelSerializer):

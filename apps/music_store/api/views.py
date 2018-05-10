@@ -128,7 +128,7 @@ class ItemViewSet(viewsets.mixins.ListModelMixin,
     @detail_route(
         methods=['post'],
         permission_classes=(permissions.IsAuthenticated,),
-        url_path='buy/(?P<payment_id>[0-9]?)',
+        url_path='buy/(?P<payment_id>[0-9]+)',
         url_name='buy',
     )
     def buy_item(self, request, payment_id=None, **kwargs):
