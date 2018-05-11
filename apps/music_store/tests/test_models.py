@@ -18,7 +18,8 @@ from apps.music_store.factories import (
     UserWithDefaultPaymentMethodFactory,
     UserWithPaymentMethodFactory
 )
-from apps.music_store.models import Album, LikeTrack, ListenTrack, Track
+
+from apps.music_store.models import Album, LikeTrack, ListenTrack, Track, PaymentMethod, PaymentTransaction
 from apps.users.factories import UserFactory
 
 
@@ -67,6 +68,99 @@ class TestPaymentAccount(TestCase):
             account.payment_methods.filter(is_default=True).count(),
             1,
         )
+
+    def test_soft_delete_payment_method(self):
+        """Test soft deletion."""
+        account = UserWithBalanceFactory(balance=100)
+        method = PaymentDefaultMethodFactory(owner=account)
+
+        tracks = TrackFactory.create_batch(3, price=10)
+        for track in tracks:
+            track.buy(account)
+
+        transactions_done = PaymentTransaction.objects.filter(user=account)
+        method = account.payment_methods.get(is_default=True)
+        method.delete()
+
+        # check method is deleted
+        self.assertFalse(
+            account.payment_methods.filter(is_default=True).exists()
+        )
+        # transactions still exist
+        self.assertEqual(
+            transactions_done.count(),
+            PaymentTransaction.objects.filter(user=account).count()
+        )
+        # method is not in objects
+        self.assertFalse(PaymentMethod.objects.filter(id=method.id).exists())
+        # method is in all_objects
+        self.assertTrue(
+            PaymentMethod.all_objects.filter(id=method.id).exists()
+        )
+        deleted_method = PaymentMethod.all_objects.filter(id=method.id).first()
+        # check deleted_ad
+        self.assertTrue(deleted_method.deleted_at is not None)
+
+    def test_hard_delete_payment_method(self):
+        """Test hard deletion."""
+        account = UserWithBalanceFactory(balance=100)
+        method = PaymentDefaultMethodFactory(owner=account)
+
+        tracks = TrackFactory.create_batch(3, price=10)
+        for track in tracks:
+            track.buy(account)
+
+        transactions = PaymentTransaction.objects.get_queryset()
+        method = account.payment_methods.get(is_default=True)
+        method.hard_delete()
+
+        # check method is deleted
+        self.assertFalse(
+            account.payment_methods.filter(is_default=True).exists()
+        )
+        # transactions of buy tracks are deleted
+        self.assertNotEqual(
+            transactions,
+            PaymentTransaction.objects.get_queryset()
+        )
+        # method is not in objects
+        self.assertFalse(PaymentMethod.objects.filter(id=method.id).exists())
+        # method is not in all_objects
+        self.assertFalse(
+            PaymentMethod.all_objects.filter(id=method.id).exists()
+        )
+
+    def test_soft_delete_queryset_payment_method(self):
+        number_of_methods = PaymentMethod.objects.count()
+        methods_to_del = PaymentMethod.objects.all().delete()
+
+        # check methods are not available in objects
+        self.assertEqual(PaymentMethod.objects.count(), 0)
+
+        # check methods are available in all_objects
+        self.assertEqual(PaymentMethod.all_objects.count(), number_of_methods)
+
+        # check method alive
+        self.assertEqual(PaymentMethod.all_objects.alive().count(), 0)
+        # check method dead
+        self.assertEqual(
+            PaymentMethod.all_objects.dead().count(),
+            number_of_methods
+        )
+
+    def test_hard_delete_queryset_payment_method(self):
+        methods_to_del = PaymentMethod.objects.all().hard_delete()
+
+        # check methods are not available in objects
+        self.assertEqual(PaymentMethod.objects.count(), 0)
+
+        # check methods are available in all_objects
+        self.assertEqual(PaymentMethod.all_objects.count(), 0)
+
+        # check method alive
+        self.assertEqual(PaymentMethod.all_objects.alive().count(), 0)
+        # check method dead
+        self.assertEqual(PaymentMethod.all_objects.dead().count(), 0)
 
 
 class TestBought(TestCase):
