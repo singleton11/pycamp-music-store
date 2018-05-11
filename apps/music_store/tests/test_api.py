@@ -81,7 +81,7 @@ class TestAPIMusicStorePaymentMethods(APITestCase):
     def test_payment_methods_put_edit(self):
         """ Edit a part of payment method with put request """
         payment_method = PaymentMethodFactory()
-        data = {'is_default': True, 'title': 'test'}
+        data = {'id': payment_method.id, 'is_default': True, 'title': 'test'}
 
         self.client.force_authenticate(user=payment_method.owner)
         url = api_url(f'payment_methods/{payment_method.pk}/')
@@ -114,6 +114,49 @@ class TestAPIMusicStorePaymentMethods(APITestCase):
         url = api_url('payment_methods/')
         caller = methodcaller(method, url, data)
         return caller(self.client)
+
+
+class TestAPIPaymentTransactions(APITestCase):
+    """Tests for API of list of transactions"""
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = UserWithBalanceFactory(balance=100)
+        cls.album = AlbumFactory(price=10)
+        cls.track = TrackFactory(price=10)
+        cls.url = api_url('transactions/')
+
+    def test_transaction_for_track(self):
+        self.client.force_authenticate(user=self.user)
+        transaction = self._make_transaction(self.track)
+
+        # check type of purchased item
+        self.assertEqual(transaction['purchase_type'], 'Track')
+        # check string repr of purchased item
+        self.assertEqual(transaction['purchase_info'], str(self.track))
+        # check id of purchased item
+        self.assertEqual(transaction['purchase_id'], self.track.id)
+
+    def test_transaction_for_album(self):
+        self.client.force_authenticate(user=self.user)
+        transaction = self._make_transaction(self.album)
+
+        # check type of purchased item
+        self.assertEqual(transaction['purchase_type'], 'Album')
+        # check string repr of purchased item
+        self.assertEqual(transaction['purchase_info'], str(self.album))
+        # check id of purchased item
+        self.assertEqual(transaction['purchase_id'], self.album.id)
+
+    def _make_transaction(self, item):
+        """Buy album or track with its .buy method and get info about its
+        transaction.
+
+        """
+        item.buy(user=self.user)
+        response = self.client.get(self.url)
+        # get transaction
+        transaction = response.data['results'][0]
+        return transaction
 
 
 class TestAPITrack(APITestCase):

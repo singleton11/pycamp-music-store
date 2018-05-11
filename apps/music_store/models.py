@@ -9,6 +9,8 @@ from django_extensions.db.models import TimeStampedModel, TitleDescriptionModel
 
 from apps.music_store.exceptions import PaymentNotFound, NotEnoughMoney, \
     ItemAlreadyBought
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 
 class SoftDeletionQuerySet(QuerySet):
@@ -74,82 +76,6 @@ class SoftDeletionModel(models.Model):
     def hard_delete(self):
         """Complete deletion of object."""
         super().delete()
-
-
-class PaymentMethod(SoftDeletionModel, models.Model):
-    """Model to store payment methods."""
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_('user'),
-        related_name='payment_methods',
-    )
-    title = models.CharField(max_length=100)
-    is_default = models.BooleanField(
-        default=False,
-        verbose_name=_('is default'),
-    )
-
-    class Meta:
-        verbose_name = _('Payment method')
-        verbose_name_plural = _('Payment methods')
-
-    def __str__(self):
-        return f'{self.owner}\'s method {self.title}'
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        # if this method is default, set all other methods not default
-        if self.is_default:
-            default_methods = PaymentMethod.objects.filter(
-                owner=self.owner,
-                is_default=True,
-            )
-            default_methods.exclude(pk=self.pk).update(is_default=False)
-
-
-class PaymentTransaction(TimeStampedModel):
-    """Model for storing operations with user balance """
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_('user'),
-        related_name='transactions',
-    )
-    amount = models.BigIntegerField(verbose_name=_('amount'))
-    payment_method = models.ForeignKey(
-        'PaymentMethod',
-        blank=True,
-        null=True,
-        verbose_name=_('payment method'),
-        related_name='transactions',
-    )
-
-    class Meta:
-        verbose_name = _('Payment transaction')
-        verbose_name_plural = _('Payment transactions')
-
-    def __str__(self):
-        if self.amount < 0:
-            return f'{self.user} has spent {abs(self.amount)}'
-        return f'{self.user} received {self.amount}'
-
-    def update_user_balance(self, user):
-        """ Method for update user balance """
-        total_balance = self.__class__.objects.filter(user=user) \
-            .aggregate(total_amount=Sum('amount')) \
-            .get('total_amount')
-
-        user.balance = total_balance
-        user.save(update_fields=['balance'])
-        user.refresh_from_db()
-
-    def save(self, **kwargs):
-        if self.amount < 0 and self.user.balance < abs(self.amount):
-            raise NotEnoughMoney
-
-        super().save(**kwargs)
-        self.update_user_balance(self.user)
 
 
 class MusicItem(TitleDescriptionModel, TimeStampedModel):
@@ -223,6 +149,7 @@ class MusicItem(TitleDescriptionModel, TimeStampedModel):
             user=user,
             amount=-self.price,
             payment_method=payment_method,
+            content_object=self,
         )
         self.bought_model.objects.create(
             user=user,
@@ -250,8 +177,8 @@ class Album(MusicItem):
     )
 
     class Meta(MusicItem.Meta):
-        verbose_name = _('Music Album')
-        verbose_name_plural = _('Music Albums')
+        verbose_name = _('Album')
+        verbose_name_plural = _('Albums')
 
     @property
     def is_empty(self):
@@ -353,6 +280,109 @@ class Track(MusicItem):
             return True
 
         return self.album and self.album.is_bought(user)
+
+
+class PaymentMethod(SoftDeletionModel, models.Model):
+    """Model to store payment methods."""
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('user'),
+        related_name='payment_methods',
+    )
+    title = models.CharField(max_length=100)
+    is_default = models.BooleanField(
+        default=False,
+        verbose_name=_('is default'),
+    )
+
+    class Meta:
+        verbose_name = _('Payment method')
+        verbose_name_plural = _('Payment methods')
+
+    def __str__(self):
+        return f'{self.owner}\'s method {self.title}'
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # if this method is default, set all other methods not default
+        if self.is_default:
+            default_methods = PaymentMethod.objects.filter(
+                owner=self.owner,
+                is_default=True,
+            )
+            default_methods.exclude(pk=self.pk).update(is_default=False)
+
+
+class PaymentTransaction(TimeStampedModel):
+    """Model for storing operations with user balance """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('user'),
+        related_name='transactions',
+    )
+    amount = models.BigIntegerField(verbose_name=_('amount'))
+    payment_method = models.ForeignKey(
+        'PaymentMethod',
+        blank=True,
+        null=True,
+        verbose_name=_('payment method'),
+        related_name='transactions',
+    )
+
+    # contenttypes implementation for storing bought item
+    content_type = models.ForeignKey(ContentType, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    # types of available goods for purchase
+    _goods = {
+        Track: 'Track',
+        Album: 'Album',
+    }
+
+    class Meta:
+        verbose_name = _('Payment transaction')
+        verbose_name_plural = _('Payment transactions')
+
+    def __str__(self):
+        if self.amount < 0:
+            return f'{self.user} has spent {abs(self.amount)}'
+        return f'{self.user} received {self.amount}'
+
+    def update_user_balance(self, user):
+        """ Method for update user balance """
+        total_balance = self.__class__.objects.filter(user=user) \
+            .aggregate(total_amount=Sum('amount')) \
+            .get('total_amount')
+
+        user.balance = total_balance
+        user.save(update_fields=['balance'])
+        user.refresh_from_db()
+
+    def save(self, **kwargs):
+        if self.amount < 0 and self.user.balance < abs(self.amount):
+            raise NotEnoughMoney
+
+        super().save(**kwargs)
+        self.update_user_balance(self.user)
+
+    @property
+    def purchase_type(self):
+        """Provide type of purchased good"""
+        good_type = self.content_type.model_class()
+        return self._goods.get(good_type)
+
+    @property
+    def purchase_info(self):
+        """Provide main info of purchased good"""
+        return str(self.content_object)
+
+    @property
+    def purchase_id(self):
+        """Provide id of purchased good"""
+        return self.object_id
 
 
 class BoughtItem(TimeStampedModel):

@@ -1,9 +1,16 @@
 from rest_framework import serializers
 
-from apps.music_store.models import PaymentMethod
+from apps.music_store.models import (
+    PaymentMethod,
+    PaymentTransaction,
+)
 from apps.users.models import AppUser
 
-__all__ = ('PaymentMethodSerializer', 'PaymentAccountSerializer',)
+__all__ = (
+    'PaymentMethodSerializer',
+    'PaymentAccountSerializer',
+    'PaymentTransactionSerializer',
+)
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):
@@ -17,7 +24,7 @@ class PaymentMethodSerializer(serializers.ModelSerializer):
             'id',
             'owner',
             'title',
-            'is_default'
+            'is_default',
         )
 
 
@@ -34,4 +41,27 @@ class PaymentAccountSerializer(serializers.ModelSerializer):
             'user',
             'email',
             'balance',
+        )
+
+
+class PaymentTransactionSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+    amount = serializers.ReadOnlyField()
+    payment_method = PaymentMethodSerializer()
+    created = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S'
+    )
+
+    class Meta:
+        model = PaymentTransaction
+        fields = (
+            'user',
+            'amount',
+            'payment_method',
+            'created',
+            'purchase_type',
+            'purchase_info',
+            'purchase_id',
         )

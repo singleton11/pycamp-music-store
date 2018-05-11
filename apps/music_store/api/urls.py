@@ -12,6 +12,7 @@ router.register(r'tracks', views.TrackViewSet)
 router.register(r'liked', views.LikeTrackViewSet)
 router.register(r'listened', views.ListenTrackViewSet)
 router.register(r'payment_methods', views.PaymentMethodViewSet)
+router.register(r'transactions', views.PaymentTransactionViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
