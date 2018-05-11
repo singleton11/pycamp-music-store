@@ -53,10 +53,6 @@ class PaymentTransactionSerializer(serializers.ModelSerializer):
         format='%Y-%m-%d %H:%M:%S'
     )
 
-    purchase_type = serializers.SerializerMethodField()
-    purchase_info = serializers.SerializerMethodField()
-    purchase_id = serializers.SerializerMethodField()
-
     class Meta:
         model = PaymentTransaction
         fields = (
@@ -68,15 +64,3 @@ class PaymentTransactionSerializer(serializers.ModelSerializer):
             'purchase_info',
             'purchase_id',
         )
-
-    def get_purchase_type(self, obj):
-        """Provide type of purchased good"""
-        return str(obj.content_type)
-
-    def get_purchase_info(self, obj):
-        """Provide main info of purchased good"""
-        return str(obj.content_object)
-
-    def get_purchase_id(self, obj):
-        """Provide id of purchased good"""
-        return obj.object_id
