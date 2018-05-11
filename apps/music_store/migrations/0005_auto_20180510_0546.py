@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('contenttypes', '0002_remove_content_type_name'),
-        ('music_store', '0004_auto_20180419_0626'),
+        ('music_store', '0005_paymentmethod_deleted_at'),
     ]
 
     operations = [
