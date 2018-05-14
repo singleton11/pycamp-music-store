@@ -149,8 +149,15 @@ class ItemViewSet(viewsets.mixins.ListModelMixin,
                 data={'message': e.message},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        if isinstance(item, Track):
+            return Response(
+                status=status.HTTP_200_OK,
+                data={'content': item.full_version},
+            )
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(
+            status=status.HTTP_200_OK,
+        )
 
     def get_queryset(self):
         """Prevent display Albums and Tracks with null price"""
