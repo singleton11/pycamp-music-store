@@ -35,7 +35,7 @@ from ...music_store.models import (
 )
 
 
-class PaymentTransactionPagination(PageNumberPagination):
+class ItemsPagination(PageNumberPagination):
     """Pagination for payment transactions"""
     page_size = 20
     page_size_query_param = 'page_size'
@@ -62,7 +62,7 @@ class PaymentTransactionViewSet(viewsets.mixins.ListModelMixin,
     serializer_class = PaymentTransactionSerializer
     permission_classes = (permissions.IsAuthenticated,)
     queryset = PaymentTransaction.objects.all()
-    pagination_class = PaymentTransactionPagination
+    pagination_class = ItemsPagination
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -168,6 +168,7 @@ class AlbumViewSet(ItemViewSet):
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     filter_fields = ('title', 'author', 'price')
     search_fields = ('title', 'author',)
+    pagination_class = ItemsPagination
 
 
 class TrackViewSet(ItemViewSet):
@@ -181,6 +182,7 @@ class TrackViewSet(ItemViewSet):
     filter_backends = (filters.SearchFilter, DjangoFilterBackend)
     filter_fields = ('title', 'author', 'album', 'price')
     search_fields = ('title', 'author',)
+    pagination_class = ItemsPagination
 
     @detail_route(
         methods=['post', 'delete'],
