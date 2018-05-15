@@ -1,4 +1,4 @@
-from unittest.mock import Mock, mock_open
+from unittest.mock import Mock, mock_open, patch
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -28,7 +28,8 @@ class TestGetAlbumsFromZipTask(TestCase):
         result = get_tracks_from_zip.delay(self.file)
         self.assertTrue(result.failed())
 
-    def test_upload_correct_zip_file(self):
+    @patch('time.sleep', return_value=None)
+    def test_upload_correct_zip_file(self, patched_sleep):
         # mock AlbumUnpacker instance
         fake = Faker()
         mock_unpacker()

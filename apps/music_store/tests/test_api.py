@@ -243,7 +243,7 @@ class TestAPITrack(APITestCase):
 
         response = self.client.get(f'{self.url}?album={album.id}')
 
-        self.assertEqual(len(tracks), len(response.data))
+        self.assertEqual(len(tracks), len(response.data['results']))
 
 
 class TestAPIAlbum(APITestCase):
@@ -619,39 +619,42 @@ class TestAPISearch(APITestCase):
 
     def test_search_tracks_many_1(self):
         response = self.client.get(self.url + 'tracks/?search=one')
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data['results']), 2)
 
     def test_search_tracks_many_2(self):
         response = self.client.get(self.url + 'tracks/?search=two')
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data['results']), 2)
 
     def test_search_tracks_one_1(self):
         response = self.client.get(self.url + 'tracks/?search=ix')
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0].get('id'), self.track_3.id)
+        self.assertEqual(len(response.data['results']), 1)
+        self.assertEqual(response.data['results'][0].get('id'), self.track_3.id)
 
     def test_search_tracks_one_2(self):
         response = self.client.get(self.url + 'tracks/?search=ive')
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0].get('id'), self.track_2.id)
+        results = response.data['results']
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].get('id'), self.track_2.id)
 
     def test_search_albums_many_1(self):
         response = self.client.get(self.url + 'albums/?search=one')
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data['results']), 2)
 
     def test_search_albums_many_2(self):
         response = self.client.get(self.url + 'albums/?search=two')
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data['results']), 2)
 
     def test_search_albums_one_1(self):
         response = self.client.get(self.url + 'albums/?search=ix')
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0].get('id'), self.album_3.id)
+        results = response.data['results']
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].get('id'), self.album_3.id)
 
     def test_search_albums_one_2(self):
         response = self.client.get(self.url + 'albums/?search=ive')
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0].get('id'), self.album_2.id)
+        results = response.data['results']
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].get('id'), self.album_2.id)
 
     def test_global_search_unique_track(self):
         response = self.client.get(self.url + 'search/?query=unique1')
