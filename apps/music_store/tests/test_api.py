@@ -442,7 +442,7 @@ class TestAPIMusicStoreBoughtTrack(APITestCase):
         response = self._api_buy_track(self.track.pk)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_track_buy_result_code(self):
+    def test_track_buy_status_code(self):
         """ Checking the purchase result code"""
         response = self._api_buy_track(self.track.pk, self.user)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -532,10 +532,10 @@ class TestAPIMusicStoreBoughtAlbum(APITestCase):
         response = self._api_buy_album(self.album.pk)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_album_buy_result_code(self):
+    def test_album_buy_status_code(self):
         """ Checking the purchase result code"""
         response = self._api_buy_album(self.album.pk, self.user)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_album_buy_sub_balance(self):
         """ Checking the reduction of balance after purchase"""
