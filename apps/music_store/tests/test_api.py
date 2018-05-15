@@ -476,6 +476,12 @@ class TestAPIMusicStoreBoughtTrack(APITestCase):
         response = self._api_buy_track(self.track.pk, self.user, method.id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_track_get_full_content_after_buy(self):
+        """Get full version of track right after buying it"""
+        track = TrackFactoryLongFullVersion()
+        response = self._api_buy_track(track.pk, self.user)
+        self.assertEqual(response.data['content'], track.full_version)
+
     def _api_buy_track(self, item_id, user=None, payment_id=None):
         """ Method for send request to bought Track Api"""
         if user:
