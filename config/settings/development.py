@@ -82,11 +82,11 @@ TEST_SWAGGER_SPEC_FILE = None
 
 # Configuration for django-jenkins
 INSTALLED_APPS += (
-    'django_jenkins', 
+    'django_jenkins',
     'django_pdb',
 )
 JENKINS_TASKS = (
-    'django_jenkins.tasks.run_flake8', 
+    'django_jenkins.tasks.run_flake8',
 )
 JENKINS_TEST_RUNNER = 'libs.testing.JenkinsCustomTestRunner'
 
@@ -112,3 +112,5 @@ CACHEOPS_REDIS = {
                             # is highly recommended
     'socket_timeout': 3     # connection timeout in seconds, optional
 }
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'
