@@ -7,6 +7,7 @@ from .views import (
     LookupUserOptionsView,
     UserGeoLocationAPIView,
     UsersViewSet,
+    UsersManageableViewSet,
     UserUploadAvatarAPIView,
 )
 
@@ -14,6 +15,7 @@ from .views import (
 # router.register(r'users', UsersAPIView)
 router = DefaultRouter()
 router.register(r'users', UsersViewSet, base_name='user')
+router.register(r'edit-users', UsersManageableViewSet, base_name='user')
 urlpatterns = router.urls
 
 urlpatterns += [

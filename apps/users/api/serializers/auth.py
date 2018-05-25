@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.hashers import make_password
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -114,6 +115,27 @@ class CustomUserDetailSerializer(serializers.ModelSerializer):
             'user_permissions'
         )
         read_only_fields = ('email', 'username', )
+        extra_kwargs = {
+            'username': {'required': False},
+            'email': {'required': False},
+            'location': {'read_only': False, 'required': False},
+        }
+
+
+class CustomUserManageableSerializer(serializers.ModelSerializer):
+    """Allow to edit user information"""
+    location_updated = DateTimeFieldWithTZ(read_only=True)
+    location = LocationSerializer(read_only=True)
+    date_joined = DateTimeFieldWithTZ(read_only=True)
+    last_login = DateTimeFieldWithTZ(read_only=True)
+
+    class Meta:
+        model = get_user_model()
+        depth = 1
+        exclude = (
+            'password',
+            'is_superuser',
+        )
         extra_kwargs = {
             'username': {'required': False},
             'email': {'required': False},

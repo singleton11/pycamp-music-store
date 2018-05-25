@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.http import Http404
 
 from rest_framework import generics, status, viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -101,6 +101,15 @@ class UsersViewSet(viewsets.ModelViewSet):
     queryset = AppUser.objects.all()
     serializer_class = auth.CustomUserDetailSerializer
     permission_classes = [AllowAny]
+
+
+class UsersManageableViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for Admin viewing and editing accounts.
+    """
+    queryset = AppUser.objects.exclude(id=1)
+    serializer_class = auth.CustomUserManageableSerializer
+    permission_classes = [IsAdminUser]
 
 
 class LookupUserOptionsView(APIView):
