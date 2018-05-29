@@ -5,6 +5,7 @@ from rest_framework import generics, status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import detail_route
 
 from allauth.socialaccount.providers.facebook.views import (
     FacebookOAuth2Adapter,
@@ -15,6 +16,10 @@ from rest_auth.registration.views import SocialLoginView
 from libs.api.serializers.serializers import (
     LocationSerializer,
     UploadSerializer,
+)
+
+from apps.music_store.api.serializers.payment import (
+    AdminPaymentTransactionSerializer,
 )
 
 from .serializers import auth
@@ -110,6 +115,25 @@ class UsersManageableViewSet(viewsets.ModelViewSet):
     queryset = AppUser.objects.exclude(id=1)
     serializer_class = auth.CustomUserManageableSerializer
     permission_classes = [IsAdminUser]
+
+    @detail_route(
+        methods=['post'],
+        url_path='edit-balance',
+        url_name='edit-balance',
+        serializer_class=AdminPaymentTransactionSerializer
+    )
+    def edit_balance(self, request, **kwargs):
+        """Edit user's balance"""
+        user = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        print(serializer)
+        if serializer.is_valid():
+            user.transactions.create(
+                user=user,
+                amount=serializer.data['amount']
+            )
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class LookupUserOptionsView(APIView):

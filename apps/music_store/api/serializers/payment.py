@@ -41,6 +41,8 @@ class PaymentAccountSerializer(serializers.ModelSerializer):
             'user',
             'email',
             'balance',
+            'is_staff',
+            'is_superuser',
         )
 
 
@@ -64,4 +66,14 @@ class PaymentTransactionSerializer(serializers.ModelSerializer):
             'purchase_type',
             'purchase_info',
             'purchase_id',
+        )
+
+
+class AdminPaymentTransactionSerializer(serializers.ModelSerializer):
+    """Transaction for admin user to reward or fine a user"""
+
+    class Meta:
+        model = PaymentTransaction
+        fields = (
+            'amount',
         )
