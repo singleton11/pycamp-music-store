@@ -112,7 +112,7 @@ class UsersManageableViewSet(viewsets.ModelViewSet):
     """
     ViewSet for Admin viewing and editing accounts.
     """
-    queryset = AppUser.objects.exclude(id=1)
+    queryset = AppUser.objects.all()
     serializer_class = auth.CustomUserManageableSerializer
     permission_classes = [IsAdminUser]
 
@@ -126,7 +126,6 @@ class UsersManageableViewSet(viewsets.ModelViewSet):
         """Edit user's balance"""
         user = self.get_object()
         serializer = self.get_serializer(data=request.data)
-        print(serializer)
         if serializer.is_valid():
             user.transactions.create(
                 user=user,
