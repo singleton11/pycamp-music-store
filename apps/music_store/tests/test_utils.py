@@ -6,7 +6,7 @@ from django.test import TestCase
 from faker import Faker
 
 from ..models import Album, Track
-from ..utils import AlbumUnpacker, NestedFolderError
+from apps.music_store.utils.upload import AlbumUnpacker, NestedFolderError
 
 
 def mock_infolist(obj):

@@ -1,10 +1,11 @@
 import zipfile
 from collections import namedtuple
 
-from config.celery import app
 from functools import partial
 
-from .models import Album, Track
+from apps.music_store.models import Album, Track
+
+import pydub
 
 
 class NestedFolderError(Exception):
@@ -194,14 +195,19 @@ class AlbumUnpacker:
             self.added_tracks_count += 1
 
 
-def get_celery_task_status_info(task_id):
-    """Return celery task status information as a dict"""
-    task_data = app.AsyncResult(task_id)
-
-    task_info = TaskInfo(task_data.task_id, task_data.state, task_data.result)
-
-    # if task returned exception, result = error_message
-    if isinstance(task_info.result, Exception):
-        task_info.result = str(task_info.result)
-
-    return task_info
+def cut_audio_track(track_id, cut_length=10):
+    """Cut audio track up to cut_length in seconds"""
+    track = Track.objects.get(id=track_id)
+    full_version = pydub.AudioSegment.from_file(
+        track.full_version.file,
+        format='wav'
+    )
+    filename, ext = track.full_version.url.split('.')
+    free_version_name = f'{filename}_free.{ext}'
+    track.free_version.save(
+        free_version_name,
+        full_version[:cut_length * 1000].export(
+            free_version_name,
+            format='wav',
+        )
+    )

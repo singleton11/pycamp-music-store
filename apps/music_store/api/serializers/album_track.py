@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import uuid
 
 from apps.music_store.models import Album, Track
 
@@ -81,18 +82,21 @@ class TrackSerializer(IsBoughtMixin, serializers.ModelSerializer):
             obj (Track): an instance of Track.
 
         """
-        request = self.context.get('request', None)
+        free_version = obj.free_version.url if obj.free_version else None
+        full_version = obj.full_version.url if obj.full_version else None
+
+        request = self.context.get('request')
         if not request:
-            return obj.free_version.name
+            return free_version
 
         user = request.user
         if user.is_authenticated and obj.is_bought(user):
-            return obj.full_version.name
-        return obj.free_version.name
+            return full_version
+        return free_version
 
     def get_is_liked(self, obj):
         """Check if track is liked by authorized user"""
-        request = self.context.get('request', None)
+        request = self.context.get('request')
         if not request:
             return False
 
@@ -104,7 +108,7 @@ class TrackSerializer(IsBoughtMixin, serializers.ModelSerializer):
 
     def get_count_likes(self, obj):
         """Get total number of 'likes' on the track"""
-        request = self.context.get('request', None)
+        request = self.context.get('request')
         if not request:
             return 0
 
@@ -113,6 +117,8 @@ class TrackSerializer(IsBoughtMixin, serializers.ModelSerializer):
 
 class AdminTrackSerializer(serializers.ModelSerializer):
     """Track serializer for admin to create, edit or delete the track"""
+    # free_version = serializers.SerializerMethodField()
+    # full_version = serializers.SerializerMethodField()
 
     class Meta:
         model = Track
@@ -122,5 +128,14 @@ class AdminTrackSerializer(serializers.ModelSerializer):
             'title',
             'album',
             'price',
+            'free_version',
             'full_version',
         )
+
+    # def get_free_version(self, obj):
+    #     """Get url of free version of track"""
+    #     return obj.free_version.url if obj.free_version else None
+    #
+    # def get_full_version(self, obj):
+    #     """Get url of full version of track"""
+    #     return obj.full_version.url if obj.full_version else None

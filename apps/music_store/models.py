@@ -11,6 +11,7 @@ from apps.music_store.exceptions import PaymentNotFound, NotEnoughMoney, \
     ItemAlreadyBought
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from apps.music_store.utils.common import unique_track_name, rename_free_version
 
 
 class SoftDeletionQuerySet(QuerySet):
@@ -212,11 +213,13 @@ class Track(MusicItem):
         verbose_name=_('full version'),
         blank=True,
         null=True,
+        upload_to=unique_track_name,
     )
     free_version = models.FileField(
         verbose_name=_('free version'),
         blank=True,
         null=True,
+        upload_to=rename_free_version,
     )
 
     class Meta(MusicItem.Meta):

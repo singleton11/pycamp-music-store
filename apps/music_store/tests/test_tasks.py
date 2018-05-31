@@ -7,7 +7,7 @@ from django.test import TestCase, override_settings
 from faker import Faker
 
 from ..tasks import get_tracks_from_zip
-from ..utils import AlbumUnpacker
+from apps.music_store.utils.upload import AlbumUnpacker
 from .test_utils import mock_unpacker
 
 

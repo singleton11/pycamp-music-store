@@ -8,7 +8,7 @@ from django.views.generic import FormView, TemplateView
 
 from apps.music_store.forms import AlbumUploadArchiveForm
 from .tasks import get_tracks_from_zip
-from .utils import get_celery_task_status_info
+from apps.music_store.utils.common import get_celery_task_status_info
 
 
 class AlbumUploadArchiveView(FormView):

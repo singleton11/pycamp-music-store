@@ -5,7 +5,7 @@ from django.core.files.storage import default_storage
 
 from celery import current_task, shared_task
 
-from .utils import AlbumUnpacker
+from apps.music_store.utils.upload import AlbumUnpacker, cut_audio_track
 
 
 # External state for celery task of getting tracks from zip archive
@@ -43,3 +43,9 @@ def get_tracks_from_zip(zip_filename):
             f'{unpacker.added_albums_count} albums added. '
             f'{unpacker.added_tracks_count} tracks added'
         )
+
+
+@shared_task
+def add_free_version(track_id):
+    """Cut full version of a track and return as a free version file"""
+    cut_audio_track(track_id)

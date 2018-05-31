@@ -47,6 +47,8 @@ django-filters
 # PDF Support
 pdfkit
 
+# Audio file edition
+pydub
 
 
 # Storage to AWS S3

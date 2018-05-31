@@ -34,6 +34,7 @@ from ...music_store.models import (
     NotEnoughMoney,
     ItemAlreadyBought
 )
+from ..tasks import add_free_version
 
 
 class ItemsPagination(PageNumberPagination):
@@ -246,6 +247,14 @@ class AdminTrackViewSet(viewsets.ModelViewSet):
     serializer_class = AdminTrackSerializer
     permission_classes = (permissions.IsAdminUser,)
     queryset = Track.objects.all()
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        add_free_version.delay(serializer.instance.id)
+
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        add_free_version.delay(serializer.instance.id)
 
 
 # ##############################################################################
