@@ -5,6 +5,7 @@ from apps.music_store.models import Album, Track
 __all__ = (
     'AlbumSerializer',
     'TrackSerializer',
+    'AdminTrackSerializer',
 )
 
 
@@ -51,11 +52,10 @@ class AlbumSerializer(IsBoughtMixin, serializers.ModelSerializer):
 class TrackSerializer(IsBoughtMixin, serializers.ModelSerializer):
     """Serializer for Music Tracks"""
 
-    content = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     count_likes = serializers.SerializerMethodField()
-
     is_bought = serializers.SerializerMethodField()
+    content = serializers.SerializerMethodField(required=False)
 
     class Meta:
         model = Track
@@ -65,14 +65,14 @@ class TrackSerializer(IsBoughtMixin, serializers.ModelSerializer):
             'title',
             'album',
             'price',
-            'content',
             'is_bought',
             'is_liked',
             'count_likes',
+            'content',
         )
 
     def get_content(self, obj):
-        """Get free or full version of track.
+        """Get name of free or full version of track.
 
         Full version is provided when track is bought by user.
         Otherwise free version is provided.
@@ -83,12 +83,12 @@ class TrackSerializer(IsBoughtMixin, serializers.ModelSerializer):
         """
         request = self.context.get('request', None)
         if not request:
-            return obj.free_version
+            return obj.free_version.name
 
         user = request.user
         if user.is_authenticated and obj.is_bought(user):
-            return obj.full_version
-        return obj.free_version
+            return obj.full_version.name
+        return obj.free_version.name
 
     def get_is_liked(self, obj):
         """Check if track is liked by authorized user"""
@@ -109,3 +109,18 @@ class TrackSerializer(IsBoughtMixin, serializers.ModelSerializer):
             return 0
 
         return obj.likes.count()
+
+
+class AdminTrackSerializer(serializers.ModelSerializer):
+    """Track serializer for admin to create, edit or delete the track"""
+
+    class Meta:
+        model = Track
+        fields = (
+            'id',
+            'author',
+            'title',
+            'album',
+            'price',
+            'full_version',
+        )

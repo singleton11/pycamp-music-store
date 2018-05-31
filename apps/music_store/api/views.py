@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from apps.music_store.api.serializers import (
     AlbumSerializer,
     TrackSerializer,
+    AdminTrackSerializer,
     LikeTrackSerializer,
     ListenTrackSerializer,
     BoughtAlbumSerializer,
@@ -238,6 +239,13 @@ class TrackViewSet(ItemViewSet):
             data={'message': 'Yeah! Music!'},
             status=status.HTTP_200_OK
         )
+
+
+class AdminTrackViewSet(viewsets.ModelViewSet):
+    """Operations for Admin user on tracks"""
+    serializer_class = AdminTrackSerializer
+    permission_classes = (permissions.IsAdminUser,)
+    queryset = Track.objects.all()
 
 
 # ##############################################################################

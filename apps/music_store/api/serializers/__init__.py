@@ -1,4 +1,4 @@
-from .album_track import AlbumSerializer, TrackSerializer
+from .album_track import AlbumSerializer, TrackSerializer, AdminTrackSerializer
 from .bought import BoughtAlbumSerializer, BoughtTrackSerializer
 from .like_listen import LikeTrackSerializer, ListenTrackSerializer
 from .payment import (
@@ -12,6 +12,7 @@ from .search import GlobalSearchSerializer
 __all__ = (
     'AlbumSerializer',
     'TrackSerializer',
+    'AdminTrackSerializer',
     'BoughtAlbumSerializer',
     'BoughtTrackSerializer',
     'LikeTrackSerializer',

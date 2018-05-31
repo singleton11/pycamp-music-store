@@ -208,12 +208,15 @@ class Track(MusicItem):
         null=True,
         related_name='tracks'
     )
-    full_version = models.TextField(
+    full_version = models.FileField(
         verbose_name=_('full version'),
+        blank=True,
+        null=True,
     )
-    free_version = models.TextField(
+    free_version = models.FileField(
         verbose_name=_('free version'),
-        default='free version'
+        blank=True,
+        null=True,
     )
 
     class Meta(MusicItem.Meta):
@@ -224,7 +227,7 @@ class Track(MusicItem):
         """Saves reduced data to free_version field.
 
         """
-        self.free_version = self.full_version[:25]
+        # self.free_version = self.full_version[:25]
         # Get author's name from related album if its not defined
         if not self.author and self.album:
             self.author = self.album.author
