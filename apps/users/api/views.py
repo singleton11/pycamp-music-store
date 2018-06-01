@@ -108,10 +108,8 @@ class UsersViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
 
-class UsersManageableViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for Admin viewing and editing accounts.
-    """
+class AdminableUsersViewSet(viewsets.ModelViewSet):
+    """ViewSet for Admin viewing and editing accounts."""
     queryset = AppUser.objects.all()
     serializer_class = auth.CustomUserManageableSerializer
     permission_classes = [IsAdminUser]

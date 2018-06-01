@@ -133,5 +133,6 @@ class CustomUserManageableSerializer(serializers.ModelSerializer):
         depth = 1
         exclude = (
             'password',
+            'notifications',
         )
         read_only_fields = ('balance',)
